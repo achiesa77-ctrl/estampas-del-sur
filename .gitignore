@@ -1,0 +1,18 @@
+# Internos de desarrollo (no van al sitio)
+.claude/
+.agents/
+awesome-ux-skills/
+skills-lock.json
+
+# Archivos fuente / notas de trabajo (no forman parte del sitio publicado)
+musicos/
+diseño.jpg
+historia.txt
+videos.txt
+logo animado nuevo .mp4
+Logo nuevo .jpeg
+
+# Sistema
+Thumbs.db
+.DS_Store
+desktop.ini

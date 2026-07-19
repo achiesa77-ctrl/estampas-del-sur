@@ -1,0 +1,666 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Estampas del Sur — grupo de folklore uruguayo de Empalme Olmos. Milonga, chamarrita, polka y cumbia folklórica con sello propio. Contrataciones para festivales, peñas y eventos." />
+  <meta name="theme-color" content="#16110c" />
+  <title>Estampas del Sur · Folklore uruguayo</title>
+
+  <!-- Favicon (el logo) -->
+  <link rel="icon" href="fotos/logo-nuevo.jpg" />
+  <link rel="apple-touch-icon" href="fotos/logo-nuevo.jpg" />
+
+  <!-- Open Graph / redes (cómo se ve al compartir el link) -->
+  <meta property="og:type" content="website" />
+  <meta property="og:site_name" content="Estampas del Sur" />
+  <meta property="og:title" content="Estampas del Sur · Folklore uruguayo" />
+  <meta property="og:description" content="Un grupo que se fue construyendo con el tiempo, fiel a una identidad propia. Milonga, chamarrita y raíz criolla en vivo." />
+  <meta property="og:image" content="fotos/logo-nuevo.jpg" />
+  <meta property="og:locale" content="es_UY" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="Estampas del Sur · Folklore uruguayo" />
+  <meta name="twitter:description" content="Milonga, chamarrita y raíz criolla con sello propio. Contrataciones para festivales, peñas y eventos." />
+  <meta name="twitter:image" content="fotos/logo-nuevo.jpg" />
+
+  <!-- Tipografías: Fraunces (display) + Manrope (cuerpo) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..900;1,9..144,300..900&family=Manrope:wght@300;400;500;600;700&family=Raleway:ital,wght@0,200;0,300;0,400;0,500;0,600;1,300&display=swap" rel="stylesheet" />
+
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+
+  <!-- Grano / textura de estampa sobre toda la página -->
+  <div class="grain" aria-hidden="true"></div>
+  <!-- Viñeta cinematográfica que "respira" -->
+  <div class="filmveil" aria-hidden="true"></div>
+  <!-- Brasas del fogón flotando sobre la escena (canvas liviano) -->
+  <canvas class="embers" id="embers" aria-hidden="true"></canvas>
+
+  <!-- Barra de progreso de lectura -->
+  <div class="progress" id="progress" aria-hidden="true"></div>
+
+  <!-- Intro: video a pantalla completa (~5s) y se congela 2s más para leer -->
+  <div class="intro" id="intro">
+    <video class="intro__video" id="introVideo" muted playsinline autoplay preload="auto"
+           src="fotos/logo-intro-nuevo.mp4"></video>
+    <button class="intro__skip" id="introSkip" type="button">Saltar intro</button>
+  </div>
+
+
+  <!-- ===================== NAV ===================== -->
+  <header class="nav" id="nav">
+    <a href="#inicio" class="nav__brand" aria-label="Estampas del Sur — inicio">
+      <span class="nav__logo">
+        <img src="fotos/logo-nuevo.jpg" alt="Estampas del Sur" />
+      </span>
+    </a>
+
+    <nav class="nav__links" id="navLinks">
+      <a href="#grupo">El Grupo</a>
+      <a href="#integrantes">Integrantes</a>
+      <a href="#historia">Historia</a>
+      <a href="#repertorio">Repertorio</a>
+      <a href="#videos">Videos</a>
+      <a href="#trayectoria">Trayectoria</a>
+      <a href="#agenda">Agenda</a>
+      <a href="#contacto" class="nav__cta">Contrataciones</a>
+    </nav>
+
+    <button class="nav__burger" id="navBurger" aria-label="Abrir menú" aria-expanded="false">
+      <span></span><span></span><span></span>
+    </button>
+  </header>
+
+  <main>
+    <!-- ===================== HERO CINEMATOGRÁFICO ===================== -->
+    <section class="hero" id="inicio">
+      <!-- Capa de FOTO: cuando tengas una foto en vivo, poné su ruta en
+           --hero-photo (styles.css) o en el style de abajo. Hoy queda un
+           escenario oscuro con luces y neblina. -->
+      <div class="hero__stage" aria-hidden="true">
+        <div class="hero__photo" data-parallax="0.12"></div>
+        <div class="hero__beam hero__beam--1"></div>
+        <div class="hero__beam hero__beam--2"></div>
+        <div class="hero__beam hero__beam--3"></div>
+        <div class="hero__haze"></div>
+        <div class="hero__floor"></div>
+        <div class="hero__vignette"></div>
+      </div>
+
+      <div class="hero__content" data-parallax="-0.06">
+        <p class="hero__eyebrow line-mask"><span>Folklore uruguayo · Empalme Olmos</span></p>
+        <h1 class="hero__title">
+          <span class="line-mask"><span>Estampas</span></span>
+          <span class="line-mask hero__title-em"><span><em>del&nbsp;Sur</em></span></span>
+        </h1>
+        <p class="hero__lead line-mask"><span>
+          Un grupo que se fue construyendo con el tiempo, fiel a una identidad
+          propia: milonga, chamarrita y raíz criolla con un sello que se reconoce.
+        </span></p>
+        <div class="hero__actions line-mask"><span>
+          <a href="#repertorio" class="btn btn--solid">Escuchá el repertorio</a>
+          <a href="#agenda" class="btn btn--ghost">Próximas fechas</a>
+        </span></div>
+      </div>
+
+      <a href="#grupo" class="hero__scroll" aria-label="Bajar">
+        <span>Descubrí</span>
+        <span class="hero__scroll-line"></span>
+      </a>
+
+      <div class="hero__meta" aria-hidden="true">
+        <span>Montevideo · Uruguay</span>
+        <span>Est. tradición del litoral</span>
+      </div>
+
+      <!-- Sello de texto circular giratorio (SVG textPath) + logo al centro -->
+      <div class="seal" aria-hidden="true">
+        <svg class="seal__ring" viewBox="0 0 200 200">
+          <defs>
+            <path id="sealArc"
+                  d="M 100,100 m -76,0 a 76,76 0 1,1 152,0 a 76,76 0 1,1 -152,0" />
+          </defs>
+          <text>
+            <textPath href="#sealArc" startOffset="0">
+              ESTAMPAS DEL SUR · FOLKLORE URUGUAYO · MILONGA · CHAMARRITA ·&nbsp;
+            </textPath>
+          </text>
+        </svg>
+        <span class="seal__logo"><img src="fotos/logo-nuevo.jpg" alt="" /></span>
+      </div>
+    </section>
+
+    <!-- ===================== MARQUESINA ===================== -->
+    <div class="marquee" aria-hidden="true">
+      <div class="marquee__track">
+        <span>Milonga</span><span class="marquee__dot">✦</span>
+        <span>Chamarrita</span><span class="marquee__dot">✦</span>
+        <span>Polka</span><span class="marquee__dot">✦</span>
+        <span>Cumbia folklórica</span><span class="marquee__dot">✦</span>
+        <span>Canción propia</span><span class="marquee__dot">✦</span>
+        <span>Raíz criolla</span><span class="marquee__dot">✦</span>
+        <span>Milonga</span><span class="marquee__dot">✦</span>
+        <span>Chamarrita</span><span class="marquee__dot">✦</span>
+        <span>Polka</span><span class="marquee__dot">✦</span>
+        <span>Cumbia folklórica</span><span class="marquee__dot">✦</span>
+        <span>Canción propia</span><span class="marquee__dot">✦</span>
+        <span>Raíz criolla</span><span class="marquee__dot">✦</span>
+      </div>
+    </div>
+
+    <!-- ===================== EL GRUPO ===================== -->
+    <section class="grupo section" id="grupo">
+      <div class="grupo__grid">
+        <div class="grupo__media reveal">
+          <div class="grupo__frame">
+            <img src="fotos/acordeon.jpg" alt="Músico de Estampas del Sur junto al río" class="grupo__img" data-parallax-img loading="lazy" />
+          </div>
+          <div class="grupo__badge">
+            <span class="grupo__badge-num">Est.</span>
+            <span class="grupo__badge-txt">Tradición<br/>del litoral</span>
+          </div>
+        </div>
+
+        <div class="grupo__text">
+          <p class="eyebrow reveal">El Grupo</p>
+          <h2 class="section__title reveal">
+            Una identidad que <em>nunca</em> se&nbsp;perdió.
+          </h2>
+          <p class="grupo__body reveal">
+            El origen de Estampas del Sur se remonta a fines de 2010, en Empalme
+            Olmos, con una formación distinta a la actual. Con los años el proyecto
+            se fue consolidando —integrantes que llegaron y otros que siguieron su
+            camino— pero siempre con la misma inquietud: hacer música propia.
+          </p>
+          <p class="grupo__body reveal">
+            Su marca es la autoría. Canciones originales atravesadas por pequeñas
+            «muletillas» —un pasaje, un acorde— que funcionan como firma. Una
+            identidad ligada al campo y al paisaje, que en el escenario se adapta
+            al público entre milonga, chamarrita, polka y cumbia folklórica.
+          </p>
+
+          <blockquote class="quote reveal">
+            <p>«Siempre mantuvimos la identidad de ser originales, de no copiar
+            y apostar a lo que nosotros escribimos.»</p>
+            <cite>— Saavedra, Estampas del Sur</cite>
+          </blockquote>
+
+          <div class="stats reveal">
+            <div class="stat">
+              <span class="stat__num" data-count="15">0</span>
+              <span class="stat__label">Años de historia</span>
+            </div>
+            <div class="stat">
+              <span class="stat__num" data-count="5">0</span>
+              <span class="stat__label">Premios y festivales</span>
+            </div>
+            <div class="stat">
+              <span class="stat__num" data-count="4">0</span>
+              <span class="stat__label">Ritmos en escena</span>
+            </div>
+          </div>
+
+          <p class="grupo__awards reveal">
+            Arco de Córdoba 2016 · Festival del Mate 2017 · Cosquín 2019 ·
+            Finalistas Generación 2020
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================== SELLO PROPIO ===================== -->
+    <section class="sello section" id="sello">
+      <div class="sello__inner">
+        <p class="eyebrow reveal">Identidad sonora</p>
+        <h2 class="sello__quote reveal">
+          «Nos gusta que el que escucha diga: <em>pa, esos son Estampas del&nbsp;Sur</em>.»
+        </h2>
+
+        <div class="features">
+          <article class="feature reveal">
+            <span class="feature__icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M4 20s2.5-9 9-13 8-3 8-3-.5 5.5-4 9-8.5 7-13 7z"/>
+                <path d="M4 20l6-6"/>
+              </svg>
+            </span>
+            <h3>Autoría propia</h3>
+            <p>No copiamos: apostamos a lo que nosotros escribimos. El respeto por la obra —propia y ajena— es innegociable.</p>
+          </article>
+
+          <article class="feature reveal" data-delay="1">
+            <span class="feature__icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M2 12h3l2-7 3.5 15L14 6l2 6h6"/>
+              </svg>
+            </span>
+            <h3>Las «muletillas»</h3>
+            <p>Recursos que se repiten en cada canción —un pasaje, un acorde— y funcionan como nuestra firma sonora.</p>
+          </article>
+
+          <article class="feature reveal" data-delay="2">
+            <span class="feature__icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M4 20c0-9 7-16 16-16 0 9-7 16-16 16z"/>
+                <path d="M4 20C8.5 15.5 13 11 20 4"/>
+              </svg>
+            </span>
+            <h3>Raíz en el campo</h3>
+            <p>«Hay mucho campo, nos gustan los pájaros.» Una identidad ligada al paisaje y a la vida fuera de la ciudad.</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================== INTEGRANTES ===================== -->
+    <section class="integrantes section" id="integrantes">
+      <div class="section__head reveal">
+        <p class="eyebrow">Los que hacen el canto</p>
+        <h2 class="section__title section__title--center">Integrantes</h2>
+        <p class="section__sub">
+          El corazón del grupo. Iremos completando cada perfil con su nombre,
+          instrumento e historia.
+        </p>
+      </div>
+
+      <div class="cards" data-stagger>
+        <article class="card">
+          <div class="card__photo">
+            <img src="fotos/bajo.jpg" alt="Guillermo Pérez, bajista de Estampas del Sur" loading="lazy" />
+            <span class="card__inst">Bajo</span>
+          </div>
+          <div class="card__body">
+            <h3 class="card__name">Guillermo Pérez</h3>
+            <p class="card__role">Bajo</p>
+            <div class="card__social">
+              <a href="https://www.instagram.com/estampasdelsur/" target="_blank" rel="noopener" aria-label="Instagram de Estampas del Sur">IG</a>
+              <a href="https://www.facebook.com/p/Estampas-Del-Sur-100063597786181/" target="_blank" rel="noopener" aria-label="Facebook de Estampas del Sur">FB</a>
+            </div>
+          </div>
+        </article>
+
+        <article class="card">
+          <div class="card__photo">
+            <img src="fotos/guitarra.jpg" alt="Marcelo Marrero, primera voz y segunda guitarra de Estampas del Sur" loading="lazy" />
+            <span class="card__inst">Voz &amp; guitarra</span>
+          </div>
+          <div class="card__body">
+            <h3 class="card__name">Marcelo Marrero</h3>
+            <p class="card__role">Primera voz · Segunda guitarra</p>
+            <div class="card__social">
+              <a href="https://www.instagram.com/estampasdelsur/" target="_blank" rel="noopener" aria-label="Instagram de Estampas del Sur">IG</a>
+              <a href="https://www.facebook.com/p/Estampas-Del-Sur-100063597786181/" target="_blank" rel="noopener" aria-label="Facebook de Estampas del Sur">FB</a>
+            </div>
+          </div>
+        </article>
+
+        <article class="card">
+          <div class="card__photo">
+            <img src="fotos/acordeon2.jpg" alt="Fernando Saavedra, primera guitarra y segunda voz de Estampas del Sur" loading="lazy" />
+            <span class="card__inst">Guitarra &amp; voz</span>
+          </div>
+          <div class="card__body">
+            <h3 class="card__name">Fernando Saavedra</h3>
+            <p class="card__role">Primera guitarra · Segunda voz</p>
+            <div class="card__social">
+              <a href="https://www.instagram.com/estampasdelsur/" target="_blank" rel="noopener" aria-label="Instagram de Estampas del Sur">IG</a>
+              <a href="https://www.facebook.com/p/Estampas-Del-Sur-100063597786181/" target="_blank" rel="noopener" aria-label="Facebook de Estampas del Sur">FB</a>
+            </div>
+          </div>
+        </article>
+
+        <article class="card">
+          <div class="card__photo">
+            <img src="fotos/acordeon.jpg" alt="Henry Acuña, acordeón y teclados de Estampas del Sur" loading="lazy" />
+            <span class="card__inst">Acordeón &amp; teclados</span>
+          </div>
+          <div class="card__body">
+            <h3 class="card__name">Henry Acuña</h3>
+            <p class="card__role">Acordeón y teclados</p>
+            <div class="card__social">
+              <a href="https://www.instagram.com/estampasdelsur/" target="_blank" rel="noopener" aria-label="Instagram de Estampas del Sur">IG</a>
+              <a href="https://www.facebook.com/p/Estampas-Del-Sur-100063597786181/" target="_blank" rel="noopener" aria-label="Facebook de Estampas del Sur">FB</a>
+            </div>
+          </div>
+        </article>
+
+        <article class="card">
+          <div class="card__photo">
+            <img src="fotos/bateria.jpg" alt="Diego Rodríguez, baterista de Estampas del Sur" loading="lazy" />
+            <span class="card__inst">Batería</span>
+          </div>
+          <div class="card__body">
+            <h3 class="card__name">Diego Rodríguez</h3>
+            <p class="card__role">Batería</p>
+            <div class="card__social">
+              <a href="https://www.instagram.com/estampasdelsur/" target="_blank" rel="noopener" aria-label="Instagram de Estampas del Sur">IG</a>
+              <a href="https://www.facebook.com/p/Estampas-Del-Sur-100063597786181/" target="_blank" rel="noopener" aria-label="Facebook de Estampas del Sur">FB</a>
+            </div>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <!-- ===================== HISTORIA ===================== -->
+    <section class="historia section" id="historia">
+      <div class="section__head reveal">
+        <p class="eyebrow">Nuestro camino</p>
+        <h2 class="section__title section__title--center">Historia</h2>
+      </div>
+      <div class="historia__body">
+        <p class="historia__lead reveal">
+          Nacimos en <em>2011</em>, en la ciudad de Pando, Canelones, con un
+          objetivo tan simple como profundo: compartir nuestra música, nuestras raíces.
+        </p>
+        <p class="reveal">
+          A lo largo del camino llegaron los reconocimientos. En 2016 ganamos el
+          <strong>Arco de Córdoba</strong>, en Argentina, por nuestra labor cultural.
+          En 2017 nos quedamos con el primer lugar en dos festivales —el del Mate, en
+          San José, y el del Olimar, en Treinta y Tres—; ese mismo año nos declararon
+          de Interés Cultural y Municipal la Intendencia de Canelones, junto a los
+          Municipios de Pando y Empalme Olmos.
+        </p>
+        <p class="reveal">
+          En 2018 editamos nuestro primer CD, <em>«Savia Nueva»</em>, con el sello
+          Productora Hipocampo; ese mismo año estrenamos nuestro primer videoclip,
+          <em>«Historias del Pasado»</em>. En 2019 representamos a Uruguay y a Canelones
+          en el Festival Nacional de Folklore de <strong>Cosquín</strong>, con presentaciones
+          en tres de sus principales escenarios, además de varias peñas tradicionales.
+          Cerramos ese año ganando el Certamen de Canción Inédita de la Intendencia de
+          Canelones.
+        </p>
+        <p class="reveal">
+          Vinieron nuevos videoclips: <em>«Sacudiendo el Ser Humano»</em> en 2022,
+          <em>«Soy Uruguayo»</em> en 2024 —este último nos valió una nominación a los
+          <strong>Premios Graffiti</strong>—. Hoy estamos finalizando un nuevo disco,
+          hecho enteramente de canciones propias.
+        </p>
+        <p class="historia__close reveal">
+          Seguimos apostando a crecer, llevando nuestra música a nuevos escenarios,
+          atentos a cada oportunidad de seguir recorriendo este hermoso camino musical.
+        </p>
+      </div>
+    </section>
+
+    <!-- ===================== REPERTORIO ===================== -->
+    <section class="repertorio section" id="repertorio">
+      <div class="repertorio__inner">
+        <div class="repertorio__head">
+          <p class="eyebrow reveal">Escuchá</p>
+          <h2 class="section__title reveal">Repertorio</h2>
+          <p class="section__sub reveal">
+            Algunos de nuestros temas. Tocá una fila para escuchar.
+          </p>
+          <a href="#contacto" class="btn btn--ghost reveal">Contrataciones</a>
+        </div>
+
+        <ol class="tracks">
+          <li class="track" data-src="repertorio/1.mp4" tabindex="0" role="button" aria-label="Reproducir Oficios">
+            <span class="track__num">01</span>
+            <span class="track__play" aria-hidden="true">
+              <svg class="track__i track__i--play" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+              <svg class="track__i track__i--pause" viewBox="0 0 24 24"><path d="M7 5h3.5v14H7zM13.5 5H17v14h-3.5z"/></svg>
+            </span>
+            <span class="track__title">Oficios</span>
+            <span class="track__time" data-dur>--:--</span>
+          </li>
+          <li class="track" data-src="repertorio/2.mp4" tabindex="0" role="button" aria-label="Reproducir Soy Uruguayo">
+            <span class="track__num">02</span>
+            <span class="track__play" aria-hidden="true">
+              <svg class="track__i track__i--play" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+              <svg class="track__i track__i--pause" viewBox="0 0 24 24"><path d="M7 5h3.5v14H7zM13.5 5H17v14h-3.5z"/></svg>
+            </span>
+            <span class="track__title">Soy Uruguayo</span>
+            <span class="track__time" data-dur>--:--</span>
+          </li>
+          <li class="track" data-src="repertorio/3.mpeg" tabindex="0" role="button" aria-label="Reproducir La Refalosa">
+            <span class="track__num">03</span>
+            <span class="track__play" aria-hidden="true">
+              <svg class="track__i track__i--play" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+              <svg class="track__i track__i--pause" viewBox="0 0 24 24"><path d="M7 5h3.5v14H7zM13.5 5H17v14h-3.5z"/></svg>
+            </span>
+            <span class="track__title">La Refalosa</span>
+            <span class="track__time" data-dur>--:--</span>
+          </li>
+        </ol>
+        <audio id="repAudio" preload="none"></audio>
+      </div>
+    </section>
+
+    <!-- ===================== VIDEOS ===================== -->
+    <section class="videos section" id="videos">
+      <div class="section__head reveal">
+        <p class="eyebrow">En pantalla</p>
+        <h2 class="section__title section__title--center">Videos</h2>
+        <p class="section__sub">Actuaciones y registros del grupo. Tocá para reproducir.</p>
+      </div>
+      <div class="videos__grid" data-stagger>
+        <div class="video reveal">
+          <button class="video__btn" type="button" data-yt="-ab0KSnYS4E"
+                  aria-label="Reproducir video de Estampas del Sur">
+            <img class="video__thumb" src="https://i.ytimg.com/vi/-ab0KSnYS4E/hqdefault.jpg"
+                 alt="Miniatura de video de Estampas del Sur" loading="lazy" width="480" height="360" />
+            <span class="video__play" aria-hidden="true">
+              <svg viewBox="0 0 68 48"><path class="video__play-bg" d="M66.5 7.7c-.8-2.9-2.5-5.4-5.4-6.2C55.8.1 34 0 34 0S12.2.1 6.9 1.5C4 2.3 2.3 4.8 1.5 7.7.1 13 0 24 0 24s.1 11 1.5 16.3c.8 2.9 2.5 5.4 5.4 6.2C12.2 47.9 34 48 34 48s21.8-.1 27.1-1.5c2.9-.8 4.6-3.3 5.4-6.2C67.9 35 68 24 68 24s-.1-11-1.5-16.3z"/><path d="M45 24 27 14v20z" fill="#fff"/></svg>
+            </span>
+          </button>
+        </div>
+        <div class="video reveal" data-delay="1">
+          <button class="video__btn" type="button" data-yt="FTPrXeWkYpg"
+                  aria-label="Reproducir video de Estampas del Sur">
+            <img class="video__thumb" src="https://i.ytimg.com/vi/FTPrXeWkYpg/hqdefault.jpg"
+                 alt="Miniatura de video de Estampas del Sur" loading="lazy" width="480" height="360" />
+            <span class="video__play" aria-hidden="true">
+              <svg viewBox="0 0 68 48"><path class="video__play-bg" d="M66.5 7.7c-.8-2.9-2.5-5.4-5.4-6.2C55.8.1 34 0 34 0S12.2.1 6.9 1.5C4 2.3 2.3 4.8 1.5 7.7.1 13 0 24 0 24s.1 11 1.5 16.3c.8 2.9 2.5 5.4 5.4 6.2C12.2 47.9 34 48 34 48s21.8-.1 27.1-1.5c2.9-.8 4.6-3.3 5.4-6.2C67.9 35 68 24 68 24s-.1-11-1.5-16.3z"/><path d="M45 24 27 14v20z" fill="#fff"/></svg>
+            </span>
+          </button>
+        </div>
+        <div class="video reveal" data-delay="2">
+          <button class="video__btn" type="button" data-yt="AmP6PfhJaIw"
+                  aria-label="Reproducir video de Estampas del Sur">
+            <img class="video__thumb" src="https://i.ytimg.com/vi/AmP6PfhJaIw/hqdefault.jpg"
+                 alt="Miniatura de video de Estampas del Sur" loading="lazy" width="480" height="360" />
+            <span class="video__play" aria-hidden="true">
+              <svg viewBox="0 0 68 48"><path class="video__play-bg" d="M66.5 7.7c-.8-2.9-2.5-5.4-5.4-6.2C55.8.1 34 0 34 0S12.2.1 6.9 1.5C4 2.3 2.3 4.8 1.5 7.7.1 13 0 24 0 24s.1 11 1.5 16.3c.8 2.9 2.5 5.4 5.4 6.2C12.2 47.9 34 48 34 48s21.8-.1 27.1-1.5c2.9-.8 4.6-3.3 5.4-6.2C67.9 35 68 24 68 24s-.1-11-1.5-16.3z"/><path d="M45 24 27 14v20z" fill="#fff"/></svg>
+            </span>
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================== TRAYECTORIA ===================== -->
+    <section class="tray section" id="trayectoria">
+      <div class="section__head reveal">
+        <p class="eyebrow">Camino recorrido</p>
+        <h2 class="section__title section__title--center">Trayectoria</h2>
+        <p class="section__sub">Premios, festivales y escenarios que fueron marcando el rumbo.</p>
+      </div>
+
+      <ol class="timeline">
+        <li class="tl reveal">
+          <span class="tl__year">2011</span>
+          <div class="tl__body"><h3>Los comienzos</h3><p>Nace el grupo en Pando, Canelones, para compartir su música y sus raíces.</p></div>
+        </li>
+        <li class="tl reveal">
+          <span class="tl__year">2016</span>
+          <div class="tl__body"><h3>Arco de Córdoba</h3><p>Ganadores en Argentina, en reconocimiento a la labor cultural.</p></div>
+        </li>
+        <li class="tl reveal">
+          <span class="tl__year">2017</span>
+          <div class="tl__body"><h3>Mate y Olimar</h3><p>Primer lugar en el Festival del Mate (San José) y en el Festival del Olimar (Treinta y Tres). Declarados de Interés Cultural y Municipal.</p></div>
+        </li>
+        <li class="tl reveal">
+          <span class="tl__year">2018</span>
+          <div class="tl__body"><h3>«Savia Nueva»</h3><p>Primer CD, con el sello Productora Hipocampo, y primer videoclip: «Historias del Pasado».</p></div>
+        </li>
+        <li class="tl reveal">
+          <span class="tl__year">2019</span>
+          <div class="tl__body"><h3>Cosquín</h3><p>Representando a Uruguay y Canelones en el festival mayor del folklore. Ganadores del Certamen de Canción Inédita de la Intendencia de Canelones.</p></div>
+        </li>
+        <li class="tl reveal">
+          <span class="tl__year">2020</span>
+          <div class="tl__body"><h3>Pago en Pago</h3><p>Finalistas del certamen de videoclip del programa, emitido por Canal 10 y Canal A+V.</p></div>
+        </li>
+        <li class="tl reveal">
+          <span class="tl__year">2022</span>
+          <div class="tl__body"><h3>«Sacudiendo el Ser Humano»</h3><p>Segundo videoclip del grupo.</p></div>
+        </li>
+        <li class="tl reveal">
+          <span class="tl__year">2024</span>
+          <div class="tl__body"><h3>«Soy Uruguayo»</h3><p>Tercer videoclip, con una nominación a los Premios Graffiti.</p></div>
+        </li>
+        <li class="tl reveal">
+          <span class="tl__year">Hoy</span>
+          <div class="tl__body"><h3>Nuevo disco</h3><p>Finalizando un nuevo CD, integrado por canciones de autoría propia.</p></div>
+        </li>
+      </ol>
+    </section>
+
+    <!-- ===================== AGENDA ===================== -->
+    <section class="agenda section" id="agenda">
+      <div class="section__head reveal">
+        <p class="eyebrow">Dónde vernos</p>
+        <h2 class="section__title section__title--center">Próximas fechas</h2>
+      </div>
+
+      <ul class="shows">
+        <li class="show reveal">
+          <div class="show__date"><span class="show__day">--</span><span class="show__mon">MES</span></div>
+          <div class="show__info">
+            <h3 class="show__place">Nombre del escenario</h3>
+            <p class="show__loc">Ciudad, Uruguay</p>
+          </div>
+          <a href="#contacto" class="show__link">Entradas</a>
+        </li>
+        <li class="show reveal">
+          <div class="show__date"><span class="show__day">--</span><span class="show__mon">MES</span></div>
+          <div class="show__info">
+            <h3 class="show__place">Nombre del escenario</h3>
+            <p class="show__loc">Ciudad, Uruguay</p>
+          </div>
+          <a href="#contacto" class="show__link">Entradas</a>
+        </li>
+        <li class="show reveal">
+          <div class="show__date"><span class="show__day">--</span><span class="show__mon">MES</span></div>
+          <div class="show__info">
+            <h3 class="show__place">Nombre del escenario</h3>
+            <p class="show__loc">Ciudad, Uruguay</p>
+          </div>
+          <a href="#contacto" class="show__link">Entradas</a>
+        </li>
+      </ul>
+    </section>
+
+    <!-- ===================== SE VIENE EL DISCO ===================== -->
+    <section class="disco section" id="disco">
+      <div class="disco__inner">
+        <div class="disco__text">
+          <p class="eyebrow reveal"><span class="dot-pulse" aria-hidden="true"></span>En preparación</p>
+          <h2 class="disco__title reveal">Se viene <em>el&nbsp;disco</em>.</h2>
+          <p class="disco__sub reveal">
+            «Queda terminar un tema nomás.» Un nuevo álbum, un videoclip en camino
+            y más presentaciones en festivales. Todo desde la autogestión y un
+            camino independiente.
+          </p>
+          <div class="disco__meta reveal">
+            <span>Nuevo álbum</span>
+            <span>Videoclip</span>
+            <span>Gira de festivales</span>
+          </div>
+        </div>
+
+        <div class="vinyl reveal" aria-hidden="true">
+          <div class="vinyl__disc">
+            <div class="vinyl__label"></div>
+            <div class="vinyl__hole"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================== GALERÍA ===================== -->
+    <section class="galeria section" id="galeria">
+      <div class="section__head reveal">
+        <p class="eyebrow">Momentos</p>
+        <h2 class="section__title section__title--center">Galería</h2>
+      </div>
+      <div class="gallery">
+        <figure class="gallery__item gallery__item--a reveal"><img src="fotos/bajo.jpg" alt="Músico con bajo junto al río" loading="lazy" /></figure>
+        <figure class="gallery__item gallery__item--b reveal" data-delay="1"><img src="fotos/guitarra.jpg" alt="Guitarrista del grupo" loading="lazy" /></figure>
+        <figure class="gallery__item gallery__item--c reveal" data-delay="2"><img src="fotos/bateria.jpg" alt="Baterista del grupo" loading="lazy" /></figure>
+        <figure class="gallery__item gallery__item--d reveal" data-delay="1"><img src="fotos/acordeon2.jpg" alt="Acordeonista del grupo" loading="lazy" /></figure>
+        <figure class="gallery__item gallery__item--e reveal" data-delay="2"><img src="fotos/acordeon.jpg" alt="Acordeonista junto al río" loading="lazy" /></figure>
+      </div>
+    </section>
+
+    <!-- ===================== CTA / CONTACTO ===================== -->
+    <section class="cta section" id="contacto">
+      <div class="cta__inner reveal">
+        <p class="eyebrow">Contrataciones</p>
+        <h2 class="cta__title">¿Querés llevar <em>Estampas del Sur</em><br/>a tu escenario?</h2>
+        <p class="cta__sub">
+          Festivales, peñas, salas y eventos. Trabajamos como un equipo profesional
+          —con roles claros en redes, contrataciones y administración— para que cada
+          presentación esté cuidada de principio a fin.
+        </p>
+        <ul class="cta__points">
+          <li>Autogestión profesional</li>
+          <li>Propuesta a medida del público</li>
+          <li>Repertorio propio y original</li>
+        </ul>
+        <div class="cta__actions">
+          <a href="https://wa.me/59895871148?text=Hola!%20Quiero%20consultar%20por%20una%20presentaci%C3%B3n%20de%20Estampas%20del%20Sur." class="btn btn--solid btn--lg" target="_blank" rel="noopener">WhatsApp · 095 871 148</a>
+          <a href="https://www.instagram.com/estampasdelsur/" class="btn btn--ghost btn--lg" target="_blank" rel="noopener">Instagram</a>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- ===================== FOOTER ===================== -->
+  <footer class="footer">
+    <div class="footer__grid">
+      <div class="footer__brand">
+        <span class="nav__name">Estampas<span class="nav__name-sub">del&nbsp;Sur</span></span>
+        <p class="footer__tag">Folklore uruguayo · raíz criolla en vivo.</p>
+      </div>
+      <div class="footer__col">
+        <h4>Navegación</h4>
+        <a href="#grupo">El Grupo</a>
+        <a href="#integrantes">Integrantes</a>
+        <a href="#repertorio">Repertorio</a>
+        <a href="#agenda">Agenda</a>
+      </div>
+      <div class="footer__col">
+        <h4>Seguinos</h4>
+        <a href="https://www.instagram.com/estampasdelsur/" target="_blank" rel="noopener">Instagram</a>
+        <a href="https://www.facebook.com/p/Estampas-Del-Sur-100063597786181/" target="_blank" rel="noopener">Facebook</a>
+      </div>
+      <div class="footer__col">
+        <h4>Contacto</h4>
+        <a href="https://wa.me/59895871148" target="_blank" rel="noopener">WhatsApp · 095 871 148</a>
+        <a href="https://www.instagram.com/estampasdelsur/" target="_blank" rel="noopener">@estampasdelsur</a>
+        <span class="footer__loc">Pando, Canelones · Uruguay</span>
+      </div>
+    </div>
+    <div class="footer__base">
+      <span>© <span id="year"></span> Estampas del Sur. Todos los derechos reservados.</span>
+      <span>Hecho con raíz y oficio.</span>
+    </div>
+  </footer>
+
+  <!-- Volver arriba -->
+  <button class="to-top" id="toTop" type="button" aria-label="Volver arriba">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M12 19V6M6 12l6-6 6 6"/>
+    </svg>
+  </button>
+
+  <!-- GSAP + ScrollTrigger para animaciones ricas -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+  <script src="script.js"></script>
+</body>
+</html>
