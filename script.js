@@ -11,7 +11,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const yearEl = document.getElementById("year");
   if (yearEl) yearEl.textContent = new Date().getFullYear();
 
-  /* ---- Intro: video 6s a pantalla completa → imagen del logo 2s → entrar ---- */
+  /* ---- Intro: video de fuego, primeros 6 s a pantalla completa → esfuma → entra ---- */
   const intro = document.getElementById("intro");
   const introVideo = document.getElementById("introVideo");
   const introSkip = document.getElementById("introSkip");
@@ -79,38 +79,46 @@ document.addEventListener("DOMContentLoaded", () => {
   } else {
     document.body.classList.add("intro-open");
 
-    // Los 5s se cuentan desde que el video EMPIEZA a verse (no desde la carga)
+    const CUT = 6; // reproducir los primeros 6 s del video, luego esfumar
+
+    // Cierre: congela el frame y esfuma (recién ahí se revela la página)
+    const finishIntro = () => { freezeVideo(); dismissIntro(); };
+
+    // Fallback por tiempo real, contado desde que el video EMPIEZA a verse
     const beginTimers = () => {
       if (timersOn) return; timersOn = true;
-      freezeTimer = setTimeout(freezeVideo, 5000);   // 5s de video → congelar
-      endTimer    = setTimeout(dismissIntro, 7000);  // +2s leyendo → entrar
+      endTimer = setTimeout(finishIntro, CUT * 1000 + 150);
     };
 
     if (introVideo) {
-      const fit5s = () => {
-        const d = introVideo.duration;
-        introVideo.playbackRate = (d && isFinite(d)) ? Math.min(2, Math.max(0.5, d / 5)) : 2;
-      };
-      introVideo.addEventListener("loadedmetadata", fit5s);
+      introVideo.addEventListener("loadedmetadata", () => { introVideo.playbackRate = 1; });
       introVideo.addEventListener("playing", beginTimers);
-      introVideo.addEventListener("ended", freezeVideo);
+
+      // Cierre preciso al alcanzar los 6 s reales de reproducción
+      const onTime = () => {
+        if (introVideo.currentTime >= CUT) {
+          introVideo.removeEventListener("timeupdate", onTime);
+          finishIntro();
+        }
+      };
+      introVideo.addEventListener("timeupdate", onTime);
 
       const startPlay = () => {
-        fit5s();
+        introVideo.playbackRate = 1;
         const p = introVideo.play?.();
         if (p && p.catch) p.catch(() => {});
       };
       // Esperar a tener buffer suficiente para que no se trabe
       if (introVideo.readyState >= 3) startPlay();
       else introVideo.addEventListener("canplaythrough", startPlay, { once: true });
-      // Si en 2.5s no arrancó (buffer lento/autoplay), arrancar igual la secuencia
+      // Si en 2.5s no arrancó (buffer lento/autoplay), arrancar igual
       setTimeout(() => { if (!timersOn) { startPlay(); beginTimers(); } }, 2500);
     } else {
       beginTimers();
     }
 
-    introSkip?.addEventListener("click", dismissIntro);
-    capTimer = setTimeout(dismissIntro, 11000); // tope duro de seguridad
+    introSkip?.addEventListener("click", finishIntro);
+    capTimer = setTimeout(finishIntro, 9000); // tope duro de seguridad
   }
 
   /* ---- Nav: fondo sólido al hacer scroll ---- */
