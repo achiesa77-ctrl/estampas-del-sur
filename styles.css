@@ -211,14 +211,14 @@ a:focus-visible, button:focus-visible, .btn:focus-visible, .track:focus-visible 
 .nav {
   position: fixed; top: 0; left: 0; right: 0; z-index: 100;
   display: flex; align-items: center; justify-content: space-between;
-  padding: 1.25rem var(--pad);
+  padding: 0.7rem var(--pad);
   transition: background-color 0.5s var(--ease), padding 0.4s var(--ease),
               backdrop-filter 0.5s var(--ease), box-shadow 0.5s var(--ease);
 }
 .nav.is-scrolled {
   background: rgba(11,13,17,0.82);
   backdrop-filter: blur(14px);
-  padding-top: 0.85rem; padding-bottom: 0.85rem;
+  padding-top: 0.55rem; padding-bottom: 0.55rem;
   box-shadow: 0 1px 0 rgba(240,230,212,0.06);
 }
 
@@ -437,10 +437,10 @@ a:focus-visible, button:focus-visible, .btn:focus-visible, .track:focus-visible 
 /* Sello giratorio = único logo, en el nav (arriba a la izquierda) */
 .seal {
   position: relative; flex-shrink: 0;
-  width: 66px; height: 66px; display: grid; place-items: center;
+  width: 90px; height: 90px; display: grid; place-items: center;
   transition: width 0.3s var(--ease), height 0.3s var(--ease);
 }
-.nav.is-scrolled .seal { width: 54px; height: 54px; }
+.nav.is-scrolled .seal { width: 72px; height: 72px; }
 .seal__ring {
   position: absolute; inset: 0; width: 100%; height: 100%;
   animation: spin 20s linear infinite;
@@ -1073,5 +1073,5 @@ a:focus-visible, button:focus-visible, .btn:focus-visible, .track:focus-visible 
   .sello__quote { max-width: 26ch; }
   .videos__grid { grid-template-columns: 1fr; max-width: 480px; }
   /* En móvil el sello (logo del nav) un poco más chico */
-  .seal { width: 56px; height: 56px; }
+  .seal { width: 72px; height: 72px; }
 }
