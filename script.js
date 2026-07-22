@@ -252,7 +252,7 @@ document.addEventListener("DOMContentLoaded", () => {
       if (near) {
         const y = window.scrollY;
         const dv = y - lastY; lastY = y;
-        angle += 0.22 + dv * 0.35;             // giro base + aporte del scroll
+        angle += 0.5 + dv * 0.35;              // giro base + aporte del scroll
         vinylDisc.style.transform = `rotate(${angle}deg)`;
       } else {
         lastY = window.scrollY;                // fuera de vista: sólo sigue el scroll

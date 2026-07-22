@@ -848,19 +848,25 @@ a:focus-visible, button:focus-visible, .btn:focus-visible, .track:focus-visible 
   box-shadow: 0 30px 60px -25px rgba(0,0,0,0.85), inset 0 0 0 1px rgba(234,238,245,0.06);
   animation: spin 16s linear infinite;
 }
-/* Reflejo diagonal: rompe la simetría para que la rotación SE VEA */
+/* Reflejo/brillo diagonal: gira con el disco y hace notar el giro */
 .vinyl__disc::before {
-  content: ""; position: absolute; inset: 0; border-radius: 50%; pointer-events: none;
-  background: linear-gradient(122deg,
-    rgba(242,199,102,0.16) 0%, rgba(255,255,255,0.05) 20%,
-    rgba(255,255,255,0) 42%, rgba(255,255,255,0) 60%,
-    rgba(234,238,245,0.05) 82%, rgba(242,199,102,0.10) 100%);
+  content: ""; position: absolute; inset: 0; border-radius: 50%; pointer-events: none; z-index: 1;
+  background: linear-gradient(125deg,
+    rgba(255,244,214,0.36) 0%, rgba(255,255,255,0.14) 12%,
+    rgba(255,255,255,0) 32%, rgba(255,255,255,0) 60%,
+    rgba(234,238,245,0.10) 82%, rgba(242,199,102,0.28) 100%);
 }
+/* Logo al centro del disco: gira junto con el vinilo */
 .vinyl__label {
-  position: absolute; inset: 34%; border-radius: 50%; background: var(--bordo);
-  box-shadow: inset 0 0 0 4px rgba(0,0,0,0.25);
+  position: absolute; inset: 32%; border-radius: 50%; overflow: hidden; z-index: 2;
+  background: var(--carbon);
+  box-shadow: inset 0 0 0 3px var(--bordo), 0 4px 14px -6px rgba(0,0,0,0.7);
 }
-.vinyl__hole { position: absolute; inset: 47.5%; border-radius: 50%; background: var(--tierra); }
+.vinyl__label img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.vinyl__hole {
+  position: absolute; inset: 48.6%; border-radius: 50%; z-index: 3;
+  background: #0b0805; box-shadow: 0 0 0 2px rgba(0,0,0,0.4);
+}
 
 /* =========================================================
    VIDEOS (miniatura → player al clickear)
