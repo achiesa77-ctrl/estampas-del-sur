@@ -1053,6 +1053,11 @@ a:focus-visible, button:focus-visible, .btn:focus-visible, .track:focus-visible 
   .nav__links a { font-size: 1.1rem; }
   .nav__burger { display: flex; z-index: 101; }
   .cards { grid-template-columns: repeat(2, 1fr); gap: 0.9rem; }
+  /* Si la última tarjeta queda sola en la fila (5 integrantes en 2 columnas),
+     la centramos en vez de dejarla pegada a la izquierda. */
+  .cards .card:last-child:nth-child(odd) {
+    grid-column: 1 / -1; justify-self: center; width: calc(50% - 0.45rem);
+  }
   .card__body { padding: 1rem; }
   .gallery { grid-template-columns: repeat(2, 1fr); grid-auto-rows: 150px; }
   .gallery__item--a, .gallery__item--b, .gallery__item--e { grid-column: span 2; }
