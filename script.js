@@ -323,6 +323,51 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
+  /* ---- Galería: slideshow con crossfade, Ken Burns y auto-avance ---- */
+  (function initSlideshow() {
+    const box = document.getElementById("slideshow");
+    if (!box) return;
+    const slides = [...box.querySelectorAll(".slide")];
+    if (slides.length < 2) return;
+    const dotsWrap = box.querySelector(".slideshow__dots");
+    const INTERVAL = 5000;
+    let idx = 0, timer = 0;
+
+    const dots = slides.map((_, i) => {
+      const d = document.createElement("button");
+      d.className = "slideshow__dot"; d.type = "button";
+      d.setAttribute("aria-label", `Foto ${i + 1}`);
+      d.addEventListener("click", () => go(i, true));
+      dotsWrap.appendChild(d);
+      return d;
+    });
+
+    const render = () => {
+      slides.forEach((s, i) => s.classList.toggle("is-active", i === idx));
+      dots.forEach((d, i) => d.classList.toggle("is-active", i === idx));
+    };
+    const go = (i, manual) => {
+      idx = (i + slides.length) % slides.length;
+      render();
+      if (manual) restart();
+    };
+    const restart = () => {
+      clearInterval(timer);
+      if (!reduceMotion) timer = setInterval(() => go(idx + 1), INTERVAL);
+    };
+
+    box.querySelector(".slideshow__nav--next").addEventListener("click", () => go(idx + 1, true));
+    box.querySelector(".slideshow__nav--prev").addEventListener("click", () => go(idx - 1, true));
+    box.addEventListener("mouseenter", () => clearInterval(timer));
+    box.addEventListener("mouseleave", restart);
+    document.addEventListener("visibilitychange", () => {
+      if (document.hidden) clearInterval(timer); else restart();
+    });
+
+    render();
+    restart();
+  })();
+
   /* ---- Brasas del fogón: partículas cálidas que suben (canvas) ---- */
   initEmbers();
 

@@ -693,29 +693,59 @@ a:focus-visible, button:focus-visible, .btn:focus-visible, .track:focus-visible 
    GALERÍA
    ========================================================= */
 .galeria { background: var(--panel-2); }
-.gallery {
-  max-width: var(--maxw); margin: 0 auto;
-  display: grid; grid-template-columns: repeat(4, 1fr); grid-auto-rows: 180px; gap: 1rem;
+
+/* Slideshow cinematográfico: fondo borroso + foto entera encima,
+   crossfade y Ken Burns alternado (así ninguna foto se recorta feo). */
+.slideshow {
+  position: relative; max-width: 1100px; margin: 3rem auto 0;
+  border-radius: 6px; overflow: hidden;
+  border: 1px solid rgba(240,230,212,0.08);
+  box-shadow: 0 40px 80px -40px rgba(0,0,0,0.85);
 }
-.gallery__item {
-  position: relative; overflow: hidden; border-radius: 3px; margin: 0;
-  border: 1px solid rgba(240,230,212,0.07);
+.slideshow__stage { position: relative; width: 100%; aspect-ratio: 16 / 10; }
+.slide { position: absolute; inset: 0; margin: 0; opacity: 0; transition: opacity 1.2s var(--ease); }
+.slide.is-active { opacity: 1; z-index: 1; }
+.slide__bg {
+  position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover;
+  filter: blur(26px) brightness(0.42) saturate(1.1); transform: scale(1.2);
 }
-.gallery__item img {
-  width: 100%; height: 100%; object-fit: cover;
-  filter: grayscale(0.5) contrast(1.05) brightness(0.85);
-  transition: transform 0.8s var(--ease), filter 0.6s var(--ease);
+.slide__fg { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; }
+/* Ken Burns sólo en la activa; alterna dirección para dar variedad */
+.slide.is-active .slide__bg { animation: kbA 7s ease-out both; }
+.slide.is-active:nth-child(even) .slide__bg { animation-name: kbB; }
+.slide.is-active .slide__fg { animation: kbFg 7s ease-out both; }
+@keyframes kbA  { from { transform: scale(1.2); }                 to { transform: scale(1.36) translate(-2%, -1.5%); } }
+@keyframes kbB  { from { transform: scale(1.36) translate(2%, 1.5%); } to { transform: scale(1.2); } }
+@keyframes kbFg { from { transform: scale(1.04); }                to { transform: scale(1); } }
+
+.slideshow__nav {
+  position: absolute; top: 50%; transform: translateY(-50%); z-index: 3;
+  width: 44px; height: 44px; display: grid; place-items: center;
+  background: rgba(12,8,5,0.45); color: var(--hueso);
+  border: 1px solid rgba(240,230,212,0.2); border-radius: 50%;
+  cursor: pointer; backdrop-filter: blur(4px);
+  transition: background-color 0.25s var(--ease), transform 0.25s var(--ease);
 }
-.gallery__item:hover img { transform: scale(1.06); filter: grayscale(0) brightness(1); }
-.gallery__item::after {
-  content: ""; position: absolute; inset: 0; pointer-events: none;
-  box-shadow: inset 0 0 60px rgba(11,8,6,0.5);
+.slideshow__nav svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.slideshow__nav--prev { left: 1rem; }
+.slideshow__nav--next { right: 1rem; }
+.slideshow__nav:hover { background: var(--bordo); transform: translateY(-50%) scale(1.08); }
+
+.slideshow__dots { position: absolute; z-index: 3; left: 0; right: 0; bottom: 1rem; display: flex; justify-content: center; gap: 0.5rem; }
+.slideshow__dot {
+  width: 8px; height: 8px; border-radius: 50%; padding: 0; cursor: pointer;
+  background: rgba(241,232,214,0.4); border: 0;
+  transition: background-color 0.25s var(--ease), transform 0.25s var(--ease);
 }
-.gallery__item--a { grid-column: span 2; grid-row: span 2; }
-.gallery__item--b { grid-column: span 2; }
-.gallery__item--c { grid-column: span 1; }
-.gallery__item--d { grid-column: span 1; }
-.gallery__item--e { grid-column: span 2; }
+.slideshow__dot:hover { background: rgba(241,232,214,0.7); }
+.slideshow__dot.is-active { background: var(--bordo); transform: scale(1.35); }
+
+@media (max-width: 720px) {
+  .slideshow__stage { aspect-ratio: 4 / 5; }
+  .slideshow__nav { width: 38px; height: 38px; }
+  .slideshow__nav--prev { left: 0.5rem; }
+  .slideshow__nav--next { right: 0.5rem; }
+}
 
 /* =========================================================
    SELLO PROPIO
@@ -992,6 +1022,7 @@ a:focus-visible, button:focus-visible, .btn:focus-visible, .track:focus-visible 
   .hero__meta, .hero__scroll { opacity: 1 !important; }
   .hero__photo { transform: scale(1.08) !important; }
   .embers { display: none; }
+  .slide { transition: none !important; }
 }
 
 /* =========================================================

@@ -587,12 +587,56 @@
         <p class="eyebrow">Momentos</p>
         <h2 class="section__title section__title--center">Galería</h2>
       </div>
-      <div class="gallery">
-        <figure class="gallery__item gallery__item--a reveal"><img src="fotos/bajo.jpg" alt="Músico con bajo junto al río" loading="lazy" /></figure>
-        <figure class="gallery__item gallery__item--b reveal" data-delay="1"><img src="fotos/guitarra.jpg" alt="Guitarrista del grupo" loading="lazy" /></figure>
-        <figure class="gallery__item gallery__item--c reveal" data-delay="2"><img src="fotos/bateria.jpg" alt="Baterista del grupo" loading="lazy" /></figure>
-        <figure class="gallery__item gallery__item--d reveal" data-delay="1"><img src="fotos/acordeon2.jpg" alt="Acordeonista del grupo" loading="lazy" /></figure>
-        <figure class="gallery__item gallery__item--e reveal" data-delay="2"><img src="fotos/acordeon.jpg" alt="Acordeonista junto al río" loading="lazy" /></figure>
+      <div class="slideshow reveal" id="slideshow" aria-roledescription="carrusel">
+        <div class="slideshow__stage">
+          <figure class="slide is-active">
+            <img class="slide__bg" src="fotos/gal/portada.jpg" alt="" aria-hidden="true" />
+            <img class="slide__fg" src="fotos/gal/portada.jpg" alt="Estampas del Sur en vivo en el Festival del Reencuentro, Montes" />
+          </figure>
+          <figure class="slide">
+            <img class="slide__bg" src="fotos/gal/g1.jpg" alt="" aria-hidden="true" loading="lazy" />
+            <img class="slide__fg" src="fotos/gal/g1.jpg" alt="Estampas del Sur en vivo" loading="lazy" />
+          </figure>
+          <figure class="slide">
+            <img class="slide__bg" src="fotos/gal/g2.jpg" alt="" aria-hidden="true" loading="lazy" />
+            <img class="slide__fg" src="fotos/gal/g2.jpg" alt="Estampas del Sur en vivo" loading="lazy" />
+          </figure>
+          <figure class="slide">
+            <img class="slide__bg" src="fotos/gal/g3.jpg" alt="" aria-hidden="true" loading="lazy" />
+            <img class="slide__fg" src="fotos/gal/g3.jpg" alt="Estampas del Sur en vivo" loading="lazy" />
+          </figure>
+          <figure class="slide">
+            <img class="slide__bg" src="fotos/gal/g4.jpg" alt="" aria-hidden="true" loading="lazy" />
+            <img class="slide__fg" src="fotos/gal/g4.jpg" alt="Estampas del Sur en vivo" loading="lazy" />
+          </figure>
+          <figure class="slide">
+            <img class="slide__bg" src="fotos/gal/g5.jpg" alt="" aria-hidden="true" loading="lazy" />
+            <img class="slide__fg" src="fotos/gal/g5.jpg" alt="Estampas del Sur en vivo" loading="lazy" />
+          </figure>
+          <figure class="slide">
+            <img class="slide__bg" src="fotos/gal/g6.jpg" alt="" aria-hidden="true" loading="lazy" />
+            <img class="slide__fg" src="fotos/gal/g6.jpg" alt="Estampas del Sur en vivo" loading="lazy" />
+          </figure>
+          <figure class="slide">
+            <img class="slide__bg" src="fotos/gal/g7.jpg" alt="" aria-hidden="true" loading="lazy" />
+            <img class="slide__fg" src="fotos/gal/g7.jpg" alt="Estampas del Sur en vivo" loading="lazy" />
+          </figure>
+          <figure class="slide">
+            <img class="slide__bg" src="fotos/gal/g8.jpg" alt="" aria-hidden="true" loading="lazy" />
+            <img class="slide__fg" src="fotos/gal/g8.jpg" alt="Estampas del Sur en vivo" loading="lazy" />
+          </figure>
+          <figure class="slide">
+            <img class="slide__bg" src="fotos/gal/g9.jpg" alt="" aria-hidden="true" loading="lazy" />
+            <img class="slide__fg" src="fotos/gal/g9.jpg" alt="Estampas del Sur en vivo" loading="lazy" />
+          </figure>
+        </div>
+        <button class="slideshow__nav slideshow__nav--prev" type="button" aria-label="Foto anterior">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg>
+        </button>
+        <button class="slideshow__nav slideshow__nav--next" type="button" aria-label="Foto siguiente">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg>
+        </button>
+        <div class="slideshow__dots" role="tablist" aria-label="Ir a la foto"></div>
       </div>
     </section>
 
