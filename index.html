@@ -53,9 +53,19 @@
   <!-- ===================== NAV ===================== -->
   <header class="nav" id="nav">
     <a href="#inicio" class="nav__brand" aria-label="Estampas del Sur — inicio">
-      <span class="nav__logo">
-        <img src="fotos/logo-nuevo.jpg" alt="Estampas del Sur" />
-      </span>
+      <div class="seal">
+        <svg class="seal__ring" viewBox="0 0 200 200" aria-hidden="true">
+          <defs>
+            <path id="sealArc" d="M 100,100 m -76,0 a 76,76 0 1,1 152,0 a 76,76 0 1,1 -152,0" />
+          </defs>
+          <text>
+            <textPath href="#sealArc" startOffset="0">
+              ESTAMPAS DEL SUR · FOLKLORE URUGUAYO · MILONGA · CHAMARRITA ·&nbsp;
+            </textPath>
+          </text>
+        </svg>
+        <span class="seal__logo"><img src="fotos/logo-nuevo.jpg" alt="Estampas del Sur" /></span>
+      </div>
     </a>
 
     <nav class="nav__links" id="navLinks">
@@ -115,22 +125,6 @@
       <div class="hero__meta" aria-hidden="true">
         <span>Empalme Olmos · Canelones</span>
         <span>Uruguay</span>
-      </div>
-
-      <!-- Sello de texto circular giratorio (SVG textPath) + logo al centro -->
-      <div class="seal" aria-hidden="true">
-        <svg class="seal__ring" viewBox="0 0 200 200">
-          <defs>
-            <path id="sealArc"
-                  d="M 100,100 m -76,0 a 76,76 0 1,1 152,0 a 76,76 0 1,1 -152,0" />
-          </defs>
-          <text>
-            <textPath href="#sealArc" startOffset="0">
-              ESTAMPAS DEL SUR · FOLKLORE URUGUAYO · MILONGA · CHAMARRITA ·&nbsp;
-            </textPath>
-          </text>
-        </svg>
-        <span class="seal__logo"><img src="fotos/logo-nuevo.jpg" alt="" /></span>
       </div>
     </section>
 
