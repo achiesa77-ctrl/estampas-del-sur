@@ -292,7 +292,7 @@ a:focus-visible, button:focus-visible, .btn:focus-visible, .track:focus-visible 
    HERO CINEMATOGRÁFICO — escenario, luces y neblina
    ========================================================= */
 .hero {
-  --hero-photo: url("fotos/gal/portada.jpg"); /* foto en vivo: Festival del Reencuentro, Montes */
+  --hero-photo: url("fotos/portada-hd.jpg"); /* foto en vivo HD y colorida: Festival del Reencuentro */
   position: relative; min-height: 100svh;
   display: flex; flex-direction: column; justify-content: center;
   padding: 8rem var(--pad) 5rem; overflow: hidden;
@@ -305,7 +305,7 @@ a:focus-visible, button:focus-visible, .btn:focus-visible, .track:focus-visible 
   position: absolute; inset: -6% ; z-index: 0;
   background-image: var(--hero-photo);
   background-size: cover; background-position: center; background-repeat: no-repeat;
-  filter: grayscale(0.25) contrast(1.05) brightness(0.55);
+  filter: contrast(1.06) brightness(0.82) saturate(1.12);
   animation: kenburns 26s ease-out infinite alternate;
   will-change: transform;
 }
@@ -351,7 +351,9 @@ a:focus-visible, button:focus-visible, .btn:focus-visible, .track:focus-visible 
 .hero__vignette {
   position: absolute; inset: 0; pointer-events: none;
   box-shadow: inset 0 0 200px 40px rgba(0,0,0,0.85);
-  background: radial-gradient(120% 90% at 50% 42%, transparent 55%, rgba(0,0,0,0.55));
+  background:
+    linear-gradient(180deg, rgba(6,4,2,0.72) 0, rgba(6,4,2,0) 15%),
+    radial-gradient(120% 90% at 50% 42%, transparent 55%, rgba(0,0,0,0.55));
 }
 
 /* Contenido */
