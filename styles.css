@@ -304,7 +304,7 @@ a:focus-visible, button:focus-visible, .btn:focus-visible, .track:focus-visible 
 .hero__photo {
   position: absolute; inset: -6% ; z-index: 0;
   background-image: var(--hero-photo);
-  background-size: cover; background-position: center;
+  background-size: cover; background-position: center; background-repeat: no-repeat;
   filter: grayscale(0.25) contrast(1.05) brightness(0.55);
   animation: kenburns 26s ease-out infinite alternate;
   will-change: transform;
@@ -1070,6 +1070,13 @@ a:focus-visible, button:focus-visible, .btn:focus-visible, .track:focus-visible 
   .show { grid-template-columns: auto 1fr; }
   .show__link { grid-column: 2; justify-self: start; }
   .hero__lead { font-size: 1rem; }
+  /* La Portada (apaisada) se ve ENTERA en el celu, sin recortar */
+  .hero__photo {
+    inset: 0;
+    background-size: contain;
+    background-position: center 40%;
+    animation: none; transform: none !important;
+  }
   .grupo__badge { right: 12px; }
   .nav__name { display: none; }               /* en móvil, solo el logo */
   .timeline::before { left: 58px; }
