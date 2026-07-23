@@ -1,0 +1,5 @@
+# Estampas del Sur — sitio estático (sin build).
+# Netlify publica la raíz del repo, donde está index.html.
+[build]
+  publish = "."
+  command = ""
