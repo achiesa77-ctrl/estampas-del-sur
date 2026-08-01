@@ -8,17 +8,25 @@
   <title>Estampas del Sur · Folklore uruguayo</title>
   <link rel="canonical" href="https://estampasdelsur.netlify.app/" />
 
-  <!-- Favicon (el logo) -->
+  <!-- Favicon (el logo). Va en JPG a propósito: el soporte de WebP en
+       favicons es irregular, y acá el ahorro serían unos pocos KB. -->
   <link rel="icon" href="fotos/logo-nuevo.jpg" />
   <link rel="apple-touch-icon" href="fotos/logo-nuevo.jpg" />
 
-  <!-- La foto del hero es lo primero que se ve: que empiece a bajar ya -->
-  <link rel="preload" as="image" href="fotos/portada-hd.jpg" fetchpriority="high" />
+  <!-- La foto del hero es lo primero que se ve: que empiece a bajar ya.
+       Apunta a la WEBP, que es la que el hero termina usando: si precargara
+       el JPG, el navegador moderno se bajaría 165 KB al pedo y DESPUÉS la
+       webp. El type hace que quien no soporte webp simplemente ignore el
+       preload (se queda sin precarga, pero la foto igual carga por CSS). -->
+  <link rel="preload" as="image" href="fotos/portada-hd.webp" type="image/webp" fetchpriority="high" />
 
   <!-- Open Graph / redes (cómo se ve al compartir el link).
        La imagen va con URL absoluta y en formato apaisado 1600x928: los
        scrapers de WhatsApp/Facebook no resuelven rutas relativas y la
-       tarjeta grande espera un apaisado, no el logo cuadrado. -->
+       tarjeta grande espera un apaisado, no el logo cuadrado.
+       SIGUE EN JPG A PROPÓSITO: varios scrapers (WhatsApp entre ellos) no
+       renderizan WebP y mostrarían la tarjeta sin imagen. Ídem el "image"
+       y el "logo" del JSON-LD de más abajo. No pasarlos a WebP. -->
   <meta property="og:type" content="website" />
   <meta property="og:site_name" content="Estampas del Sur" />
   <meta property="og:url" content="https://estampasdelsur.netlify.app/" />
@@ -137,7 +145,10 @@
                       textLength="477" lengthAdjust="spacing">ESTAMPAS DEL SUR · FOLKLORE URUGUAYO ·</textPath>
           </text>
         </svg>
-        <span class="seal__logo"><img src="fotos/logo-nuevo.jpg" alt="Estampas del Sur" /></span>
+        <span class="seal__logo"><picture>
+          <source srcset="fotos/logo-nuevo.webp" type="image/webp" />
+          <img src="fotos/logo-nuevo.jpg" alt="Estampas del Sur" />
+        </picture></span>
       </div>
     </a>
 
@@ -250,8 +261,15 @@
     <section class="grupo section" id="grupo">
       <div class="grupo__grid">
         <div class="grupo__media reveal">
+          <!-- Patrón de todo el sitio: <source> WebP primero, <img> JPG como
+               respaldo. El navegador baja UNA sola: la WebP si la entiende
+               (~98% del parque hoy), el JPG si no. Las clases y los atributos
+               quedan en el <img>, así que el CSS y el JS no cambian. -->
           <div class="grupo__frame">
-            <img src="fotos/acordeon.jpg" alt="Músico de Estampas del Sur junto al río" class="grupo__img" data-parallax-img loading="lazy" width="1220" height="1434" />
+            <picture>
+              <source srcset="fotos/acordeon.webp" type="image/webp" />
+              <img src="fotos/acordeon.jpg" alt="Músico de Estampas del Sur junto al río" class="grupo__img" data-parallax-img loading="lazy" width="1220" height="1434" />
+            </picture>
           </div>
           <div class="grupo__badge">
             <span class="grupo__badge-num">Est.</span>
@@ -307,7 +325,10 @@
       <div class="cards" data-stagger>
         <article class="card">
           <div class="card__photo">
-            <img src="fotos/guillermo-perez.jpg" alt="Guillermo Pérez, bajista de Estampas del Sur" loading="lazy" width="991" height="1600" />
+            <picture>
+              <source srcset="fotos/guillermo-perez.webp" type="image/webp" />
+              <img src="fotos/guillermo-perez.jpg" alt="Guillermo Pérez, bajista de Estampas del Sur" loading="lazy" width="720" height="1162" />
+            </picture>
             <span class="card__inst">Bajo</span>
           </div>
           <div class="card__body">
@@ -322,7 +343,10 @@
 
         <article class="card">
           <div class="card__photo">
-            <img src="fotos/marcelo-marrero.jpg" alt="Marcelo Marrero, primera voz y segunda guitarra de Estampas del Sur" loading="lazy" width="1066" height="1600" />
+            <picture>
+              <source srcset="fotos/marcelo-marrero.webp" type="image/webp" />
+              <img src="fotos/marcelo-marrero.jpg" alt="Marcelo Marrero, primera voz y segunda guitarra de Estampas del Sur" loading="lazy" width="720" height="1081" />
+            </picture>
             <span class="card__inst">Voz &amp; guitarra</span>
           </div>
           <div class="card__body">
@@ -337,7 +361,10 @@
 
         <article class="card">
           <div class="card__photo">
-            <img src="fotos/fernando-saavedra.jpg" alt="Fernando Saavedra, primera guitarra y segunda voz de Estampas del Sur" loading="lazy" width="1066" height="1600" />
+            <picture>
+              <source srcset="fotos/fernando-saavedra.webp" type="image/webp" />
+              <img src="fotos/fernando-saavedra.jpg" alt="Fernando Saavedra, primera guitarra y segunda voz de Estampas del Sur" loading="lazy" width="720" height="1081" />
+            </picture>
             <span class="card__inst">Guitarra &amp; voz</span>
           </div>
           <div class="card__body">
@@ -352,7 +379,10 @@
 
         <article class="card">
           <div class="card__photo">
-            <img src="fotos/henry-acuna.jpg" alt="Henry Acuña, acordeón y teclados de Estampas del Sur" loading="lazy" width="1536" height="2040" />
+            <picture>
+              <source srcset="fotos/henry-acuna.webp" type="image/webp" />
+              <img src="fotos/henry-acuna.jpg" alt="Henry Acuña, acordeón y teclados de Estampas del Sur" loading="lazy" width="720" height="956" />
+            </picture>
             <span class="card__inst">Acordeón &amp; teclados</span>
           </div>
           <div class="card__body">
@@ -367,7 +397,10 @@
 
         <article class="card">
           <div class="card__photo">
-            <img src="fotos/diego-rodriguez.jpg" alt="Diego Rodríguez, baterista de Estampas del Sur" loading="lazy" width="1220" height="1495" />
+            <picture>
+              <source srcset="fotos/diego-rodriguez.webp" type="image/webp" />
+              <img src="fotos/diego-rodriguez.jpg" alt="Diego Rodríguez, baterista de Estampas del Sur" loading="lazy" width="720" height="882" />
+            </picture>
             <span class="card__inst">Batería</span>
           </div>
           <div class="card__body">
@@ -664,40 +697,94 @@
         <p class="sr-only" id="slideshowStatus" aria-live="polite"></p>
         <div class="slideshow__stage">
           <figure class="slide is-active">
-            <img class="slide__bg" src="fotos/gal/g1.jpg" alt="" aria-hidden="true" />
-            <img class="slide__fg" src="fotos/gal/g1.jpg" alt="Estampas del Sur en vivo" />
+            <picture>
+              <source srcset="fotos/gal/g1.webp" type="image/webp" />
+              <img class="slide__bg" src="fotos/gal/g1.jpg" alt="" aria-hidden="true" />
+            </picture>
+            <picture>
+              <source srcset="fotos/gal/g1.webp" type="image/webp" />
+              <img class="slide__fg" src="fotos/gal/g1.jpg" alt="Estampas del Sur en vivo" />
+            </picture>
           </figure>
           <figure class="slide">
-            <img class="slide__bg" src="fotos/gal/g2.jpg" alt="" aria-hidden="true" loading="lazy" />
-            <img class="slide__fg" src="fotos/gal/g2.jpg" alt="Estampas del Sur en vivo" loading="lazy" />
+            <picture>
+              <source srcset="fotos/gal/g2.webp" type="image/webp" />
+              <img class="slide__bg" src="fotos/gal/g2.jpg" alt="" aria-hidden="true" loading="lazy" />
+            </picture>
+            <picture>
+              <source srcset="fotos/gal/g2.webp" type="image/webp" />
+              <img class="slide__fg" src="fotos/gal/g2.jpg" alt="Estampas del Sur en vivo" loading="lazy" />
+            </picture>
           </figure>
           <figure class="slide">
-            <img class="slide__bg" src="fotos/gal/g3.jpg" alt="" aria-hidden="true" loading="lazy" />
-            <img class="slide__fg" src="fotos/gal/g3.jpg" alt="Estampas del Sur en vivo" loading="lazy" />
+            <picture>
+              <source srcset="fotos/gal/g3.webp" type="image/webp" />
+              <img class="slide__bg" src="fotos/gal/g3.jpg" alt="" aria-hidden="true" loading="lazy" />
+            </picture>
+            <picture>
+              <source srcset="fotos/gal/g3.webp" type="image/webp" />
+              <img class="slide__fg" src="fotos/gal/g3.jpg" alt="Estampas del Sur en vivo" loading="lazy" />
+            </picture>
           </figure>
           <figure class="slide">
-            <img class="slide__bg" src="fotos/gal/g4.jpg" alt="" aria-hidden="true" loading="lazy" />
-            <img class="slide__fg" src="fotos/gal/g4.jpg" alt="Estampas del Sur en vivo" loading="lazy" />
+            <picture>
+              <source srcset="fotos/gal/g4.webp" type="image/webp" />
+              <img class="slide__bg" src="fotos/gal/g4.jpg" alt="" aria-hidden="true" loading="lazy" />
+            </picture>
+            <picture>
+              <source srcset="fotos/gal/g4.webp" type="image/webp" />
+              <img class="slide__fg" src="fotos/gal/g4.jpg" alt="Estampas del Sur en vivo" loading="lazy" />
+            </picture>
           </figure>
           <figure class="slide">
-            <img class="slide__bg" src="fotos/gal/g5.jpg" alt="" aria-hidden="true" loading="lazy" />
-            <img class="slide__fg" src="fotos/gal/g5.jpg" alt="Estampas del Sur en vivo" loading="lazy" />
+            <picture>
+              <source srcset="fotos/gal/g5.webp" type="image/webp" />
+              <img class="slide__bg" src="fotos/gal/g5.jpg" alt="" aria-hidden="true" loading="lazy" />
+            </picture>
+            <picture>
+              <source srcset="fotos/gal/g5.webp" type="image/webp" />
+              <img class="slide__fg" src="fotos/gal/g5.jpg" alt="Estampas del Sur en vivo" loading="lazy" />
+            </picture>
           </figure>
           <figure class="slide">
-            <img class="slide__bg" src="fotos/gal/g6.jpg" alt="" aria-hidden="true" loading="lazy" />
-            <img class="slide__fg" src="fotos/gal/g6.jpg" alt="Estampas del Sur en vivo" loading="lazy" />
+            <picture>
+              <source srcset="fotos/gal/g6.webp" type="image/webp" />
+              <img class="slide__bg" src="fotos/gal/g6.jpg" alt="" aria-hidden="true" loading="lazy" />
+            </picture>
+            <picture>
+              <source srcset="fotos/gal/g6.webp" type="image/webp" />
+              <img class="slide__fg" src="fotos/gal/g6.jpg" alt="Estampas del Sur en vivo" loading="lazy" />
+            </picture>
           </figure>
           <figure class="slide">
-            <img class="slide__bg" src="fotos/gal/g7.jpg" alt="" aria-hidden="true" loading="lazy" />
-            <img class="slide__fg" src="fotos/gal/g7.jpg" alt="Estampas del Sur en vivo" loading="lazy" />
+            <picture>
+              <source srcset="fotos/gal/g7.webp" type="image/webp" />
+              <img class="slide__bg" src="fotos/gal/g7.jpg" alt="" aria-hidden="true" loading="lazy" />
+            </picture>
+            <picture>
+              <source srcset="fotos/gal/g7.webp" type="image/webp" />
+              <img class="slide__fg" src="fotos/gal/g7.jpg" alt="Estampas del Sur en vivo" loading="lazy" />
+            </picture>
           </figure>
           <figure class="slide">
-            <img class="slide__bg" src="fotos/gal/g8.jpg" alt="" aria-hidden="true" loading="lazy" />
-            <img class="slide__fg" src="fotos/gal/g8.jpg" alt="Estampas del Sur en vivo" loading="lazy" />
+            <picture>
+              <source srcset="fotos/gal/g8.webp" type="image/webp" />
+              <img class="slide__bg" src="fotos/gal/g8.jpg" alt="" aria-hidden="true" loading="lazy" />
+            </picture>
+            <picture>
+              <source srcset="fotos/gal/g8.webp" type="image/webp" />
+              <img class="slide__fg" src="fotos/gal/g8.jpg" alt="Estampas del Sur en vivo" loading="lazy" />
+            </picture>
           </figure>
           <figure class="slide">
-            <img class="slide__bg" src="fotos/gal/g9.jpg" alt="" aria-hidden="true" loading="lazy" />
-            <img class="slide__fg" src="fotos/gal/g9.jpg" alt="Estampas del Sur en vivo" loading="lazy" />
+            <picture>
+              <source srcset="fotos/gal/g9.webp" type="image/webp" />
+              <img class="slide__bg" src="fotos/gal/g9.jpg" alt="" aria-hidden="true" loading="lazy" />
+            </picture>
+            <picture>
+              <source srcset="fotos/gal/g9.webp" type="image/webp" />
+              <img class="slide__fg" src="fotos/gal/g9.jpg" alt="Estampas del Sur en vivo" loading="lazy" />
+            </picture>
           </figure>
         </div>
         <button class="slideshow__nav slideshow__nav--prev" type="button" aria-label="Foto anterior">

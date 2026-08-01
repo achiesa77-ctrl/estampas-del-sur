@@ -79,6 +79,11 @@ body {
 body::before {
   content: ""; position: fixed; inset: 0; z-index: -2;
   background: url("fotos/fondo.jpg") center center / cover no-repeat;
+  /* Igual que el <picture> del HTML, pero para fondos: el navegador que no
+     entiende image-set() ignora esta linea y se queda con el JPG de arriba.
+     Por eso la declaracion JPG va PRIMERO y no se borra. */
+  background-image: image-set(url("fotos/fondo.webp") type("image/webp"),
+                              url("fotos/fondo.jpg")  type("image/jpeg"));
   filter: blur(2px) saturate(0.92);
   transform: scale(1.03);
 }
@@ -370,6 +375,13 @@ a:focus-visible, button:focus-visible, .btn:focus-visible, .track:focus-visible 
 .hero__photo {
   position: absolute; inset: -6% ; z-index: 0;
   background-image: var(--hero-photo);
+  /* OJO: el image-set va LITERAL, no dentro de un var(). Un var() que resuelve
+     a algo que el navegador no entiende cae en "invalid at computed-value
+     time" y la propiedad se va al valor inicial (o sea, foto en blanco) en vez
+     de retroceder a la linea de arriba. Escrito literal, el navegador viejo
+     descarta esta declaracion en el parseo y se queda con var(--hero-photo). */
+  background-image: image-set(url("fotos/portada-hd.webp") type("image/webp"),
+                              url("fotos/portada-hd.jpg")  type("image/jpeg"));
   background-size: cover; background-position: center; background-repeat: no-repeat;
   /* Más oscura que antes (0.82 -> 0.5): ahora es la BASE del collage y las
      letras rellenas de foto necesitan un fondo apagado para despegar. */
@@ -481,6 +493,18 @@ a:focus-visible, button:focus-visible, .btn:focus-visible, .track:focus-visible 
       url("fotos/diego-rodriguez.jpg"),
       url("fotos/acordeon2.jpg"),
       url("fotos/portada-hd.jpg");
+    /* Las mismas 8 fichas en WebP. Si el navegador no entiende image-set()
+       descarta este bloque entero y se queda con la lista de JPG de arriba;
+       el mosaico no se rompe a medias porque es una sola declaracion. */
+    background-image:
+      image-set(url("fotos/guitarra.webp") type("image/webp"), url("fotos/guitarra.jpg") type("image/jpeg")),
+      image-set(url("fotos/bateria.webp") type("image/webp"), url("fotos/bateria.jpg") type("image/jpeg")),
+      image-set(url("fotos/guillermo-perez.webp") type("image/webp"), url("fotos/guillermo-perez.jpg") type("image/jpeg")),
+      image-set(url("fotos/fernando-saavedra.webp") type("image/webp"), url("fotos/fernando-saavedra.jpg") type("image/jpeg")),
+      image-set(url("fotos/bajo.webp") type("image/webp"), url("fotos/bajo.jpg") type("image/jpeg")),
+      image-set(url("fotos/diego-rodriguez.webp") type("image/webp"), url("fotos/diego-rodriguez.jpg") type("image/jpeg")),
+      image-set(url("fotos/acordeon2.webp") type("image/webp"), url("fotos/acordeon2.jpg") type("image/jpeg")),
+      image-set(url("fotos/portada-hd.webp") type("image/webp"), url("fotos/portada-hd.jpg") type("image/jpeg"));
     background-repeat: no-repeat;
     /* 26x52 en vez de 25x50: el solape evita costuras entre fichas */
     background-size: 26% 52%;
@@ -529,6 +553,11 @@ a:focus-visible, button:focus-visible, .btn:focus-visible, .track:focus-visible 
         url("fotos/bateria.jpg"),
         url("fotos/bajo.jpg"),
         url("fotos/portada-hd.jpg");
+      background-image:
+        image-set(url("fotos/guitarra.webp") type("image/webp"), url("fotos/guitarra.jpg") type("image/jpeg")),
+        image-set(url("fotos/bateria.webp") type("image/webp"), url("fotos/bateria.jpg") type("image/jpeg")),
+        image-set(url("fotos/bajo.webp") type("image/webp"), url("fotos/bajo.jpg") type("image/jpeg")),
+        image-set(url("fotos/portada-hd.webp") type("image/webp"), url("fotos/portada-hd.jpg") type("image/jpeg"));
       background-size: 52% 52%;
       background-position: 0% 0%, 100% 0%, 0% 100%, 100% 100%;
       animation: none;
