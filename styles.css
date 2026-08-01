@@ -361,7 +361,9 @@ a:focus-visible, button:focus-visible, .btn:focus-visible, .track:focus-visible 
   position: absolute; inset: -6% ; z-index: 0;
   background-image: var(--hero-photo);
   background-size: cover; background-position: center; background-repeat: no-repeat;
-  filter: contrast(1.06) brightness(0.82) saturate(1.12);
+  /* Más oscura que antes (0.82 -> 0.5): ahora es la BASE del collage y las
+     letras rellenas de foto necesitan un fondo apagado para despegar. */
+  filter: contrast(1.08) brightness(0.5) saturate(1.05);
   animation: kenburns 26s ease-out infinite alternate;
   will-change: transform;
 }
@@ -414,6 +416,16 @@ a:focus-visible, button:focus-visible, .btn:focus-visible, .track:focus-visible 
 
 /* Contenido */
 .hero__content { position: relative; z-index: 2; max-width: 900px; will-change: transform; }
+/* Velo del lado del texto: con las letras rellenas de foto, el fondo tiene
+   que estar apagado debajo del título o las dos imágenes compiten.
+   OJO: va acá dentro de .hero__stage (z-index 0) y NO como ::before de
+   .hero__content — ahí el will-change:transform arma un contexto de
+   apilado propio y el velo terminaba tapando el texto. */
+.hero__stage::after {
+  content: ""; position: absolute; inset: 0; pointer-events: none;
+  background: linear-gradient(100deg,
+              rgba(7,4,2,0.80) 0%, rgba(7,4,2,0.55) 38%, rgba(7,4,2,0) 68%);
+}
 .hero__eyebrow {
   font-family: var(--display);
   font-size: 0.76rem; font-weight: 500; letter-spacing: 0.36em;
@@ -425,6 +437,93 @@ a:focus-visible, button:focus-visible, .btn:focus-visible, .track:focus-visible 
   line-height: 0.98; letter-spacing: 0.05em; text-transform: uppercase;
   display: flex; flex-direction: column;
   text-shadow: 0 2px 40px rgba(0,0,0,0.5);
+}
+/* =========================================================
+   COLLAGE DENTRO DE LAS LETRAS ("Estampas")
+   Las 8 fotos se montan como un mosaico de 4x2 usando capas de
+   background, y background-clip:text hace que sólo se asomen dentro de
+   los trazos de la palabra. El viraje cálido lo da background-blend-mode:
+   luminosity sobre un color tierra: las fotos aportan la LUZ y el color
+   sale del tono cálido de la web. Así las tomas diurnas del río (celeste,
+   verde) dejan de pelear con la paleta nocturna del sitio.
+   ========================================================= */
+/* Fallback: si el navegador no soporta el recorte, queda crema sólido */
+.hero__title-collage > span { color: var(--hueso); }
+
+/* Raleway 300 es demasiado fina para rellenarla con fotos: no queda área
+   donde se vea la imagen y la palabra se pierde. Con trazo grueso el
+   collage se lee Y la palabra gana presencia. */
+.hero__title-collage { font-weight: 700; letter-spacing: 0.02em; }
+
+@supports ((-webkit-background-clip: text) or (background-clip: text)) {
+  .hero__title-collage > span {
+    /* Tono tierra que tiñe todo el mosaico */
+    background-color: #c9803a;
+    /* Las fotos originales son de mediodía pero adentro de la letra llegan
+       apagadas: se levantan para que despeguen del fondo oscuro. */
+    filter: brightness(1.45) contrast(1.12) saturate(1.15);
+    background-image:
+      url("fotos/guitarra.jpg"),
+      url("fotos/bateria.jpg"),
+      url("fotos/guillermo-perez.jpg"),
+      url("fotos/fernando-saavedra.jpg"),
+      url("fotos/bajo.jpg"),
+      url("fotos/diego-rodriguez.jpg"),
+      url("fotos/acordeon2.jpg"),
+      url("fotos/portada-hd.jpg");
+    background-repeat: no-repeat;
+    /* 26x52 en vez de 25x50: el solape evita costuras entre fichas */
+    background-size: 26% 52%;
+    background-position:
+        0%   0%, 33.33%   0%, 66.67%   0%, 100%   0%,
+        0% 100%, 33.33% 100%, 66.67% 100%, 100% 100%;
+    background-blend-mode: luminosity;
+    -webkit-background-clip: text;
+            background-clip: text;
+    color: transparent;
+    -webkit-text-fill-color: transparent;
+    /* La deriva mueve el mosaico DENTRO de letras quietas.
+       COSTO: animar background-position repinta las 8 capas en cada cuadro
+       (no se puede componer en GPU como transform). El área repintada es
+       sólo la caja de la palabra y va a 48s, así que es barata; aun así,
+       si en alguna máquina se nota tirón, la solución es esta única línea:
+       comentarla y el collage queda quieto sin perder nada más.
+       En móvil ya está desactivada más abajo. */
+    animation: collageDrift 48s ease-in-out infinite alternate;
+  }
+}
+
+/* Deriva lenta: todas las fichas se corren juntas (misma base de cálculo,
+   porque todas miden igual), así el mosaico se lee como una sola pieza. */
+@keyframes collageDrift {
+  from {
+    background-position:
+        0%   0%, 33.33%   0%, 66.67%   0%, 100%   0%,
+        0% 100%, 33.33% 100%, 66.67% 100%, 100% 100%;
+  }
+  to {
+    background-position:
+        6%   14%, 39.33%   14%, 72.67%   14%, 106%   14%,
+        6%  114%, 39.33%  114%, 72.67%  114%, 106%  114%;
+  }
+}
+
+/* En pantalla chica las letras son mucho más bajas: con 8 fichas el
+   interior se vuelve ruido. Se pasa a un mosaico de 2x2 con las cuatro
+   fotos más legibles, para que cada letra muestre algo reconocible. */
+@media (max-width: 720px) {
+  @supports ((-webkit-background-clip: text) or (background-clip: text)) {
+    .hero__title-collage > span {
+      background-image:
+        url("fotos/guitarra.jpg"),
+        url("fotos/bateria.jpg"),
+        url("fotos/bajo.jpg"),
+        url("fotos/portada-hd.jpg");
+      background-size: 52% 52%;
+      background-position: 0% 0%, 100% 0%, 0% 100%, 100% 100%;
+      animation: none;
+    }
+  }
 }
 .hero__title-em em {
   font-family: var(--serif);
@@ -1063,6 +1162,8 @@ a:focus-visible, button:focus-visible, .btn:focus-visible, .track:focus-visible 
   .line-mask > span, .hero__title .ch { transform: none !important; transition: none !important; }
   .hero__scroll { opacity: 1 !important; }
   .hero__photo { transform: scale(1.08) !important; }
+  /* El collage de las letras queda quieto, pero se sigue viendo */
+  .hero__title-collage > span { animation: none !important; }
   .embers { display: none; }
   .slide { transition: none !important; }
 }

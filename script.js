@@ -55,7 +55,12 @@ document.addEventListener("DOMContentLoaded", () => {
         }
       });
     };
-    title.querySelectorAll(".line-mask").forEach((line) => {
+    /* Sólo se parte "del Sur". La línea "Estampas" lleva el collage con
+       background-clip:text, y envolver cada letra en spans transformados
+       rompe ese recorte (cada letra pasaría a ser su propia capa y el
+       mosaico se cortaría por letra en vez de correr continuo). Esa línea
+       entra con el revelado tipo cortina, que sí lo respeta. */
+    title.querySelectorAll(".line-mask.hero__title-em").forEach((line) => {
       line.classList.add("is-split");
       wrap(line.querySelector(":scope > span") || line);
     });
