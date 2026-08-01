@@ -17,11 +17,95 @@ document.addEventListener("DOMContentLoaded", () => {
   const introSkip = document.getElementById("introSkip");
   // Al entrar al sitio: revela el hero y DIFIERE las animaciones GSAP
   // (así el video del intro no compite por CPU y no se traba).
+  // Con GSAP + SplitText el hero lo maneja un timeline; si el CDN no cargo
+  // (o hay reduced-motion) se cae al revelado por CSS, que hace lo mismo mas
+  // simple. Los dos caminos terminan con .is-loaded puesto.
+  const useGsapHero = !reduceMotion && !!(window.gsap && window.SplitText);
   const startHero = () => {
-    if (!reduceMotion) splitHeroTitle();
-    requestAnimationFrame(() => document.body.classList.add("is-loaded"));
+    if (useGsapHero) {
+      document.documentElement.classList.add("gsap-hero");
+      requestAnimationFrame(() => {
+        document.body.classList.add("is-loaded");
+        heroTimeline();
+      });
+    } else {
+      if (!reduceMotion) splitHeroTitle();
+      requestAnimationFrame(() => document.body.classList.add("is-loaded"));
+    }
     setTimeout(initScrollFX, 350);
   };
+
+  /* ---- Entrada del hero: una sola linea de tiempo orquestada ----
+     El orden cuenta la portada: primero el lugar (eyebrow), despues el
+     nombre letra por letra, la franja se abre en el medio de esa cascada,
+     y "del Sur" cierra. Todo con expo.out, el mismo easing del resto del
+     sitio (--ease), para que el hero no se sienta de otra web. */
+  function heroTimeline() {
+    const splitChars = (sel) => {
+      const el = document.querySelector(sel);
+      if (!el) return [];
+      // La mascara la da el overflow:hidden de .line-mask que envuelve
+      gsap.set(el, { y: 0 });
+      return new SplitText(el, { type: "chars", charsClass: "hchar" }).chars;
+    };
+    const estampas = splitChars(".hero__title-line > span");
+    const delSur   = splitChars(".hero__title-em > span");
+
+    const tl = gsap.timeline({ defaults: { ease: "expo.out" } });
+
+    tl.from(".hero__eyebrow > span", { yPercent: 115, duration: 0.9 })
+      // El nombre entra letra por letra: esto es lo que el collage impedia,
+      // porque envolver las letras rompia el background-clip:text.
+      .from(estampas, { yPercent: 115, duration: 1.15, stagger: 0.035 }, "-=0.55")
+      // La franja se abre desde la linea del medio mientras caen las ultimas
+      // letras: las dos cosas se leen como un mismo gesto.
+      .fromTo(".hero__strip",
+              { clipPath: "inset(50% 0% 50% 0%)" },
+              { clipPath: "inset(0% 0% 0% 0%)", duration: 1.25 }, "-=0.8")
+      .fromTo(".hero__strip img",
+              { scale: 1.16 }, { scale: 1, duration: 2, ease: "power3.out" }, "<")
+      .from(delSur, { yPercent: 115, duration: 1, stagger: 0.045 }, "-=1.05")
+      .from(".hero__lead > span",    { yPercent: 115, duration: 0.9 }, "-=0.85")
+      .from(".hero__actions > span", { yPercent: 115, duration: 0.8 }, "-=0.7")
+      .to(".hero__scroll", { opacity: 1, duration: 0.6 }, "-=0.35");
+
+    // Los efectos de scroll de la franja se arman RECIEN cuando termina la
+    // entrada. Antes se creaban a los 350ms, con la entrada todavia en el
+    // aire: el tween de scroll tomaba como punto de partida un clip-path a
+    // medio abrir, y al volver arriba la franja quedaba colapsada.
+    tl.eventCallback("onComplete", heroScrollFX);
+  }
+
+  /* ---- Hero al scrollear ----
+     La foto se mueve DENTRO del marco (por eso el <img> mide 122% de alto:
+     ese sobrante es el recorrido) y las dos palabras del nombre se separan
+     apenas, como si la franja las estuviera abriendo. Todo con scrub, o sea
+     atado a la barra de scroll y no a un tiempo fijo. */
+  function heroScrollFX() {
+    if (heroScrollFX.done) return;
+    heroScrollFX.done = true;
+    if (!(window.gsap && window.ScrollTrigger) || reduceMotion) return;
+    if (!document.querySelector(".hero__strip")) return;
+
+    const scrub = () => ({
+      trigger: ".hero", start: "top top", end: "bottom top", scrub: 0.6
+    });
+
+    gsap.to(".hero__strip img",  { yPercent: 9,    ease: "none", scrollTrigger: scrub() });
+    gsap.to(".hero__title-line", { xPercent: -3.5, ease: "none", scrollTrigger: scrub() });
+    gsap.to(".hero__title-em",   { xPercent: 3.5,  ease: "none", scrollTrigger: scrub() });
+
+    // Sólo con el hero animado por GSAP: si el revelado lo hizo el CSS, el
+    // clip-path lo maneja una transicion y meterle un tween encima vuelve a
+    // provocar la misma pelea de dos animaciones sobre una sola propiedad.
+    if (useGsapHero) {
+      gsap.to(".hero__strip", {
+        clipPath: "inset(18% 0% 18% 0%)", ease: "none",
+        immediateRender: false,
+        scrollTrigger: scrub()
+      });
+    }
+  }
 
   /* ---- Split del título del hero: envuelve cada letra en su propio span ----
      Preserva el <em> (itálica serif) y numera las letras con --i para la
@@ -675,6 +759,12 @@ document.addEventListener("DOMContentLoaded", () => {
     if (!(window.gsap && window.ScrollTrigger) || reduceMotion) return;
 
     gsap.registerPlugin(ScrollTrigger);
+
+    // Con el hero animado por GSAP, esto lo dispara el onComplete del
+    // timeline. Llamarlo tambien desde aca (a los 350ms, con la entrada en
+    // curso) marcaria heroScrollFX como hecho antes de tiempo y volveria a
+    // armar el tween de clip-path sobre un valor a medio abrir.
+    if (!useGsapHero) heroScrollFX();
 
     /* Parallax de la foto de "El Grupo" */
     const grupoImg = document.querySelector("[data-parallax-img]");

@@ -18,7 +18,7 @@
        el JPG, el navegador moderno se bajaría 165 KB al pedo y DESPUÉS la
        webp. El type hace que quien no soporte webp simplemente ignore el
        preload (se queda sin precarga, pero la foto igual carga por CSS). -->
-  <link rel="preload" as="image" href="fotos/portada-hd.webp" type="image/webp" fetchpriority="high" />
+  <link rel="preload" as="image" href="fotos/hero-franja.webp" type="image/webp" fetchpriority="high" />
 
   <!-- Open Graph / redes (cómo se ve al compartir el link).
        La imagen va con URL absoluta y en formato apaisado 1600x928: los
@@ -176,8 +176,11 @@
       <!-- Capa de FOTO: cuando tengas una foto en vivo, poné su ruta en
            --hero-photo (styles.css) o en el style de abajo. Hoy queda un
            escenario oscuro con luces y neblina. -->
+      <!-- Ya NO hay foto de fondo a sangre. La única foto del hero es la
+           franja de adentro del título: dos imágenes compitiendo era
+           justamente lo que volvía barro esta portada. Acá quedan sólo las
+           capas de atmósfera (haces, neblina, piso, viñeta). -->
       <div class="hero__stage" aria-hidden="true">
-        <div class="hero__photo" data-parallax="0.12"></div>
         <div class="hero__beam hero__beam--1"></div>
         <div class="hero__beam hero__beam--2"></div>
         <div class="hero__beam hero__beam--3"></div>
@@ -187,23 +190,38 @@
       </div>
 
       <div class="hero__content" data-parallax="-0.06">
-        <p class="hero__eyebrow line-mask"><span>Folklore uruguayo · Pando</span></p>
-        <!-- "Estampas" se rellena con el collage de fotos (ver .hero__title-collage
-             en styles.css). Sigue siendo texto real: se lee, se selecciona y
-             Google lo indexa; sólo cambia con qué se pinta. "del Sur" queda en
-             oro sólido para garantizar una linea siempre legible. -->
+        <p class="hero__eyebrow line-mask"><span>Folklore uruguayo · Pando · desde 2011</span></p>
+
+        <!-- LA IDEA DE LA PORTADA: la foto en vivo va encajada DENTRO del
+             nombre, como una franja de cine entre las dos palabras.
+             Reemplaza al collage que se rellenaba con background-clip:text,
+             que se leía sucio y ademas impedia animar esa linea.
+             El <img> lleva alt="" a proposito: el nombre accesible del <h1>
+             tiene que seguir siendo "Estampas del Sur" y nada mas. -->
         <h1 class="hero__title">
-          <span class="line-mask hero__title-collage"><span>Estampas</span></span>
+          <span class="line-mask hero__title-line"><span>Estampas</span></span>
+
+          <span class="hero__strip">
+            <picture>
+              <source srcset="fotos/hero-franja.webp" type="image/webp" />
+              <img src="fotos/hero-franja.jpg" alt="" width="1920" height="730" fetchpriority="high" />
+            </picture>
+          </span>
+
           <span class="line-mask hero__title-em"><span><em>del&nbsp;Sur</em></span></span>
         </h1>
-        <p class="hero__lead line-mask"><span>
-          Un grupo que se fue construyendo con el tiempo, fiel a una identidad
-          propia: milonga, chamarrita y raíz criolla con un sello que se reconoce.
-        </span></p>
-        <div class="hero__actions line-mask"><span>
-          <a href="#repertorio" class="btn btn--solid">Escuchá</a>
-          <a href="#agenda" class="btn btn--ghost">Próximas fechas</a>
-        </span></div>
+        <!-- Bajada y botones comparten fila: apilados empujaban las
+             contrataciones abajo del pliegue en pantallas de portátil. -->
+        <div class="hero__foot">
+          <p class="hero__lead line-mask"><span>
+            Un grupo que se fue construyendo con el tiempo, fiel a una identidad
+            propia: milonga, chamarrita y raíz criolla con un sello que se reconoce.
+          </span></p>
+          <div class="hero__actions line-mask"><span>
+            <a href="#repertorio" class="btn btn--solid">Escuchá</a>
+            <a href="#agenda" class="btn btn--ghost">Próximas fechas</a>
+          </span></div>
+        </div>
       </div>
 
       <a href="#grupo" class="hero__scroll" aria-label="Bajar">
@@ -863,9 +881,16 @@
     </svg>
   </button>
 
-  <!-- GSAP + ScrollTrigger para animaciones ricas -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+  <!-- GSAP 3.15 + ScrollTrigger + SplitText.
+       SplitText era plugin de pago del Club; desde que Webflow banca el
+       proyecto GSAP es 100% gratis con todos los plugins, asi que ahora se
+       puede usar sin licencia. Reemplaza al partidor de texto hecho a mano:
+       maneja lineas/palabras/letras y se re-parte solo al cambiar el ancho.
+       Si el CDN no carga, el sitio sigue andando: hay camino de respaldo en
+       CSS + el splitHeroTitle() propio de script.js. -->
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.15.0/dist/gsap.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.15.0/dist/ScrollTrigger.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.15.0/dist/SplitText.min.js"></script>
   <script src="script.js"></script>
 </body>
 </html>
