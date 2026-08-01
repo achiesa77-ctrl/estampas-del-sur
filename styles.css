@@ -116,6 +116,16 @@ a { color: inherit; text-decoration: none; }
 }
 .skip-link:focus-visible { transform: translate(-50%, 0); outline-offset: -4px; }
 
+/* Texto sólo para lectores de pantalla (avisos en vivo del slideshow).
+   No usa display:none ni visibility:hidden: eso lo sacaría del árbol de
+   accesibilidad y el lector no lo leería. */
+.sr-only {
+  position: absolute; width: 1px; height: 1px;
+  margin: -1px; padding: 0; border: 0;
+  overflow: hidden; white-space: nowrap;
+  clip-path: inset(50%);
+}
+
 /* ---------- Grano / textura de estampa ---------- */
 .grain {
   position: fixed; inset: 0; z-index: var(--z-grain); pointer-events: none;
@@ -802,23 +812,34 @@ a:focus-visible, button:focus-visible, .btn:focus-visible, .track:focus-visible 
 .tracks { list-style: none; }
 .track {
   display: grid;
-  grid-template-columns: auto auto 1fr auto; gap: 1.2rem;
-  align-items: center; padding: 1.15rem 0.5rem;
+  grid-template-columns: 1fr auto;
+  align-items: center; column-gap: 1.2rem; row-gap: 0;
+  padding: 1.15rem 0.5rem;
   border-bottom: 1px solid rgba(240,230,212,0.08);
   /* transform en vez de padding-left: mover layout en hover forzaba
      reflow en cada pasada del mouse (R12) */
   transition: background-color 0.3s var(--ease), transform 0.35s var(--ease-out-quint);
-  cursor: pointer;
 }
 .track:hover { background: rgba(217,164,65,0.05); transform: translateX(8px); }
+
+/* El botón ocupa toda la parte izquierda de la fila: sigue siendo cómodo
+   hacer clic en "cualquier lado", pero ahora con semántica de botón real. */
+.track__toggle {
+  display: grid; grid-template-columns: auto auto 1fr;
+  align-items: center; gap: 1.2rem;
+  background: none; border: 0; padding: 0; margin: 0;
+  color: inherit; font: inherit; text-align: left; cursor: pointer;
+  min-height: 44px;                    /* mínimo táctil */
+}
 .track__num { font-family: var(--display); font-style: italic; color: var(--humo-2); font-size: 1.1rem; }
 .track__play {
+  position: relative;
   width: 32px; height: 32px; display: grid; place-items: center; border-radius: 50%;
   border: 1px solid rgba(234,238,245,0.2); color: var(--bordo-claro); font-size: 0.65rem;
   transition: background-color 0.3s var(--ease), color 0.3s var(--ease), transform 0.3s var(--ease);
 }
-.track:hover .track__play,
-.track:focus-visible .track__play { background: var(--bordo); color: var(--noche); transform: scale(1.08); }
+.track__toggle:hover .track__play,
+.track__toggle:focus-visible .track__play { background: var(--bordo); color: var(--noche); transform: scale(1.08); }
 .track__i { width: 12px; height: 12px; fill: currentColor; display: block; }
 .track__i--pause { display: none; }
 .track.is-playing .track__i--play { display: none; }
@@ -827,7 +848,77 @@ a:focus-visible, button:focus-visible, .btn:focus-visible, .track:focus-visible 
 .track.is-playing .track__play { background: var(--bordo); color: var(--noche); }
 .track.is-playing .track__num { color: var(--oro-claro); }
 .track__title { font-size: 1.05rem; font-weight: 500; }
-.track__time { color: var(--humo-2); font-variant-numeric: tabular-nums; font-size: 0.9rem; }
+.track__time {
+  color: var(--humo-2); font-variant-numeric: tabular-nums; font-size: 0.9rem;
+  display: flex; gap: 0.35rem; align-items: baseline;
+}
+/* El tiempo transcurrido sólo tiene sentido en la pista en curso */
+.track__cur, .track__sep { opacity: 0; transition: opacity 0.25s ease; }
+.track.is-current .track__cur,
+.track.is-current .track__sep { opacity: 1; }
+.track.is-current .track__cur { color: var(--oro-claro); }
+
+/* ---- Carga: el archivo puede tardar (La Refalosa pesa ~9,6 MB) ---- */
+.track__spinner { display: none; }
+.track.is-loading .track__i { visibility: hidden; }
+.track.is-loading .track__spinner {
+  display: block; position: absolute; inset: 5px;
+  border: 2px solid rgba(241,232,214,0.25);
+  border-top-color: var(--oro-claro); border-radius: 50%;
+  animation: trackSpin 0.7s linear infinite;
+}
+@keyframes trackSpin { to { transform: rotate(360deg); } }
+
+/* ---- Barra de búsqueda: control nativo, teclado y arrastre gratis ---- */
+/* El riel se ve de 3px, pero el control mide 28px de alto (44 en táctil):
+   un input[type=range] de 3px de alto es un blanco de 3px para el dedo, o sea
+   inagarrable en un celular. El riel se pinta centrado con background-size,
+   así que el área crece sin que cambie el dibujo. */
+.track__seek {
+  grid-column: 1 / -1;
+  -webkit-appearance: none; appearance: none;
+  width: 100%; height: 28px; margin: 0.5rem 0 -0.2rem; padding: 0;
+  border: 0; cursor: pointer; display: none;
+  /* Relleno de progreso. Es un degradado de dos paradas duras, o sea una
+     división de color, no una decoración: sin esto no se distingue lo
+     reproducido de lo que falta. --pct lo actualiza script.js. */
+  background-image: linear-gradient(to right,
+              var(--bordo) 0 calc(var(--pct, 0) * 1%),
+              rgba(241,232,214,0.16) calc(var(--pct, 0) * 1%) 100%);
+  background-size: 100% 3px;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-color: transparent;
+  touch-action: none;   /* arrastrar la barra no debe scrollear la página */
+}
+/* Los rieles nativos se ocultan: el riel visible es el background de arriba */
+.track__seek::-webkit-slider-runnable-track { background: none; height: 28px; }
+.track__seek::-moz-range-track { background: none; height: 28px; }
+.track.is-current .track__seek { display: block; }
+.track__seek::-webkit-slider-thumb {
+  -webkit-appearance: none; appearance: none;
+  width: 13px; height: 13px; border-radius: 50%;
+  background: var(--bordo); border: 0; cursor: grab;
+  /* WebKit apoya el thumb en el TECHO del riel; con un riel de 28px hay que
+     bajarlo a mano para que quede sobre la línea de 3px. Firefox centra solo. */
+  margin-top: 7.5px;
+  transition: transform 0.15s var(--ease-out-cubic);
+}
+.track__seek::-moz-range-thumb {
+  width: 13px; height: 13px; border-radius: 50%;
+  background: var(--bordo); border: 0; cursor: grab;
+}
+.track__seek:hover::-webkit-slider-thumb { transform: scale(1.25); }
+.track__seek:active::-webkit-slider-thumb { cursor: grabbing; transform: scale(1.1); }
+.track__seek:disabled { opacity: 0.4; cursor: default; }
+.track__seek:focus-visible { outline: 2px solid var(--bordo-claro); outline-offset: 4px; }
+
+/* ---- Error: antes el fallo se tragaba en silencio y la fila no hacía nada ---- */
+.track__error {
+  grid-column: 1 / -1; margin: 0.7rem 0 0;
+  font-size: 0.82rem; color: var(--bordo-claro);
+}
+.track__error[hidden] { display: none; }
 
 /* =========================================================
    AGENDA
@@ -935,20 +1026,31 @@ a:focus-visible, button:focus-visible, .btn:focus-visible, .track:focus-visible 
 .slideshow__nav--next { right: clamp(1rem, 5vw, 5.5rem); }
 .slideshow__nav:hover { background: var(--bordo); color: var(--noche); transform: translateY(-50%) scale(1.08); }
 
-.slideshow__dots { position: absolute; z-index: 3; left: 0; right: 0; bottom: 1rem; display: flex; justify-content: center; gap: 0.5rem; }
+.slideshow__dots { position: absolute; z-index: 3; left: 0; right: 0; bottom: 0.25rem; display: flex; justify-content: center; gap: 0; }
+/* El punto que se VE mide 8px, pero el botón que se TOCA mide 44px de alto:
+   antes el <button> era el punto (8x8) y con nueve pegados era casi imposible
+   acertar en un celular. El área crece; el diseño no cambia. */
 .slideshow__dot {
-  width: 8px; height: 8px; border-radius: 50%; padding: 0; cursor: pointer;
-  background: rgba(241,232,214,0.4); border: 0;
+  width: 28px; height: 44px; padding: 0; cursor: pointer;
+  background: none; border: 0;
+  display: grid; place-items: center;
+}
+.slideshow__dot::before {
+  content: ""; width: 8px; height: 8px; border-radius: 50%;
+  background: rgba(241,232,214,0.4);
   transition: background-color 0.25s var(--ease), transform 0.25s var(--ease);
 }
-.slideshow__dot:hover { background: rgba(241,232,214,0.7); }
-.slideshow__dot.is-active { background: var(--bordo); transform: scale(1.35); }
+.slideshow__dot:hover::before { background: rgba(241,232,214,0.7); }
+.slideshow__dot.is-active::before { background: var(--bordo); transform: scale(1.35); }
+.slideshow__dot:focus-visible { outline: 2px solid var(--bordo-claro); outline-offset: -6px; border-radius: 4px; }
 
 @media (max-width: 720px) {
   .slideshow__stage { aspect-ratio: 4 / 5; max-height: none; min-height: 0; }
   .slideshow__nav { width: 44px; height: 44px; }  /* mínimo táctil */
   .slideshow__nav--prev { left: 0.5rem; }
   .slideshow__nav--next { right: 0.5rem; }
+  /* 9 puntos x 28px = 252px: entra cómodo en 375px sin achicar el toque */
+  .slideshow__dot { width: 28px; }
 }
 
 /* =========================================================
@@ -1075,6 +1177,43 @@ a:focus-visible, button:focus-visible, .btn:focus-visible, .track:focus-visible 
   width: 100%; aspect-ratio: 16 / 9; display: block;
   border: 0; border-radius: 4px;
 }
+
+/* Con el video abierto, la miniatura se oculta pero SIGUE en el DOM: así se
+   puede volver a ella al cerrar (antes el botón se destruía). */
+.video { position: relative; isolation: isolate; }
+.video.is-playing .video__btn { display: none; }
+.video__close {
+  position: absolute; z-index: 2; top: 0.6rem; right: 0.6rem;
+  width: 36px; height: 36px; display: grid; place-items: center;
+  border-radius: 50%; cursor: pointer;
+  background: rgba(12,8,5,0.78); color: var(--hueso);
+  border: 1px solid rgba(240,230,212,0.22);
+  backdrop-filter: blur(4px);
+  transition: background-color 0.2s ease, color 0.2s ease, transform 0.2s var(--ease-out-cubic);
+}
+.video__close svg { width: 18px; height: 18px; }
+.video__close:hover { background: var(--bordo); color: var(--noche); transform: scale(1.08); }
+.video__close:active { transform: scale(0.96); }
+
+/* Título visible de cada videoclip. Antes las tres tarjetas eran miniaturas
+   mudas: había que adivinar cuál era cuál (o abrirlas de a una). */
+.video__caption {
+  display: flex; flex-direction: column; gap: 0.18rem;
+  padding: 0.85rem 0.15rem 0;
+}
+.video__name {
+  font-family: var(--display); font-size: 1.02rem; font-weight: 500;
+  letter-spacing: 0.02em; color: var(--hueso);
+}
+.video__meta {
+  font-size: 0.78rem; letter-spacing: 0.08em; text-transform: uppercase;
+  color: var(--humo-2);
+}
+.video--feat .video__name { font-size: 1.3rem; }
+/* El título acompaña el hover de la miniatura: el foco es uno solo */
+.video:hover .video__name,
+.video:focus-within .video__name { color: var(--oro-claro); }
+.video__name { transition: color 0.3s var(--ease); }
 
 /* =========================================================
    HISTORIA (narrativa)
@@ -1270,6 +1409,14 @@ a:focus-visible, button:focus-visible, .btn:focus-visible, .track:focus-visible 
   .tl::before { left: 54px; }
   .tl__year { font-size: 0.82rem; }
   .videos__grid { grid-template-columns: 1fr; }
+  .video--feat .video__name { font-size: 1.15rem; }
+  /* Mínimo táctil: 36px era cómodo con mouse, no con el pulgar */
+  .video__close { width: 44px; height: 44px; }
+  /* Más recorrido para el dedo al arrastrar dentro del tema */
+  .track__seek { height: 44px; margin: 0.35rem 0 -0.5rem; }
+  .track__seek::-webkit-slider-runnable-track { height: 44px; }
+  .track__seek::-moz-range-track { height: 44px; }
+  .track__seek::-webkit-slider-thumb { margin-top: 15.5px; }
   /* En móvil el sello (logo del nav) un poco más chico, pero sin bajar
      del punto en que el texto circular deja de leerse */
   .seal { width: 88px; height: 88px; }

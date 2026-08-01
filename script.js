@@ -309,16 +309,59 @@ document.addEventListener("DOMContentLoaded", () => {
      No carga el iframe hasta el click: página más liviana y sin cookies
      de YouTube hasta que el usuario decide reproducir. */
   document.querySelectorAll(".video__btn[data-yt]").forEach((btn) => {
+    const wrap = btn.closest(".video");
+    if (!wrap) return;
+    const title = btn.dataset.title || "Estampas del Sur";
+    // El estado vive ACÁ, fuera del click. Antes el listener de Escape se
+    // registraba adentro del handler: cada apertura sumaba uno nuevo, y los
+    // viejos seguían apuntando al iframe ya borrado. Al reabrir, Escape
+    // corría primero el cierre viejo — sacaba is-playing (volvía la
+    // miniatura) pero dejaba el iframe NUEVO reproduciendo abajo.
+    let frame = null, close = null;
+
+    const closeVideo = () => {
+      if (!frame) return;
+      frame.remove();
+      close.remove();
+      frame = close = null;
+      wrap.classList.remove("is-playing");
+      btn.focus();                         // el foco vuelve de donde salió
+    };
+
+    // Una sola vez por tarjeta, no una por apertura
+    wrap.addEventListener("keydown", (e) => {
+      if (e.key === "Escape") closeVideo();
+    });
+
     btn.addEventListener("click", () => {
+      if (frame) return;
       const id = btn.dataset.yt;
-      const frame = document.createElement("iframe");
+
+      frame = document.createElement("iframe");
       frame.className = "video__frame";
       frame.src = `https://www.youtube-nocookie.com/embed/${encodeURIComponent(id)}?autoplay=1&rel=0`;
-      frame.title = "Video de Estampas del Sur";
+      frame.title = `Videoclip «${title}» de Estampas del Sur`;
       frame.allow = "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share";
       frame.allowFullscreen = true;
       frame.loading = "lazy";
-      btn.replaceWith(frame);
+
+      // Botón de cierre: antes se hacía btn.replaceWith(frame), que DESTRUÍA
+      // el botón — abierto un video no había forma de volver a la miniatura
+      // sin recargar la página.
+      close = document.createElement("button");
+      close.type = "button";
+      close.className = "video__close";
+      close.setAttribute("aria-label", `Cerrar «${title}» y volver a la miniatura`);
+      close.innerHTML =
+        '<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" ' +
+        'stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>';
+      close.addEventListener("click", closeVideo);
+
+      wrap.classList.add("is-playing");
+      // Después del botón (oculto) y ANTES del <figcaption>: si se agregara al
+      // final, el player quedaría debajo del título de la tarjeta.
+      btn.after(frame, close);
+      close.focus();
     });
   });
 
@@ -332,37 +375,153 @@ document.addEventListener("DOMContentLoaded", () => {
       ? `${Math.floor(s / 60)}:${String(Math.floor(s % 60)).padStart(2, "0")}`
       : "--:--";
 
-    // Precargar sólo el metadata de cada tema para mostrar su duración
-    repTracks.forEach((t) => {
-      const probe = new Audio();
-      probe.preload = "metadata";
-      probe.src = t.dataset.src;
-      probe.addEventListener("loadedmetadata", () => {
-        const el = t.querySelector("[data-dur]");
-        if (el) el.textContent = fmt(probe.duration);
+    // Precargar sólo el metadata de cada tema para mostrar su duración.
+    // Se difiere hasta que la sección se acerca: antes esto disparaba tres
+    // pedidos de red apenas cargaba la página, incluso para quien nunca
+    // bajaba hasta el repertorio (y hay servidores que ignoran el Range y
+    // mandan el archivo entero — «La Refalosa» pesa varios MB).
+    let probed = false;
+    const probeDurations = () => {
+      if (probed) return;
+      probed = true;
+      repTracks.forEach((t) => {
+        const probe = new Audio();
+        probe.preload = "metadata";
+        probe.src = t.dataset.src;
+        probe.addEventListener("loadedmetadata", () => {
+          const el = t.querySelector("[data-dur]");
+          if (el) el.textContent = fmt(probe.duration);
+        });
       });
-    });
+    };
+    const repSection = document.getElementById("repertorio");
+    if (repSection && "IntersectionObserver" in window) {
+      const durIO = new IntersectionObserver((entries) => {
+        if (!entries.some((e) => e.isIntersecting)) return;
+        durIO.disconnect();
+        probeDurations();
+      }, { rootMargin: "600px 0px" });
+      durIO.observe(repSection);
+      // Red de seguridad: si el observer no llega a disparar nunca, las
+      // duraciones se quedarían en "--:--" para siempre. Igual se espera a
+      // que la página termine de cargar, que era el punto: no competir con
+      // la portada y las tipografías durante el arranque.
+      setTimeout(probeDurations, 6000);
+    } else {
+      probeDurations();
+    }
 
-    let current = null;
+    const seekOf = (t) => t.querySelector(".track__seek");
+    const curOf  = (t) => t.querySelector("[data-cur]");
+    const errOf  = (t) => t.querySelector(".track__error");
+    let current = null, scrubbing = false;
+
+    // Pinta la porción ya reproducida de la barra
+    const paint = (s) => {
+      const max = Number(s.max) || 0;
+      s.style.setProperty("--pct", max ? (Number(s.value) / max) * 100 : 0);
+    };
+
+    // Deja la fila anterior como si nunca se hubiera tocado
+    const resetTrack = (t) => {
+      if (!t) return;
+      t.classList.remove("is-current", "is-playing", "is-loading");
+      const s = seekOf(t); if (s) { s.value = 0; s.disabled = true; paint(s); }
+      const c = curOf(t);  if (c) c.textContent = "0:00";
+      const e = errOf(t);  if (e) e.hidden = true;
+    };
+
     const play = (t) => {
       if (current === t && !repAudio.paused) { repAudio.pause(); return; }
-      if (current !== t) { repAudio.src = t.dataset.src; current = t; }
-      repAudio.play().catch(() => {});
-    };
-    repTracks.forEach((t) => {
-      t.addEventListener("click", () => play(t));
-      t.addEventListener("keydown", (e) => {
-        if (e.key === "Enter" || e.key === " ") { e.preventDefault(); play(t); }
+      if (current !== t) {
+        resetTrack(current);
+        repAudio.src = t.dataset.src;
+        current = t;
+        t.classList.add("is-current", "is-loading");
+        errOf(t) && (errOf(t).hidden = true);
+      }
+      const p = repAudio.play();
+      // El fallo YA NO se traga en silencio: antes la fila simplemente no
+      // hacía nada y el usuario no sabía si había roto algo.
+      if (p && p.catch) p.catch((err) => {
+        t.classList.remove("is-loading");
+        // AbortError = el usuario saltó a otro tema antes de que arrancara
+        // éste. Es uso normal, no una falla: no hay que alarmarlo.
+        if (err && err.name === "AbortError") return;
+        const e = errOf(t); if (e) e.hidden = false;
       });
+    };
+
+    repTracks.forEach((t) => {
+      t.querySelector(".track__toggle").addEventListener("click", () => play(t));
+
+      const seek = seekOf(t);
+      if (!seek) return;
+      // input = arrastre y flechas del teclado; se marca scrubbing para que
+      // timeupdate no pelee con la mano del usuario
+      seek.addEventListener("input", () => {
+        if (current !== t || !isFinite(repAudio.duration)) return;
+        scrubbing = true;
+        paint(seek);
+        const c = curOf(t); if (c) c.textContent = fmt(Number(seek.value));
+      });
+      const commit = () => {
+        if (current !== t || !isFinite(repAudio.duration)) return;
+        repAudio.currentTime = Number(seek.value);
+        scrubbing = false;
+      };
+      seek.addEventListener("change", commit);
+      seek.addEventListener("pointerup", commit);
     });
+
+    repAudio.addEventListener("loadedmetadata", () => {
+      if (!current) return;
+      const s = seekOf(current);
+      if (s && isFinite(repAudio.duration)) { s.max = repAudio.duration; s.disabled = false; paint(s); }
+      const d = current.querySelector("[data-dur]");
+      if (d) d.textContent = fmt(repAudio.duration);
+    });
+    repAudio.addEventListener("timeupdate", () => {
+      if (!current || scrubbing) return;
+      const s = seekOf(current); if (s) { s.value = repAudio.currentTime; paint(s); }
+      const c = curOf(current);  if (c) c.textContent = fmt(repAudio.currentTime);
+    });
+    // Buffer vacío a mitad de camino: vuelve el spinner
+    repAudio.addEventListener("waiting", () => current && current.classList.add("is-loading"));
+    repAudio.addEventListener("playing", () => current && current.classList.remove("is-loading"));
+    repAudio.addEventListener("canplay", () => current && current.classList.remove("is-loading"));
+    repAudio.addEventListener("error", () => {
+      if (!current) return;
+      current.classList.remove("is-loading", "is-playing");
+      const e = errOf(current); if (e) e.hidden = false;
+    });
+
+    // El botón dice lo que va a hacer, no lo que está pasando
+    const syncLabels = () => {
+      repTracks.forEach((t) => {
+        const b = t.querySelector(".track__toggle");
+        const title = t.querySelector(".track__title").textContent.trim();
+        const playing = t === current && !repAudio.paused;
+        b.setAttribute("aria-label", (playing ? "Pausar " : "Reproducir ") + title);
+      });
+    };
+
     repAudio.addEventListener("play", () => {
       repTracks.forEach((t) => t.classList.remove("is-playing"));
       if (current) current.classList.add("is-playing");
+      syncLabels();
     });
-    repAudio.addEventListener("pause", () => current && current.classList.remove("is-playing"));
+    repAudio.addEventListener("pause", () => {
+      current && current.classList.remove("is-playing");
+      syncLabels();
+    });
     repAudio.addEventListener("ended", () => {
-      repTracks.forEach((t) => t.classList.remove("is-playing"));
-      current = null;
+      // Queda "current" para que se vea dónde terminó, pero vuelve a cero
+      if (current) {
+        current.classList.remove("is-playing", "is-loading");
+        const s = seekOf(current); if (s) { s.value = 0; paint(s); }
+        const c = curOf(current);  if (c) c.textContent = "0:00";
+      }
     });
   }
 
@@ -373,13 +532,15 @@ document.addEventListener("DOMContentLoaded", () => {
     const slides = [...box.querySelectorAll(".slide")];
     if (slides.length < 2) return;
     const dotsWrap = box.querySelector(".slideshow__dots");
+    const status = document.getElementById("slideshowStatus");
     const INTERVAL = 5000;
+    const total = slides.length;
     let idx = 0, timer = 0;
 
     const dots = slides.map((_, i) => {
       const d = document.createElement("button");
       d.className = "slideshow__dot"; d.type = "button";
-      d.setAttribute("aria-label", `Foto ${i + 1}`);
+      d.setAttribute("aria-label", `Ir a la foto ${i + 1} de ${total}`);
       d.addEventListener("click", () => go(i, true));
       dotsWrap.appendChild(d);
       return d;
@@ -387,24 +548,49 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const render = () => {
       slides.forEach((s, i) => s.classList.toggle("is-active", i === idx));
-      dots.forEach((d, i) => d.classList.toggle("is-active", i === idx));
+      dots.forEach((d, i) => {
+        d.classList.toggle("is-active", i === idx);
+        // aria-current reemplaza al aria-selected del tablist que había antes:
+        // acá los puntos son botones, no pestañas.
+        if (i === idx) d.setAttribute("aria-current", "true");
+        else d.removeAttribute("aria-current");
+      });
+      if (status) status.textContent = `Foto ${idx + 1} de ${total}`;
     };
     const go = (i, manual) => {
-      idx = (i + slides.length) % slides.length;
+      idx = (i + total) % total;
       render();
       if (manual) restart();
     };
     const restart = () => {
       clearInterval(timer);
-      if (!reduceMotion) timer = setInterval(() => go(idx + 1), INTERVAL);
+      if (reduceMotion) return;
+      // Mientras el usuario está encima o con el foco adentro, nada se mueve
+      // solo: reanudar el ciclo bajo la mano de alguien que está eligiendo
+      // una foto es exactamente lo que hace odioso a un carrusel.
+      if (box.matches(":hover") || box.contains(document.activeElement)) return;
+      timer = setInterval(() => go(idx + 1), INTERVAL);
     };
+    const pause = () => clearInterval(timer);
 
     box.querySelector(".slideshow__nav--next").addEventListener("click", () => go(idx + 1, true));
     box.querySelector(".slideshow__nav--prev").addEventListener("click", () => go(idx - 1, true));
-    box.addEventListener("mouseenter", () => clearInterval(timer));
+    box.addEventListener("mouseenter", pause);
     box.addEventListener("mouseleave", restart);
+    // El auto-avance se frenaba SÓLO con el mouse encima. Quien navega con
+    // teclado quedaba peleando contra un carrusel que se le movía solo
+    // mientras tabulaba por los puntos.
+    box.addEventListener("focusin", pause);
+    box.addEventListener("focusout", (e) => {
+      if (!box.contains(e.relatedTarget)) restart();
+    });
+    // Flechas para moverse, como en cualquier carrusel
+    box.addEventListener("keydown", (e) => {
+      if (e.key === "ArrowRight") { e.preventDefault(); go(idx + 1, true); }
+      else if (e.key === "ArrowLeft") { e.preventDefault(); go(idx - 1, true); }
+    });
     document.addEventListener("visibilitychange", () => {
-      if (document.hidden) clearInterval(timer); else restart();
+      if (document.hidden) pause(); else restart();
     });
 
     render();
@@ -499,16 +685,12 @@ document.addEventListener("DOMContentLoaded", () => {
       });
     }
 
-    /* Parallax sutil en la galería (velocidades distintas por ítem) */
-    gsap.utils.toArray(".gallery__item img").forEach((img, i) => {
-      gsap.fromTo(img, { yPercent: -6 }, {
-        yPercent: 6 + (i % 3) * 3, ease: "none",
-        scrollTrigger: { trigger: img.parentElement, scrub: 0.6 }
-      });
-    });
+    /* (Acá había un parallax sobre ".gallery__item img". Esa grilla ya no
+       existe: la galería pasó a ser el slideshow, así que el selector no
+       encontraba nada.) */
 
     /* Stagger de las tarjetas de integrantes */
-    const cards = document.querySelector("[data-stagger]");
+    const cards = document.querySelector(".cards[data-stagger]");
     if (cards) {
       gsap.from(cards.children, {
         opacity: 0, y: 40, duration: 0.6, stagger: 0.08, ease: "expo.out",

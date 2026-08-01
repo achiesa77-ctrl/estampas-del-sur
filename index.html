@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="description" content="Estampas del Sur — grupo de folklore uruguayo de Empalme Olmos. Milonga, chamarrita, polka y cumbia folklórica con sello propio. Contrataciones para festivales, peñas y eventos." />
+  <meta name="description" content="Estampas del Sur — grupo de folklore uruguayo de Pando, Canelones. Milonga, chamarrita, polka y cumbia folklórica con sello propio. Contrataciones para festivales, peñas y eventos." />
   <meta name="theme-color" content="#16110c" />
   <title>Estampas del Sur · Folklore uruguayo</title>
   <link rel="canonical" href="https://estampasdelsur.netlify.app/" />
@@ -52,7 +52,7 @@
     "url": "https://estampasdelsur.netlify.app/",
     "image": "https://estampasdelsur.netlify.app/fotos/portada-hd.jpg",
     "logo": "https://estampasdelsur.netlify.app/fotos/logo-nuevo.jpg",
-    "description": "Grupo de folklore uruguayo formado en 2011 en Pando, Canelones. Repertorio de autoría propia entre milonga, chamarrita, polka y cumbia folklórica.",
+    "description": "Grupo de folklore uruguayo formado en 2011 en Pando, Canelones. Repertorio de autoría propia entre milonga, chamarrita, polka y cumbia folklórica. Discos: «Savia Nueva» (2018) y «Soy Uruguayo» (2026).",
     "genre": ["Folklore", "Milonga", "Chamarrita", "Polka", "Cumbia folklórica"],
     "foundingDate": "2011",
     "foundingLocation": {
@@ -63,7 +63,7 @@
     "telephone": "+598 95 871 148",
     "address": {
       "@type": "PostalAddress",
-      "addressLocality": "Empalme Olmos",
+      "addressLocality": "Pando",
       "addressRegion": "Canelones",
       "addressCountry": "UY"
     },
@@ -78,12 +78,19 @@
       { "@type": "Person", "name": "Henry Acuña", "roleName": "Acordeón y teclados" },
       { "@type": "Person", "name": "Diego Rodríguez", "roleName": "Batería" }
     ],
-    "album": {
-      "@type": "MusicAlbum",
-      "name": "Savia Nueva",
-      "datePublished": "2018",
-      "recordLabel": { "@type": "Organization", "name": "Productora Hipocampo" }
-    }
+    "album": [
+      {
+        "@type": "MusicAlbum",
+        "name": "Savia Nueva",
+        "datePublished": "2018",
+        "recordLabel": { "@type": "Organization", "name": "Productora Hipocampo" }
+      },
+      {
+        "@type": "MusicAlbum",
+        "name": "Soy Uruguayo",
+        "datePublished": "2026"
+      }
+    ]
   }
   </script>
 </head>
@@ -146,7 +153,8 @@
       <a href="#contacto" class="nav__cta">Contrataciones</a>
     </nav>
 
-    <button class="nav__burger" id="navBurger" aria-label="Abrir menú" aria-expanded="false">
+    <button class="nav__burger" id="navBurger" type="button" aria-label="Abrir menú"
+            aria-expanded="false" aria-controls="navLinks">
       <span></span><span></span><span></span>
     </button>
   </header>
@@ -168,7 +176,7 @@
       </div>
 
       <div class="hero__content" data-parallax="-0.06">
-        <p class="hero__eyebrow line-mask"><span>Folklore uruguayo · Empalme Olmos</span></p>
+        <p class="hero__eyebrow line-mask"><span>Folklore uruguayo · Pando</span></p>
         <!-- "Estampas" se rellena con el collage de fotos (ver .hero__title-collage
              en styles.css). Sigue siendo texto real: se lee, se selecciona y
              Google lo indexa; sólo cambia con qué se pinta. "del Sur" queda en
@@ -182,7 +190,7 @@
           propia: milonga, chamarrita y raíz criolla con un sello que se reconoce.
         </span></p>
         <div class="hero__actions line-mask"><span>
-          <a href="#repertorio" class="btn btn--solid">Escuchá el repertorio</a>
+          <a href="#repertorio" class="btn btn--solid">Escuchá</a>
           <a href="#agenda" class="btn btn--ghost">Próximas fechas</a>
         </span></div>
       </div>
@@ -256,9 +264,14 @@
           <h2 class="section__title reveal">
             Una identidad que <em>nunca</em> se&nbsp;perdió.
           </h2>
+          <!-- 2011 / Pando: es lo que dice historia.txt (la fuente del grupo) y
+               lo que dice la sección Historia más abajo. Acá figuraba "fines de
+               2010, en Empalme Olmos", o sea la página se contradecía a sí misma
+               en el año y la ciudad de origen — justo en el dato que alguien
+               chequea antes de contratarlos. -->
           <p class="grupo__body reveal">
-            El origen de Estampas del Sur se remonta a fines de 2010, en Empalme
-            Olmos, con una formación distinta a la actual. Con los años el proyecto
+            El origen de Estampas del Sur se remonta a 2011, en Pando, Canelones,
+            con una formación distinta a la actual. Con los años el proyecto
             se fue consolidando —integrantes que llegaron y otros que siguieron su
             camino— pero siempre con la misma inquietud: hacer música propia.
           </p>
@@ -274,24 +287,6 @@
             y apostar a lo que nosotros escribimos.»</p>
             <cite>— Saavedra, Estampas del Sur</cite>
           </blockquote>
-
-          <!-- Datos exactos y verificables. "5+ premios y festivales" era
-               vago justo donde se juega una decisión de contratación; el
-               data-suffix vacío evita el "+" en cifras cerradas. -->
-          <div class="stats reveal">
-            <div class="stat">
-              <span class="stat__num" data-count="15" data-suffix="">0</span>
-              <span class="stat__label">Años de historia</span>
-            </div>
-            <div class="stat">
-              <span class="stat__num" data-count="3" data-suffix="">0</span>
-              <span class="stat__label">Videoclips propios</span>
-            </div>
-            <div class="stat">
-              <span class="stat__num" data-count="4" data-suffix="">0</span>
-              <span class="stat__label">Ritmos en escena</span>
-            </div>
-          </div>
         </div>
       </div>
     </section>
@@ -419,8 +414,8 @@
         <p class="reveal">
           Vinieron nuevos videoclips: <em>«Sacudiendo el Ser Humano»</em> en 2022,
           <em>«Soy Uruguayo»</em> en 2024 —este último nos valió una nominación a los
-          <strong>Premios Graffiti</strong>—. Hoy estamos finalizando un nuevo disco,
-          hecho enteramente de canciones propias.
+          <strong>Premios Graffiti</strong>—. Y en 2026 editamos nuestro segundo disco,
+          <em>«Soy Uruguayo»</em>, integrado enteramente por canciones de autoría propia.
         </p>
         <p class="historia__close reveal">
           Seguimos apostando a crecer, llevando nuestra música a nuevos escenarios,
@@ -441,33 +436,61 @@
           <a href="#contacto" class="btn btn--ghost reveal">Contrataciones</a>
         </div>
 
+        <!-- Cada fila: un <button> real para reproducir + un <input type="range">
+             para buscar. El range nativo trae gratis teclado (flechas), arrastre
+             y lectores de pantalla. Antes la fila entera era role="button", así
+             que no se le podía anidar ningún control sin romper la semántica. -->
         <ol class="tracks">
-          <li class="track" data-src="repertorio/1.mp4" tabindex="0" role="button" aria-label="Reproducir Oficios">
-            <span class="track__num">01</span>
-            <span class="track__play" aria-hidden="true">
-              <svg class="track__i track__i--play" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
-              <svg class="track__i track__i--pause" viewBox="0 0 24 24"><path d="M7 5h3.5v14H7zM13.5 5H17v14h-3.5z"/></svg>
+          <li class="track" data-src="repertorio/1.mp4">
+            <button class="track__toggle" type="button" aria-label="Reproducir Oficios">
+              <span class="track__num">01</span>
+              <span class="track__play" aria-hidden="true">
+                <svg class="track__i track__i--play" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+                <svg class="track__i track__i--pause" viewBox="0 0 24 24"><path d="M7 5h3.5v14H7zM13.5 5H17v14h-3.5z"/></svg>
+                <span class="track__spinner" aria-hidden="true"></span>
+              </span>
+              <span class="track__title">Oficios</span>
+            </button>
+            <span class="track__time">
+              <span class="track__cur" data-cur>0:00</span><span class="track__sep">/</span><span data-dur>--:--</span>
             </span>
-            <span class="track__title">Oficios</span>
-            <span class="track__time" data-dur>--:--</span>
+            <input class="track__seek" type="range" min="0" max="100" step="0.1" value="0"
+                   aria-label="Buscar dentro de Oficios" disabled />
+            <p class="track__error" role="alert" hidden>No se pudo reproducir. Probá de nuevo.</p>
           </li>
-          <li class="track" data-src="repertorio/2.mp4" tabindex="0" role="button" aria-label="Reproducir Soy Uruguayo">
-            <span class="track__num">02</span>
-            <span class="track__play" aria-hidden="true">
-              <svg class="track__i track__i--play" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
-              <svg class="track__i track__i--pause" viewBox="0 0 24 24"><path d="M7 5h3.5v14H7zM13.5 5H17v14h-3.5z"/></svg>
+          <li class="track" data-src="repertorio/2.mp4">
+            <button class="track__toggle" type="button" aria-label="Reproducir Soy Uruguayo">
+              <span class="track__num">02</span>
+              <span class="track__play" aria-hidden="true">
+                <svg class="track__i track__i--play" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+                <svg class="track__i track__i--pause" viewBox="0 0 24 24"><path d="M7 5h3.5v14H7zM13.5 5H17v14h-3.5z"/></svg>
+                <span class="track__spinner" aria-hidden="true"></span>
+              </span>
+              <span class="track__title">Soy Uruguayo</span>
+            </button>
+            <span class="track__time">
+              <span class="track__cur" data-cur>0:00</span><span class="track__sep">/</span><span data-dur>--:--</span>
             </span>
-            <span class="track__title">Soy Uruguayo</span>
-            <span class="track__time" data-dur>--:--</span>
+            <input class="track__seek" type="range" min="0" max="100" step="0.1" value="0"
+                   aria-label="Buscar dentro de Soy Uruguayo" disabled />
+            <p class="track__error" role="alert" hidden>No se pudo reproducir. Probá de nuevo.</p>
           </li>
-          <li class="track" data-src="repertorio/3.mpeg" tabindex="0" role="button" aria-label="Reproducir La Refalosa">
-            <span class="track__num">03</span>
-            <span class="track__play" aria-hidden="true">
-              <svg class="track__i track__i--play" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
-              <svg class="track__i track__i--pause" viewBox="0 0 24 24"><path d="M7 5h3.5v14H7zM13.5 5H17v14h-3.5z"/></svg>
+          <li class="track" data-src="repertorio/3.mpeg">
+            <button class="track__toggle" type="button" aria-label="Reproducir La Refalosa">
+              <span class="track__num">03</span>
+              <span class="track__play" aria-hidden="true">
+                <svg class="track__i track__i--play" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+                <svg class="track__i track__i--pause" viewBox="0 0 24 24"><path d="M7 5h3.5v14H7zM13.5 5H17v14h-3.5z"/></svg>
+                <span class="track__spinner" aria-hidden="true"></span>
+              </span>
+              <span class="track__title">La Refalosa</span>
+            </button>
+            <span class="track__time">
+              <span class="track__cur" data-cur>0:00</span><span class="track__sep">/</span><span data-dur>--:--</span>
             </span>
-            <span class="track__title">La Refalosa</span>
-            <span class="track__time" data-dur>--:--</span>
+            <input class="track__seek" type="range" min="0" max="100" step="0.1" value="0"
+                   aria-label="Buscar dentro de La Refalosa" disabled />
+            <p class="track__error" role="alert" hidden>No se pudo reproducir. Probá de nuevo.</p>
           </li>
         </ol>
         <audio id="repAudio" preload="none"></audio>
@@ -483,39 +506,61 @@
         </div>
         <p class="section__sub">Actuaciones y registros del grupo. Tocá para reproducir.</p>
       </div>
+      <!-- Cada video se nombra por su título real. Antes los tres botones
+           compartían el mismo aria-label ("Reproducir video de Estampas del
+           Sur") y el mismo alt: quien navega con lector de pantalla oía tres
+           veces lo mismo sin forma de saber cuál era cuál. El título visible
+           además evita que haya que adivinar por la miniatura.
+           Orden: del más reciente al más viejo, y el nominado al Graffiti
+           en el lugar destacado. -->
       <div class="videos__grid" data-stagger>
-        <div class="video video--feat reveal">
-          <button class="video__btn" type="button" data-yt="-ab0KSnYS4E"
-                  aria-label="Reproducir video de Estampas del Sur">
-            <!-- maxres sólo existe si el video se subió en HD; si no, cae a hq -->
-            <img class="video__thumb" src="https://i.ytimg.com/vi/-ab0KSnYS4E/maxresdefault.jpg"
-                 onerror="this.onerror=null;this.src='https://i.ytimg.com/vi/-ab0KSnYS4E/hqdefault.jpg';"
-                 alt="Miniatura de video de Estampas del Sur" loading="lazy" width="1280" height="720" />
-            <span class="video__play" aria-hidden="true">
-              <svg viewBox="0 0 68 48"><path class="video__play-bg" d="M66.5 7.7c-.8-2.9-2.5-5.4-5.4-6.2C55.8.1 34 0 34 0S12.2.1 6.9 1.5C4 2.3 2.3 4.8 1.5 7.7.1 13 0 24 0 24s.1 11 1.5 16.3c.8 2.9 2.5 5.4 5.4 6.2C12.2 47.9 34 48 34 48s21.8-.1 27.1-1.5c2.9-.8 4.6-3.3 5.4-6.2C67.9 35 68 24 68 24s-.1-11-1.5-16.3z"/><path d="M45 24 27 14v20z" fill="#fff"/></svg>
-            </span>
-          </button>
-        </div>
-        <div class="video reveal" data-delay="1">
+        <figure class="video video--feat reveal">
           <button class="video__btn" type="button" data-yt="FTPrXeWkYpg"
-                  aria-label="Reproducir video de Estampas del Sur">
-            <img class="video__thumb" src="https://i.ytimg.com/vi/FTPrXeWkYpg/hqdefault.jpg"
-                 alt="Miniatura de video de Estampas del Sur" loading="lazy" width="480" height="360" />
+                  data-title="Soy Uruguayo"
+                  aria-label="Reproducir el videoclip «Soy Uruguayo» (2024)">
+            <!-- maxres sólo existe si el video se subió en HD; si no, cae a hq -->
+            <img class="video__thumb" src="https://i.ytimg.com/vi/FTPrXeWkYpg/maxresdefault.jpg"
+                 onerror="this.onerror=null;this.src='https://i.ytimg.com/vi/FTPrXeWkYpg/hqdefault.jpg';"
+                 alt="Fotograma del videoclip «Soy Uruguayo» de Estampas del Sur" loading="lazy" width="1280" height="720" />
             <span class="video__play" aria-hidden="true">
               <svg viewBox="0 0 68 48"><path class="video__play-bg" d="M66.5 7.7c-.8-2.9-2.5-5.4-5.4-6.2C55.8.1 34 0 34 0S12.2.1 6.9 1.5C4 2.3 2.3 4.8 1.5 7.7.1 13 0 24 0 24s.1 11 1.5 16.3c.8 2.9 2.5 5.4 5.4 6.2C12.2 47.9 34 48 34 48s21.8-.1 27.1-1.5c2.9-.8 4.6-3.3 5.4-6.2C67.9 35 68 24 68 24s-.1-11-1.5-16.3z"/><path d="M45 24 27 14v20z" fill="#fff"/></svg>
             </span>
           </button>
-        </div>
-        <div class="video reveal" data-delay="2">
+          <figcaption class="video__caption">
+            <span class="video__name">«Soy Uruguayo»</span>
+            <span class="video__meta">Videoclip · 2024 · Nominado a los Premios Graffiti</span>
+          </figcaption>
+        </figure>
+        <figure class="video reveal" data-delay="1">
+          <button class="video__btn" type="button" data-yt="-ab0KSnYS4E"
+                  data-title="Sacudiendo el Ser Humano"
+                  aria-label="Reproducir el videoclip «Sacudiendo el Ser Humano» (2022)">
+            <img class="video__thumb" src="https://i.ytimg.com/vi/-ab0KSnYS4E/hqdefault.jpg"
+                 alt="Fotograma del videoclip «Sacudiendo el Ser Humano» de Estampas del Sur" loading="lazy" width="480" height="360" />
+            <span class="video__play" aria-hidden="true">
+              <svg viewBox="0 0 68 48"><path class="video__play-bg" d="M66.5 7.7c-.8-2.9-2.5-5.4-5.4-6.2C55.8.1 34 0 34 0S12.2.1 6.9 1.5C4 2.3 2.3 4.8 1.5 7.7.1 13 0 24 0 24s.1 11 1.5 16.3c.8 2.9 2.5 5.4 5.4 6.2C12.2 47.9 34 48 34 48s21.8-.1 27.1-1.5c2.9-.8 4.6-3.3 5.4-6.2C67.9 35 68 24 68 24s-.1-11-1.5-16.3z"/><path d="M45 24 27 14v20z" fill="#fff"/></svg>
+            </span>
+          </button>
+          <figcaption class="video__caption">
+            <span class="video__name">«Sacudiendo el Ser Humano»</span>
+            <span class="video__meta">Videoclip · 2022</span>
+          </figcaption>
+        </figure>
+        <figure class="video reveal" data-delay="2">
           <button class="video__btn" type="button" data-yt="AmP6PfhJaIw"
-                  aria-label="Reproducir video de Estampas del Sur">
+                  data-title="Historias del Pasado"
+                  aria-label="Reproducir el videoclip «Historias del Pasado» (2018)">
             <img class="video__thumb" src="https://i.ytimg.com/vi/AmP6PfhJaIw/hqdefault.jpg"
-                 alt="Miniatura de video de Estampas del Sur" loading="lazy" width="480" height="360" />
+                 alt="Fotograma del videoclip «Historias del Pasado» de Estampas del Sur" loading="lazy" width="480" height="360" />
             <span class="video__play" aria-hidden="true">
               <svg viewBox="0 0 68 48"><path class="video__play-bg" d="M66.5 7.7c-.8-2.9-2.5-5.4-5.4-6.2C55.8.1 34 0 34 0S12.2.1 6.9 1.5C4 2.3 2.3 4.8 1.5 7.7.1 13 0 24 0 24s.1 11 1.5 16.3c.8 2.9 2.5 5.4 5.4 6.2C12.2 47.9 34 48 34 48s21.8-.1 27.1-1.5c2.9-.8 4.6-3.3 5.4-6.2C67.9 35 68 24 68 24s-.1-11-1.5-16.3z"/><path d="M45 24 27 14v20z" fill="#fff"/></svg>
             </span>
           </button>
-        </div>
+          <figcaption class="video__caption">
+            <span class="video__name">«Historias del Pasado»</span>
+            <span class="video__meta">Videoclip · 2018 · Primer videoclip del grupo</span>
+          </figcaption>
+        </figure>
       </div>
     </section>
 
@@ -560,11 +605,14 @@
         </li>
         <li class="tl reveal">
           <span class="tl__year">2024</span>
-          <div class="tl__body"><h3>«Soy Uruguayo»</h3><p>Tercer videoclip, con una nominación a los Premios Graffiti.</p></div>
+          <div class="tl__body"><h3>Videoclip «Soy Uruguayo»</h3><p>Tercer videoclip del grupo, con una nominación a los Premios Graffiti.</p></div>
         </li>
         <li class="tl reveal">
-          <span class="tl__year">Hoy</span>
-          <div class="tl__body"><h3>Nuevo disco</h3><p>Finalizando un nuevo CD, integrado por canciones de autoría propia.</p></div>
+          <span class="tl__year">2026</span>
+          <!-- Dice "Disco" en el título a propósito: el videoclip de 2024 se
+               llama igual, y dos hitos seguidos con el mismo nombre se leían
+               como un dato repetido por error. -->
+          <div class="tl__body"><h3>Disco «Soy Uruguayo»</h3><p>Segundo disco del grupo, integrado enteramente por canciones de autoría propia.</p></div>
         </li>
       </ol>
     </section>
@@ -596,32 +644,11 @@
       </div>
     </section>
 
-    <!-- ===================== SE VIENE EL DISCO ===================== -->
-    <section class="disco section" id="disco">
-      <div class="disco__inner">
-        <div class="disco__text">
-          <p class="eyebrow reveal"><span class="dot-pulse" aria-hidden="true"></span>En preparación</p>
-          <h2 class="disco__title reveal">Se viene <em>el&nbsp;disco</em>.</h2>
-          <p class="disco__sub reveal">
-            «Queda terminar un tema nomás.» Un nuevo álbum, un videoclip en camino
-            y más presentaciones en festivales. Todo desde la autogestión y un
-            camino independiente.
-          </p>
-          <div class="disco__meta reveal">
-            <span>Nuevo álbum</span>
-            <span>Videoclip</span>
-            <span>Gira de festivales</span>
-          </div>
-        </div>
-
-        <div class="vinyl reveal" aria-hidden="true">
-          <div class="vinyl__disc">
-            <div class="vinyl__label"><img src="fotos/logo-nuevo.jpg" alt="" /></div>
-            <div class="vinyl__hole"></div>
-          </div>
-        </div>
-      </div>
-    </section>
+    <!-- Acá iba la sección "En preparación / Se viene el disco". Se sacó
+         porque el disco ya salió. El CSS (.disco, .vinyl) y el giro del
+         vinilo en script.js siguen en su lugar, sin usarse: cuando haya
+         algo nuevo para anunciar, alcanza con volver a poner el bloque
+         (está en el historial de git, commit anterior a este cambio). -->
 
     <!-- ===================== GALERÍA ===================== -->
     <section class="galeria section" id="galeria">
@@ -629,7 +656,12 @@
         <p class="eyebrow">Momentos</p>
         <h2 class="section__title">Galería</h2>
       </div>
-      <div class="slideshow reveal" id="slideshow" aria-roledescription="carrusel">
+      <!-- role="group" es obligatorio para que aria-roledescription valga: en un
+           <div> pelado (sin rol) la anotación se descarta y el lector no anuncia
+           nada. El aria-live avisa qué foto se está viendo al cambiar. -->
+      <div class="slideshow reveal" id="slideshow" role="group"
+           aria-roledescription="carrusel" aria-label="Fotos de Estampas del Sur en vivo">
+        <p class="sr-only" id="slideshowStatus" aria-live="polite"></p>
         <div class="slideshow__stage">
           <figure class="slide is-active">
             <img class="slide__bg" src="fotos/gal/g1.jpg" alt="" aria-hidden="true" />
@@ -674,7 +706,10 @@
         <button class="slideshow__nav slideshow__nav--next" type="button" aria-label="Foto siguiente">
           <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg>
         </button>
-        <div class="slideshow__dots" role="tablist" aria-label="Ir a la foto"></div>
+        <!-- Sin role="tablist": los puntos que genera script.js son botones,
+             no pestañas, y un tablist con hijos que no son "tab" es una
+             estructura ARIA inválida (el lector la anuncia mal o la ignora). -->
+        <div class="slideshow__dots" role="group" aria-label="Ir a una foto"></div>
       </div>
     </section>
 
@@ -725,7 +760,7 @@
         <a href="https://wa.me/59895871148" target="_blank" rel="noopener">WhatsApp · 095 871 148</a>
         <a href="mailto:estampasdelsur23@gmail.com">estampasdelsur23@gmail.com</a>
         <a href="https://www.instagram.com/estampasdelsur/" target="_blank" rel="noopener">@estampasdelsur</a>
-        <span class="footer__loc">Empalme Olmos, Canelones · Uruguay</span>
+        <span class="footer__loc">Pando, Canelones · Uruguay</span>
       </div>
     </div>
     <div class="footer__base">
