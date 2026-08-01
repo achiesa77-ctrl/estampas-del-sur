@@ -73,7 +73,14 @@ document.addEventListener("DOMContentLoaded", () => {
     setTimeout(() => intro.remove(), 1000);
   };
 
-  if (!intro || reduceMotion || sessionStorage.getItem("introSeen")) {
+  /* El video del intro pesa ~2 MB. En "ahorro de datos" o en conexiones
+     lentas (2g/3g) eso es una pantalla negra esperando como primera
+     impresión: en ese caso se saltea y se entra directo al hero. */
+  const conn = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
+  const slowNet = !!conn && (conn.saveData === true ||
+                  /^(slow-2g|2g|3g)$/.test(conn.effectiveType || ""));
+
+  if (!intro || reduceMotion || slowNet || sessionStorage.getItem("introSeen")) {
     if (intro) intro.remove();
     startHero();
   } else {
@@ -93,6 +100,11 @@ document.addEventListener("DOMContentLoaded", () => {
     if (introVideo) {
       introVideo.addEventListener("loadedmetadata", () => { introVideo.playbackRate = 1; });
       introVideo.addEventListener("playing", beginTimers);
+
+      // Recién acá arranca la descarga del video del intro
+      introVideo.preload = "auto";
+      introVideo.src = introVideo.dataset.src;
+      introVideo.load();
 
       // Cierre preciso al alcanzar los 6 s reales de reproducción
       const onTime = () => {
@@ -167,11 +179,35 @@ document.addEventListener("DOMContentLoaded", () => {
     links.classList.toggle("is-open", isOpen);
     burger.classList.toggle("is-open", isOpen);
     burger.setAttribute("aria-expanded", String(isOpen));
+    document.body.classList.toggle("menu-open", isOpen);
+    // Al abrir, el foco entra al panel; al cerrar, vuelve al botón que lo abrió
+    if (isOpen) links.querySelector("a")?.focus();
+    else if (document.activeElement && links.contains(document.activeElement)) burger.focus();
   };
   burger.addEventListener("click", () => toggleMenu());
   links.querySelectorAll("a").forEach(a =>
     a.addEventListener("click", () => toggleMenu(false))
   );
+
+  // Escape cierra el menú (vía de salida estándar)
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape" && links.classList.contains("is-open")) toggleMenu(false);
+  });
+  // Tocar fuera del panel también lo cierra
+  document.addEventListener("pointerdown", (e) => {
+    if (!links.classList.contains("is-open")) return;
+    if (links.contains(e.target) || burger.contains(e.target)) return;
+    toggleMenu(false);
+  });
+  // El foco no se escapa del panel abierto mientras se tabula
+  links.addEventListener("keydown", (e) => {
+    if (e.key !== "Tab" || !links.classList.contains("is-open")) return;
+    const focusables = [...links.querySelectorAll("a")];
+    if (!focusables.length) return;
+    const first = focusables[0], last = focusables[focusables.length - 1];
+    if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+    else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+  });
 
   /* ---- Revelados al hacer scroll (IntersectionObserver, siempre) ---- */
   const reveals = document.querySelectorAll(".reveal");

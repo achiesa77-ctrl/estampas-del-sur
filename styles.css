@@ -39,6 +39,22 @@
   --ease-out-quint:    cubic-bezier(.23, 1, .32, 1); /* hover / micro-interacciones */
   --ease-in-out-cubic: cubic-bezier(.645, .045, .355, 1);
   --ease-out-cubic:    cubic-bezier(.33, 1, .68, 1);
+
+  /* Escala de z-index — ÚNICA fuente de verdad. Nada de números sueltos:
+     si algo necesita apilarse dentro de un componente, ese componente
+     abre su propio contexto con isolation:isolate y usa 1/2/3 locales. */
+  --z-embers:   1;    /* brasas, detrás de todo el contenido */
+  --z-nav:      100;  /* barra fija */
+  --z-totop:    150;  /* volver arriba */
+  --z-progress: 200;  /* barra de lectura */
+  --z-intro:    500;  /* intro a pantalla completa */
+  --z-veil:     600;  /* viñeta cinematográfica (no interactiva) */
+  --z-grain:    601;  /* grano de película (no interactivo) */
+  --z-skip:     700;  /* skip link: por encima de todo al enfocarse */
+
+  /* Altura que ocupa el nav fijo: se usa para que los anclajes del menú
+     no dejen el título tapado detrás de la barra. */
+  --nav-h: 132px;
 }
 
 
@@ -55,28 +71,54 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 /* Fondo real de piedra + madera, fijo detrás de todo el sitio */
+/* OJO: fotos/fondo.jpg mide 532x417 y acá se estira a pantalla completa
+   (~4x en un monitor de 1920), así que llega blando. El desenfoque leve lo
+   convierte en fuera de foco intencional en vez de imagen pixelada; el
+   scale evita que el blur deje bordes claros. Lo ideal igual es reexportar
+   esa foto a 1920px de ancho o más. */
 body::before {
   content: ""; position: fixed; inset: 0; z-index: -2;
   background: url("fotos/fondo.jpg") center center / cover no-repeat;
+  filter: blur(2px) saturate(0.92);
+  transform: scale(1.03);
 }
 body::after {
   content: ""; position: fixed; inset: 0; z-index: -1;
   background: linear-gradient(180deg, rgba(20,13,8,0.78), rgba(12,8,5,0.9));
 }
 body.intro-open { overflow: hidden; }
+/* Con el menú móvil abierto, el fondo no scrollea detrás del panel */
+body.menu-open { overflow: hidden; }
 
-/* Los paneles de sección son semitransparentes para dejar ver la piedra detrás */
-.section { position: relative; }
+/* Los paneles de sección son semitransparentes para dejar ver la piedra detrás.
+   isolation:isolate = cada sección abre su propio contexto de apilado, así el
+   z-index:1 de sus hijos es local y no pelea con el resto de la página. */
+.section { position: relative; isolation: isolate; }
 .section > * { position: relative; z-index: 1; }
+
+/* Los anclajes del menú frenan por debajo del nav fijo, no detrás de él */
+:target { scroll-margin-top: var(--nav-h); }
+section[id] { scroll-margin-top: var(--nav-h); }
 
 ::selection { background: var(--oro); color: var(--noche); }
 
 img { max-width: 100%; display: block; }
 a { color: inherit; text-decoration: none; }
 
+/* ---------- Skip link (accesibilidad de teclado) ---------- */
+.skip-link {
+  position: fixed; top: 0; left: 50%; z-index: var(--z-skip);
+  transform: translate(-50%, -120%);
+  background: var(--bordo); color: var(--noche); font-weight: 700;
+  font-size: 0.8rem; letter-spacing: 0.1em; text-transform: uppercase;
+  padding: 0.85rem 1.6rem; border-radius: 0 0 3px 3px;
+  transition: transform 0.2s var(--ease-out-cubic);
+}
+.skip-link:focus-visible { transform: translate(-50%, 0); outline-offset: -4px; }
+
 /* ---------- Grano / textura de estampa ---------- */
 .grain {
-  position: fixed; inset: 0; z-index: 9999; pointer-events: none;
+  position: fixed; inset: 0; z-index: var(--z-grain); pointer-events: none;
   opacity: 0.06; mix-blend-mode: overlay;
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
   animation: grainShift 0.5s steps(1, end) infinite;
@@ -94,7 +136,7 @@ a { color: inherit; text-decoration: none; }
 
 /* ---------- Viñeta cinematográfica que respira ---------- */
 .filmveil {
-  position: fixed; inset: 0; z-index: 9998; pointer-events: none;
+  position: fixed; inset: 0; z-index: var(--z-veil); pointer-events: none;
   background: radial-gradient(ellipse 120% 100% at 50% 42%,
               transparent 46%, rgba(8,5,2,0.28) 78%, rgba(4,2,1,0.62) 100%);
   animation: filmBreathe 9s ease-in-out infinite;
@@ -103,19 +145,19 @@ a { color: inherit; text-decoration: none; }
 
 /* ---------- Brasas del fogón (canvas) ---------- */
 .embers {
-  position: fixed; inset: 0; z-index: 1; pointer-events: none;
+  position: fixed; inset: 0; z-index: var(--z-embers); pointer-events: none;
   opacity: 0.9;
 }
 
 /* ---------- Intro (video a pantalla completa + imagen del logo) ---------- */
 .intro {
-  position: fixed; inset: 0; z-index: 500; overflow: hidden; background: #060809;
+  position: fixed; inset: 0; z-index: var(--z-intro); overflow: hidden; background: #0a0704;
   transition: opacity 0.9s var(--ease), visibility 0.9s var(--ease);
 }
 .intro.is-hidden { opacity: 0; visibility: hidden; pointer-events: none; }
 .intro__video {
   position: absolute; inset: 0; width: 100%; height: 100%;
-  object-fit: cover; display: block; background: #060809;
+  object-fit: cover; display: block; background: #0a0704;
 }
 /* En pantallas verticales (celular) el video apaisado se muestra entero
    (contain) para que el logo no quede cortado por los costados. */
@@ -129,7 +171,7 @@ a { color: inherit; text-decoration: none; }
   padding: 0.65rem 1.3rem; border-radius: 2px; cursor: pointer; backdrop-filter: blur(4px);
   transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease;
 }
-.intro__skip:hover { background: var(--bordo); border-color: var(--bordo); color: #fff; }
+.intro__skip:hover { background: var(--bordo); border-color: var(--bordo); color: var(--noche); }
 
 /* ---------- Utilidades ---------- */
 .section { padding: clamp(4.5rem, 10vw, 8rem) var(--pad); }
@@ -170,6 +212,36 @@ a { color: inherit; text-decoration: none; }
 .section__head { max-width: 640px; margin: 0 auto 3.5rem; text-align: center; }
 .section__sub { color: var(--humo); margin-top: 1rem; font-size: 1.02rem; }
 
+/* =========================================================
+   RITMO DE SECCIÓN (R4 — matar la monotonía)
+   Antes, seis secciones seguidas (Integrantes, Historia, Videos,
+   Trayectoria, Agenda, Galería) usaban el MISMO cabezal centrado, el mismo
+   ancho y el mismo padding: al mirar la página entrecerrando los ojos, todas
+   iguales. Estas variantes le dan a cada una su propio peso y composición.
+   ========================================================= */
+
+/* Secciones de respiro: menos aire que una sección plena */
+.section--tight { padding-block: clamp(3rem, 6.5vw, 5rem); }
+
+/* --- Cabezal partido: título a la izquierda, bajada a la derecha --- */
+.section__head--split {
+  max-width: var(--maxw); margin: 0 auto 3.2rem;
+  display: grid; grid-template-columns: auto 1fr;
+  gap: clamp(1.2rem, 6vw, 5rem);
+  align-items: end; text-align: left;
+  padding-bottom: 1.5rem;
+  border-bottom: 1px solid rgba(240,230,212,0.1);
+}
+.section__head--split .eyebrow { justify-content: flex-start; }
+.section__head--split .eyebrow::before { display: block; }
+.section__head--split .section__sub {
+  margin: 0; max-width: 40ch; justify-self: end; padding-bottom: 0.3rem;
+}
+@media (max-width: 860px) {
+  .section__head--split { grid-template-columns: 1fr; gap: 1rem; align-items: start; }
+  .section__head--split .section__sub { justify-self: start; }
+}
+
 /* ---------- Botones ---------- */
 .btn {
   display: inline-flex; align-items: center; justify-content: center;
@@ -209,39 +281,22 @@ a:focus-visible, button:focus-visible, .btn:focus-visible, .track:focus-visible 
    NAV
    ========================================================= */
 .nav {
-  position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+  position: fixed; top: 0; left: 0; right: 0; z-index: var(--z-nav);
   display: flex; align-items: center; justify-content: space-between;
   padding: 0.7rem var(--pad);
   transition: background-color 0.5s var(--ease), padding 0.4s var(--ease),
               backdrop-filter 0.5s var(--ease), box-shadow 0.5s var(--ease);
 }
+/* Marrón nocturno, no azul: el fondo del nav tiene que ser de la misma
+   familia térmica que la piedra y la brasa (antes era rgba(11,13,17)) */
 .nav.is-scrolled {
-  background: rgba(11,13,17,0.82);
+  background: rgba(18,13,8,0.86);
   backdrop-filter: blur(14px);
   padding-top: 0.55rem; padding-bottom: 0.55rem;
   box-shadow: 0 1px 0 rgba(240,230,212,0.06);
 }
 
 .nav__brand { display: flex; align-items: center; gap: 0.75rem; }
-.nav__logo {
-  width: 58px; height: 58px; border-radius: 50%; overflow: hidden;
-  display: grid; place-items: center; flex-shrink: 0;
-  border: 1px solid rgba(234,238,245,0.16);
-  box-shadow: 0 6px 18px -8px rgba(0,0,0,0.7);
-  transition: transform 0.6s var(--ease), box-shadow 0.4s var(--ease);
-  /* entrada animada al cargar */
-  animation: logoIn 1s var(--ease) both;
-}
-.nav__logo img { width: 100%; height: 100%; object-fit: cover; }
-.nav.is-scrolled .nav__logo { width: 48px; height: 48px; }
-.nav__brand:hover .nav__logo {
-  transform: rotate(-8deg) scale(1.06);
-  box-shadow: 0 8px 22px -8px rgba(222,90,78,0.5);
-}
-@keyframes logoIn {
-  from { opacity: 0; transform: rotate(-140deg) scale(0.3); }
-  to   { opacity: 1; transform: rotate(0deg) scale(1); }
-}
 @keyframes spin { to { transform: rotate(360deg); } }
 
 .nav__name {
@@ -274,7 +329,8 @@ a:focus-visible, button:focus-visible, .btn:focus-visible, .track:focus-visible 
   text-transform: uppercase; letter-spacing: 0.1em; font-size: 0.74rem !important;
   transition: background-color 0.3s var(--ease), color 0.3s var(--ease);
 }
-.nav__cta:hover { background: var(--bordo); color: #fff !important; }
+/* Texto oscuro sobre coral (5.1:1) — el #fff daba 3.2:1 y no pasaba AA */
+.nav__cta:hover { background: var(--bordo); color: var(--noche) !important; }
 
 .nav__burger {
   display: none; flex-direction: column; gap: 5px; background: none;
@@ -397,13 +453,6 @@ a:focus-visible, button:focus-visible, .btn:focus-visible, .track:focus-visible 
 }
 @keyframes scrollcue { 0% { top: -50%; } 60%,100% { top: 100%; } }
 
-.hero__meta {
-  position: absolute; z-index: 2; bottom: 2.2rem; right: var(--pad);
-  display: flex; flex-direction: column; align-items: flex-end; gap: 0.35rem;
-  font-size: 0.68rem; letter-spacing: 0.18em; text-transform: uppercase; color: var(--humo-2);
-  text-align: right;
-}
-
 /* ---- Revelado tipo cortina (line-mask) para el hero ---- */
 .line-mask { overflow: hidden; }
 .line-mask > span {
@@ -431,7 +480,7 @@ a:focus-visible, button:focus-visible, .btn:focus-visible, .track:focus-visible 
 .is-loaded .hero__title .ch { transform: translateY(0); }
 .is-loaded .hero__lead > span        { transition-delay: 0.45s; }
 .is-loaded .hero__actions > span     { transition-delay: 0.60s; display: flex; gap: 1rem; flex-wrap: wrap; }
-.hero__meta, .hero__scroll { opacity: 0; animation: fadeUp 1s var(--ease) forwards; animation-delay: 0.9s; }
+.hero__scroll { opacity: 0; animation: fadeUp 1s var(--ease) forwards; animation-delay: 0.9s; }
 @keyframes fadeUp { from { opacity: 0; transform: translate(var(--fx,0), 14px); } to { opacity: 1; } }
 .hero__scroll { --fx: -50%; }
 
@@ -439,18 +488,21 @@ a:focus-visible, button:focus-visible, .btn:focus-visible, .track:focus-visible 
 /* Sello giratorio = único logo, en el nav (arriba a la izquierda) */
 .seal {
   position: relative; flex-shrink: 0;
-  width: 90px; height: 90px; display: grid; place-items: center;
+  width: 112px; height: 112px; display: grid; place-items: center;
   transition: width 0.3s var(--ease), height 0.3s var(--ease);
 }
-.nav.is-scrolled .seal { width: 72px; height: 72px; }
+.nav.is-scrolled .seal { width: 88px; height: 88px; }
 .seal__ring {
   position: absolute; inset: 0; width: 100%; height: 100%;
   animation: spin 20s linear infinite;
   filter: drop-shadow(0 6px 14px rgba(0,0,0,0.55));
 }
+/* El SVG escala con la caja, así que agrandar .seal agranda el texto.
+   El tracking lo reparte textLength en el HTML, por eso acá va en normal:
+   si se suma letter-spacing, el texto vuelve a pasarse de largo. */
 .seal__ring text {
-  font-family: var(--display); font-size: 12.5px; font-weight: 600;
-  letter-spacing: 0.12em; text-transform: uppercase; fill: var(--oro-claro);
+  font-family: var(--display); font-size: 15px; font-weight: 700;
+  letter-spacing: normal; text-transform: uppercase; fill: var(--oro-claro);
 }
 .seal__logo {
   position: relative; width: 44%; aspect-ratio: 1; border-radius: 50%;
@@ -465,7 +517,7 @@ a:focus-visible, button:focus-visible, .btn:focus-visible, .track:focus-visible 
 .marquee {
   border-top: 1px solid rgba(234,238,245,0.08);
   border-bottom: 1px solid rgba(234,238,245,0.08);
-  background: rgba(10,12,16,0.72); overflow: hidden; padding: 1.1rem 0;
+  background: rgba(16,11,7,0.75); overflow: hidden; padding: 1.1rem 0;
 }
 .marquee__track {
   display: inline-flex; align-items: center; gap: 2.5rem;
@@ -477,27 +529,6 @@ a:focus-visible, button:focus-visible, .btn:focus-visible, .track:focus-visible 
 }
 .marquee__dot { color: var(--oro) !important; font-style: normal !important; font-size: 1rem !important; }
 @keyframes marquee { to { transform: translateX(-50%); } }
-
-/* =========================================================
-   PLACEHOLDERS DE IMAGEN
-   ========================================================= */
-.ph {
-  position: relative; border-radius: 3px; overflow: hidden;
-  background:
-    repeating-linear-gradient(135deg, rgba(240,230,212,0.03) 0 12px, transparent 12px 24px),
-    linear-gradient(160deg, var(--tierra-2), var(--carbon));
-  border: 1px solid rgba(240,230,212,0.08);
-  display: grid; place-items: center;
-}
-.ph::before {
-  content: ""; position: absolute; inset: 0;
-  background: radial-gradient(60% 60% at 50% 40%, rgba(217,164,65,0.10), transparent 70%);
-}
-.ph__label {
-  position: relative; font-size: 0.7rem; letter-spacing: 0.28em;
-  text-transform: uppercase; color: var(--humo-2);
-  border: 1px solid rgba(240,230,212,0.14); padding: 0.4rem 0.9rem; border-radius: 2px;
-}
 
 /* =========================================================
    EL GRUPO
@@ -523,7 +554,6 @@ a:focus-visible, button:focus-visible, .btn:focus-visible, .track:focus-visible 
   filter: grayscale(0.4) contrast(1.06) brightness(0.82);
   will-change: transform;
 }
-.ph--tall { aspect-ratio: 4/5; }
 .grupo__badge {
   position: absolute; right: -20px; bottom: -20px;
   background: var(--bordo); color: var(--hueso);
@@ -547,11 +577,6 @@ a:focus-visible, button:focus-visible, .btn:focus-visible, .track:focus-visible 
 .quote cite {
   display: block; margin-top: 0.8rem; font-style: normal;
   font-size: 0.72rem; letter-spacing: 0.18em; text-transform: uppercase; color: var(--oro);
-}
-
-.grupo__awards {
-  margin-top: 1.8rem; font-size: 0.8rem; letter-spacing: 0.06em;
-  color: var(--humo-2); border-top: 1px solid rgba(234,238,245,0.08); padding-top: 1.2rem;
 }
 
 .stats { display: flex; gap: clamp(1.5rem, 4vw, 3rem); margin-top: 2.6rem; }
@@ -608,7 +633,6 @@ a:focus-visible, button:focus-visible, .btn:focus-visible, .track:focus-visible 
   color: var(--oro); font-size: 0.7rem; letter-spacing: 0.14em;
   text-transform: uppercase; margin-top: 0.35rem;
 }
-.card__bio { color: var(--humo-2); font-size: 0.84rem; margin-top: 0.9rem; line-height: 1.6; }
 .card__social { display: flex; gap: 0.6rem; margin-top: 1.2rem; }
 .card__social a {
   width: 34px; height: 34px; display: grid; place-items: center;
@@ -634,10 +658,12 @@ a:focus-visible, button:focus-visible, .btn:focus-visible, .track:focus-visible 
   grid-template-columns: auto auto 1fr auto; gap: 1.2rem;
   align-items: center; padding: 1.15rem 0.5rem;
   border-bottom: 1px solid rgba(240,230,212,0.08);
-  transition: background-color 0.3s var(--ease), padding-left 0.35s var(--ease);
+  /* transform en vez de padding-left: mover layout en hover forzaba
+     reflow en cada pasada del mouse (R12) */
+  transition: background-color 0.3s var(--ease), transform 0.35s var(--ease-out-quint);
   cursor: pointer;
 }
-.track:hover { background: rgba(217,164,65,0.05); padding-left: 1rem; }
+.track:hover { background: rgba(217,164,65,0.05); transform: translateX(8px); }
 .track__num { font-family: var(--display); font-style: italic; color: var(--humo-2); font-size: 1.1rem; }
 .track__play {
   width: 32px; height: 32px; display: grid; place-items: center; border-radius: 50%;
@@ -645,35 +671,50 @@ a:focus-visible, button:focus-visible, .btn:focus-visible, .track:focus-visible 
   transition: background-color 0.3s var(--ease), color 0.3s var(--ease), transform 0.3s var(--ease);
 }
 .track:hover .track__play,
-.track:focus-visible .track__play { background: var(--bordo); color: #fff; transform: scale(1.08); }
+.track:focus-visible .track__play { background: var(--bordo); color: var(--noche); transform: scale(1.08); }
 .track__i { width: 12px; height: 12px; fill: currentColor; display: block; }
 .track__i--pause { display: none; }
 .track.is-playing .track__i--play { display: none; }
 .track.is-playing .track__i--pause { display: block; }
 .track.is-playing { background: rgba(217,164,65,0.07); }
-.track.is-playing .track__play { background: var(--bordo); color: #fff; }
+.track.is-playing .track__play { background: var(--bordo); color: var(--noche); }
 .track.is-playing .track__num { color: var(--oro-claro); }
 .track__title { font-size: 1.05rem; font-weight: 500; }
-.track__genre {
-  font-size: 0.7rem; letter-spacing: 0.14em; text-transform: uppercase;
-  color: var(--oro); border: 1px solid rgba(217,164,65,0.3);
-  padding: 0.22rem 0.65rem; border-radius: 2px;
-}
 .track__time { color: var(--humo-2); font-variant-numeric: tabular-nums; font-size: 0.9rem; }
 
 /* =========================================================
    AGENDA
    ========================================================= */
 .agenda { background: var(--panel-2); }
+
+/* Estado vacío con oficio: mientras no haya fechas confirmadas, la sección
+   dice la verdad y ofrece las dos salidas útiles (consultar / seguir),
+   en vez de mostrar filas placeholder que se leían como sitio sin terminar. */
+.agenda__inner { max-width: 680px; margin: 0 auto; text-align: center; }
+.agenda__inner .eyebrow { justify-content: center; }
+.agenda__inner .eyebrow::before { display: none; }
+.agenda__empty { margin-top: 2.2rem; }
+.agenda__empty-lead {
+  font-family: var(--serif); font-style: italic; font-weight: 400;
+  font-size: clamp(1.25rem, 3vw, 1.8rem); line-height: 1.4; color: var(--hueso);
+}
+.agenda__empty-sub {
+  color: var(--humo); margin: 1.1rem auto 0; max-width: 50ch; font-size: 1rem;
+}
+.agenda__actions {
+  margin-top: 2.2rem; display: flex; gap: 1rem;
+  justify-content: center; flex-wrap: wrap;
+}
+
 .shows { list-style: none; max-width: var(--maxw); margin: 0 auto; }
 .show {
   display: grid; grid-template-columns: auto 1fr auto; gap: 1.8rem;
   align-items: center; padding: 1.6rem 0.5rem;
   border-top: 1px solid rgba(240,230,212,0.09);
-  transition: padding-left 0.35s var(--ease);
+  transition: transform 0.35s var(--ease-out-quint);
 }
 .show:last-child { border-bottom: 1px solid rgba(240,230,212,0.09); }
-.show:hover { padding-left: 1rem; }
+.show:hover { transform: translateX(8px); }
 .show__date {
   display: flex; flex-direction: column; align-items: center; justify-content: center;
   width: 70px; height: 70px; border: 1px solid rgba(217,164,65,0.3); border-radius: 4px;
@@ -688,22 +729,35 @@ a:focus-visible, button:focus-visible, .btn:focus-visible, .track:focus-visible 
   border: 1px solid var(--bordo); padding: 0.7rem 1.3rem; border-radius: 2px;
   transition: background-color 0.3s var(--ease), color 0.3s var(--ease);
 }
-.show__link:hover { background: var(--bordo); color: #fff; }
+.show__link:hover { background: var(--bordo); color: var(--noche); }
 
 /* =========================================================
    GALERÍA
    ========================================================= */
-.galeria { background: var(--panel-2); }
+/* Galería a sangre completa: es el corte de ritmo más fuerte de la página.
+   Después de tres secciones con contenedor de 1200px, el slideshow rompe
+   de borde a borde y funciona como respiro visual antes del cierre. */
+.galeria { background: var(--panel-2); padding-inline: 0; }
+.galeria__head {
+  max-width: var(--maxw); margin: 0 auto 2.4rem;
+  padding-inline: var(--pad); text-align: left;
+}
+.galeria__head .eyebrow { justify-content: flex-start; }
 
 /* Slideshow cinematográfico: fondo borroso + foto entera encima,
    crossfade y Ken Burns alternado (así ninguna foto se recorta feo). */
 .slideshow {
-  position: relative; max-width: 1100px; margin: 3rem auto 0;
-  border-radius: 6px; overflow: hidden;
-  border: 1px solid rgba(240,230,212,0.08);
-  box-shadow: 0 40px 80px -40px rgba(0,0,0,0.85);
+  position: relative; width: 100%; margin: 0;
+  overflow: hidden; isolation: isolate;
+  border-top: 1px solid rgba(240,230,212,0.08);
+  border-bottom: 1px solid rgba(240,230,212,0.08);
 }
-.slideshow__stage { position: relative; width: 100%; aspect-ratio: 16 / 10; }
+/* A sangre completa hace falta una proporción más apaisada: con 16/10 el
+   escenario quedaría de ~1200px de alto en un monitor de 1920. */
+.slideshow__stage {
+  position: relative; width: 100%; aspect-ratio: 21 / 9;
+  max-height: 78svh; min-height: 380px;
+}
 .slide { position: absolute; inset: 0; margin: 0; opacity: 0; transition: opacity 1.2s var(--ease); }
 .slide.is-active { opacity: 1; z-index: 1; }
 .slide__bg {
@@ -728,9 +782,11 @@ a:focus-visible, button:focus-visible, .btn:focus-visible, .track:focus-visible 
   transition: background-color 0.25s var(--ease), transform 0.25s var(--ease);
 }
 .slideshow__nav svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
-.slideshow__nav--prev { left: 1rem; }
-.slideshow__nav--next { right: 1rem; }
-.slideshow__nav:hover { background: var(--bordo); transform: translateY(-50%) scale(1.08); }
+/* Se meten hacia adentro para no chocar con el botón "volver arriba",
+   que es fijo en la esquina inferior derecha */
+.slideshow__nav--prev { left: clamp(1rem, 5vw, 5.5rem); }
+.slideshow__nav--next { right: clamp(1rem, 5vw, 5.5rem); }
+.slideshow__nav:hover { background: var(--bordo); color: var(--noche); transform: translateY(-50%) scale(1.08); }
 
 .slideshow__dots { position: absolute; z-index: 3; left: 0; right: 0; bottom: 1rem; display: flex; justify-content: center; gap: 0.5rem; }
 .slideshow__dot {
@@ -742,46 +798,11 @@ a:focus-visible, button:focus-visible, .btn:focus-visible, .track:focus-visible 
 .slideshow__dot.is-active { background: var(--bordo); transform: scale(1.35); }
 
 @media (max-width: 720px) {
-  .slideshow__stage { aspect-ratio: 4 / 5; }
-  .slideshow__nav { width: 38px; height: 38px; }
+  .slideshow__stage { aspect-ratio: 4 / 5; max-height: none; min-height: 0; }
+  .slideshow__nav { width: 44px; height: 44px; }  /* mínimo táctil */
   .slideshow__nav--prev { left: 0.5rem; }
   .slideshow__nav--next { right: 0.5rem; }
 }
-
-/* =========================================================
-   SELLO PROPIO
-   ========================================================= */
-.sello { background: var(--panel-2); }
-.sello__inner { max-width: var(--maxw); margin: 0 auto; }
-.sello__inner .eyebrow { justify-content: center; }
-.sello__inner .eyebrow::before { display: none; }
-.sello__quote {
-  font-family: var(--serif); font-style: italic; font-weight: 300;
-  font-size: clamp(1.6rem, 3.8vw, 2.9rem); line-height: 1.3;
-  text-align: center; max-width: 18ch; margin: 0.4rem auto 0; color: var(--hueso);
-}
-.sello__quote em { font-style: italic; color: var(--oro-claro); }
-.features {
-  display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.4rem;
-  margin-top: 3.5rem;
-}
-.feature {
-  background: var(--carbon); border: 1px solid rgba(234,238,245,0.07);
-  border-radius: 4px; padding: 2rem 1.7rem;
-  transition: transform 0.26s var(--ease-out-quint), border-color 0.26s var(--ease-out-quint);
-}
-.feature:hover { transform: translateY(-6px); border-color: rgba(222,90,78,0.35); }
-.feature__icon {
-  display: grid; place-items: center; width: 52px; height: 52px;
-  border-radius: 50%; border: 1px solid rgba(222,90,78,0.35); color: var(--bordo-claro);
-  margin-bottom: 1.3rem;
-}
-.feature__icon svg { width: 26px; height: 26px; }
-.feature h3 {
-  font-family: var(--display); font-weight: 400; text-transform: uppercase;
-  letter-spacing: 0.08em; font-size: 1.05rem;
-}
-.feature p { color: var(--humo); font-size: 0.92rem; margin-top: 0.7rem; line-height: 1.6; }
 
 /* =========================================================
    TRAYECTORIA (timeline)
@@ -873,10 +894,13 @@ a:focus-visible, button:focus-visible, .btn:focus-visible, .track:focus-visible 
 /* =========================================================
    VIDEOS (miniatura → player al clickear)
    ========================================================= */
+/* Un video destacado a ancho completo + dos abajo: le da a la sección un
+   punto focal en vez de tres cajas del mismo peso (R4). */
 .videos__grid {
-  display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.2rem;
-  max-width: var(--maxw); margin: 3rem auto 0;
+  display: grid; grid-template-columns: repeat(2, 1fr); gap: 1.2rem;
+  max-width: var(--maxw); margin: 0 auto;
 }
+.video--feat { grid-column: 1 / -1; }
 .video__btn {
   display: block; width: 100%; aspect-ratio: 16 / 9; position: relative;
   padding: 0; cursor: pointer; overflow: hidden; border-radius: 4px;
@@ -908,12 +932,22 @@ a:focus-visible, button:focus-visible, .btn:focus-visible, .track:focus-visible 
 /* =========================================================
    HISTORIA (narrativa)
    ========================================================= */
-.historia__body { max-width: 760px; margin: 3rem auto 0; }
+/* Cabezal editorial: alineado a la izquierda sobre la columna de texto,
+   en vez del cabezal centrado que ya usaban otras cinco secciones */
+.historia__head { max-width: 760px; margin: 0 auto; text-align: left; }
+.historia__head .eyebrow { justify-content: flex-start; }
+
+.historia__body { max-width: 760px; margin: 2.4rem auto 0; }
 .historia__body > p.historia__lead {
   font-family: var(--serif); font-weight: 400;
   font-size: clamp(1.35rem, 3.2vw, 2.1rem); line-height: 1.42;
   color: var(--hueso); margin-bottom: 2rem;
   padding-bottom: 2rem; border-bottom: 1px solid rgba(234,238,245,0.1);
+}
+/* Capitular: marca el arranque del relato y refuerza el tono editorial */
+.historia__body > p.historia__lead::first-letter {
+  float: left; font-size: 3.6em; line-height: 0.82;
+  padding: 0.06em 0.12em 0 0; color: var(--oro-claro);
 }
 .historia__lead em { font-style: italic; color: var(--oro-claro); }
 .historia__body > p { color: var(--humo); font-size: 1.06rem; line-height: 1.85; margin-bottom: 1.4rem; }
@@ -987,18 +1021,19 @@ a:focus-visible, button:focus-visible, .btn:focus-visible, .track:focus-visible 
 /* =========================================================
    BARRA DE PROGRESO + CURSOR + LUCES AMBIENTALES
    ========================================================= */
+/* Color plano y decidido: el degradado acá no comunicaba nada (R1) */
 .progress {
   position: fixed; top: 0; left: 0; height: 3px; width: 0%;
-  background: linear-gradient(90deg, var(--terracota), var(--oro));
-  z-index: 200; transition: width 0.1s linear;
+  background: var(--oro);
+  z-index: var(--z-progress); transition: width 0.1s linear;
 }
 
 /* Botón "volver arriba" */
 .to-top {
-  position: fixed; right: 1.6rem; bottom: 1.6rem; z-index: 150;
+  position: fixed; right: 1.6rem; bottom: 1.6rem; z-index: var(--z-totop);
   width: 46px; height: 46px; display: grid; place-items: center;
   border-radius: 50%; cursor: pointer;
-  background: var(--bordo); color: #fff; border: 0;
+  background: var(--bordo); color: var(--noche); border: 0;
   box-shadow: 0 12px 26px -12px rgba(0,0,0,0.8);
   opacity: 0; transform: translateY(14px) scale(0.9); pointer-events: none;
   transition: opacity 0.3s var(--ease-out-quint), transform 0.3s var(--ease-out-quint),
@@ -1026,7 +1061,7 @@ a:focus-visible, button:focus-visible, .btn:focus-visible, .track:focus-visible 
   * { animation: none !important; scroll-behavior: auto !important; }
   .reveal { opacity: 1; transform: none; transition: none; }
   .line-mask > span, .hero__title .ch { transform: none !important; transition: none !important; }
-  .hero__meta, .hero__scroll { opacity: 1 !important; }
+  .hero__scroll { opacity: 1 !important; }
   .hero__photo { transform: scale(1.08) !important; }
   .embers { display: none; }
   .slide { transition: none !important; }
@@ -1042,19 +1077,21 @@ a:focus-visible, button:focus-visible, .btn:focus-visible, .track:focus-visible 
   .grupo__grid, .repertorio__inner { grid-template-columns: 1fr; }
   .footer__grid { grid-template-columns: 1fr 1fr; }
   .grupo__media { max-width: 460px; }
-  .features { grid-template-columns: 1fr; max-width: 480px; margin-inline: auto; }
   .disco__inner { grid-template-columns: 1fr; gap: 2.5rem; }
   .vinyl { order: -1; }
 }
 
 @media (max-width: 720px) {
+  /* El nav es más bajo en móvil: el freno de los anclajes lo acompaña */
+  :root { --nav-h: 108px; }
   .nav__links {
     position: fixed; inset: 0 0 0 auto; width: min(78vw, 320px);
     flex-direction: column; align-items: flex-start; justify-content: center;
     gap: 1.6rem; padding: var(--pad);
-    background: rgba(20,25,35,0.97); backdrop-filter: blur(18px);
+    /* Marrón nocturno para que combine con la piedra (antes: azul-gris frío) */
+    background: rgba(20,14,9,0.97); backdrop-filter: blur(18px);
     transform: translateX(100%); transition: transform 0.5s var(--ease);
-    border-left: 1px solid rgba(234,238,245,0.08);
+    border-left: 1px solid rgba(224,168,68,0.16);
   }
   .nav__links.is-open { transform: translateX(0); }
   .nav__links a { font-size: 1.1rem; }
@@ -1066,8 +1103,6 @@ a:focus-visible, button:focus-visible, .btn:focus-visible, .track:focus-visible 
     grid-column: 1 / -1; justify-self: center; width: calc(50% - 0.45rem);
   }
   .card__body { padding: 1rem; }
-  .gallery { grid-template-columns: repeat(2, 1fr); grid-auto-rows: 150px; }
-  .gallery__item--a, .gallery__item--b, .gallery__item--e { grid-column: span 2; }
   .footer__grid { grid-template-columns: 1fr; gap: 2rem; }
   .show { grid-template-columns: auto 1fr; }
   .show__link { grid-column: 2; justify-self: start; }
@@ -1085,8 +1120,9 @@ a:focus-visible, button:focus-visible, .btn:focus-visible, .track:focus-visible 
   .tl { grid-template-columns: 52px 1fr; gap: 1.1rem; }
   .tl::before { left: 54px; }
   .tl__year { font-size: 0.82rem; }
-  .sello__quote { max-width: 26ch; }
-  .videos__grid { grid-template-columns: 1fr; max-width: 480px; }
-  /* En móvil el sello (logo del nav) un poco más chico */
-  .seal { width: 72px; height: 72px; }
+  .videos__grid { grid-template-columns: 1fr; }
+  /* En móvil el sello (logo del nav) un poco más chico, pero sin bajar
+     del punto en que el texto circular deja de leerse */
+  .seal { width: 88px; height: 88px; }
+  .nav.is-scrolled .seal { width: 74px; height: 74px; }
 }
