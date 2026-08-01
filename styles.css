@@ -630,6 +630,54 @@ a:focus-visible, button:focus-visible, .btn:focus-visible, .track:focus-visible 
 @keyframes marquee { to { transform: translateX(-50%); } }
 
 /* =========================================================
+   CREDENCIALES — franja de prueba social bajo el hero
+   Es una BANDA, no una sección: poco alto y bordes al ras, para que
+   funcione como remate del hero y no como un bloque más del ritmo.
+   ========================================================= */
+.proof {
+  background: var(--panel);
+  border-bottom: 1px solid rgba(240,230,212,0.08);
+  padding: clamp(1.6rem, 4vw, 2.4rem) var(--pad);
+  isolation: isolate;
+}
+.proof__list {
+  list-style: none; max-width: var(--maxw); margin: 0 auto;
+  display: grid; grid-template-columns: repeat(4, 1fr); gap: 0;
+}
+.proof__item {
+  display: flex; flex-direction: column; gap: 0.45rem;
+  padding: 0.2rem clamp(1rem, 2.5vw, 2rem);
+  border-left: 1px solid rgba(240,230,212,0.12);
+}
+.proof__item:first-child { border-left: 0; padding-left: 0; }
+.proof__year {
+  font-family: var(--display); font-weight: 500;
+  font-size: 0.72rem; letter-spacing: 0.22em; color: var(--bordo-claro);
+}
+.proof__txt {
+  font-family: var(--display); font-weight: 400;
+  font-size: clamp(0.95rem, 1.5vw, 1.15rem);
+  text-transform: uppercase; letter-spacing: 0.06em; line-height: 1.25;
+  display: flex; flex-direction: column; gap: 0.3rem;
+}
+/* La bajada en itálica serif: mismo recurso que el resto del sitio */
+.proof__txt em {
+  font-family: var(--serif); font-style: italic; font-weight: 400;
+  font-size: 0.82rem; letter-spacing: 0; text-transform: none;
+  color: var(--humo);
+}
+
+@media (max-width: 860px) {
+  .proof__list { grid-template-columns: repeat(2, 1fr); gap: 1.4rem 0; }
+  /* Con dos columnas, el borde va en los de índice par, no en el primero */
+  .proof__item:nth-child(odd) { border-left: 0; padding-left: 0; }
+}
+@media (max-width: 420px) {
+  .proof__list { grid-template-columns: 1fr; gap: 1.1rem; }
+  .proof__item { border-left: 0; padding-left: 0; }
+}
+
+/* =========================================================
    EL GRUPO
    ========================================================= */
 .grupo { background: var(--panel); }
@@ -1226,4 +1274,14 @@ a:focus-visible, button:focus-visible, .btn:focus-visible, .track:focus-visible 
      del punto en que el texto circular deja de leerse */
   .seal { width: 88px; height: 88px; }
   .nav.is-scrolled .seal { width: 74px; height: 74px; }
+
+  /* --- Dieta de animación en celular ---
+     El hero corría 9 animaciones infinitas a la vez (grano, viñeta, brasas,
+     3 haces, neblina, Ken Burns, sello, marquesina). En desktop se banca;
+     en un teléfono es batería y CPU para siempre. Se apagan las que menos
+     se notan en pantalla chica y se conservan las que dan el carácter:
+     brasas (ya reducidas a ~8), sello, marquesina y grano. */
+  .hero__beam { display: none; }
+  .hero__haze { animation: none; }
+  .filmveil   { animation: none; opacity: 0.85; }
 }

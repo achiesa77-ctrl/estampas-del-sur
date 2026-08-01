@@ -238,7 +238,9 @@ document.addEventListener("DOMContentLoaded", () => {
       const tick = (now) => {
         const p = Math.min((now - start) / dur, 1);
         const eased = 1 - Math.pow(1 - p, 3);
-        el.textContent = Math.round(target * eased) + (p === 1 ? "+" : "");
+        // data-suffix="" fuerza cifra exacta; sin el atributo, sigue el "+"
+        const suffix = el.dataset.suffix !== undefined ? el.dataset.suffix : "+";
+        el.textContent = Math.round(target * eased) + (p === 1 ? suffix : "");
         if (p < 1) requestAnimationFrame(tick);
       };
       requestAnimationFrame(tick);
