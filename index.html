@@ -96,7 +96,17 @@
       {
         "@type": "MusicAlbum",
         "name": "Soy Uruguayo",
-        "datePublished": "2026"
+        "datePublished": "2026-07-24",
+        "image": "https://estampasdelsur.netlify.app/fotos/disco-soy-uruguayo.jpg",
+        "albumProductionType": "https://schema.org/StudioAlbum",
+        "description": "Nuevo material discográfico de Estampas del Sur, autogestionado. Se entrega en formato pendrive e incluye un souvenir exclusivo de recuerdo.",
+        "offers": {
+          "@type": "Offer",
+          "availability": "https://schema.org/InStock",
+          "availabilityStarts": "2026-07-24",
+          "seller": { "@type": "MusicGroup", "name": "Estampas del Sur" },
+          "url": "https://estampasdelsur.netlify.app/#disco"
+        }
       }
     ]
   }
@@ -157,6 +167,7 @@
       <a href="#integrantes">Integrantes</a>
       <a href="#historia">Historia</a>
       <a href="#repertorio">Repertorio</a>
+      <a href="#disco">El Disco</a>
       <a href="#videos">Videos</a>
       <a href="#trayectoria">Trayectoria</a>
       <a href="#agenda">Próximas Fechas</a>
@@ -548,6 +559,79 @@
       </div>
     </section>
 
+    <!-- ===================== EL DISCO =====================
+         Va justo despues de Repertorio a proposito: el visitante acaba de
+         escuchar temas sueltos, y ese es el momento en que ofrecerle el
+         disco entero tiene sentido. Datos sacados del anuncio de Instagram
+         del 21/07 (texto y flyer). -->
+    <section class="disco section" id="disco">
+      <div class="disco__inner">
+        <div class="disco__text">
+          <p class="eyebrow reveal"><span class="dot-pulse" aria-hidden="true"></span>Ya disponible</p>
+          <h2 class="disco__title reveal">
+            <em>«Soy&nbsp;Uruguayo»</em>
+          </h2>
+          <p class="disco__kicker reveal">Nuevo material discográfico</p>
+
+          <p class="disco__body reveal">
+            Después de un tiempo de trabajo, dedicación y mucho compromiso,
+            presentamos nuestro nuevo disco. Un proyecto completamente
+            autogestionado, hecho con cariño y respeto por nuestra música:
+            detrás de cada canción hay horas de ensayo, esfuerzo y el deseo de
+            compartir algo que nos representa profundamente.
+          </p>
+
+          <ul class="disco__specs reveal">
+            <li>
+              <span class="disco__ico" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+                  <rect x="8" y="9" width="8" height="13" rx="1.4"/><path d="M10 9V4h4v5"/><path d="M11 2v2M13 2v2"/>
+                </svg>
+              </span>
+              <span><strong>En formato pendrive.</strong> Para que lo puedas
+              escuchar desde cualquier dispositivo.</span>
+            </li>
+            <li>
+              <span class="disco__ico" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+                  <rect x="3" y="9" width="18" height="12" rx="1.5"/><path d="M3 13h18M12 9v12"/>
+                  <path d="M12 9S9.5 4.5 7.5 5.4 8.6 9 12 9zM12 9s2.5-4.5 4.5-3.6S15.4 9 12 9z"/>
+                </svg>
+              </span>
+              <span><strong>Incluye un souvenir exclusivo</strong> de recuerdo,
+              preparado especialmente para esta edición.</span>
+            </li>
+          </ul>
+
+          <div class="disco__actions reveal">
+            <a class="btn btn--solid btn--lg"
+               href="https://wa.me/59895871148?text=Hola!%20Quiero%20pedir%20el%20disco%20%C2%ABSoy%20Uruguayo%C2%BB%20de%20Estampas%20del%20Sur."
+               target="_blank" rel="noopener">Pedilo por WhatsApp</a>
+            <a class="btn btn--ghost btn--lg" href="https://www.instagram.com/estampasdelsur/"
+               target="_blank" rel="noopener">Escribinos por Instagram</a>
+          </div>
+          <p class="disco__note reveal">
+            Disponible desde el viernes 24 de julio · Pedidos al 095 871 148
+            o por cualquiera de nuestras redes.
+          </p>
+        </div>
+
+        <figure class="disco__media reveal">
+          <div class="disco__frame">
+            <picture>
+              <source srcset="fotos/disco-soy-uruguayo.webp" type="image/webp" />
+              <img src="fotos/disco-soy-uruguayo.jpg" width="621" height="470" loading="lazy"
+                   alt="El disco «Soy Uruguayo» en pendrive con el logo grabado, junto al souvenir de madera con forma del mapa de Uruguay" />
+            </picture>
+          </div>
+          <figcaption>
+            «Es una producción independiente, hecha con mucho esfuerzo,
+            dedicación y corazón.»
+          </figcaption>
+        </figure>
+      </div>
+    </section>
+
     <!-- ===================== VIDEOS ===================== -->
     <section class="videos section" id="videos">
       <div class="section__head section__head--split reveal">
@@ -694,12 +778,6 @@
         </div>
       </div>
     </section>
-
-    <!-- Acá iba la sección "En preparación / Se viene el disco". Se sacó
-         porque el disco ya salió. El CSS (.disco, .vinyl) y el giro del
-         vinilo en script.js siguen en su lugar, sin usarse: cuando haya
-         algo nuevo para anunciar, alcanza con volver a poner el bloque
-         (está en el historial de git, commit anterior a este cambio). -->
 
     <!-- ===================== GALERÍA ===================== -->
     <section class="galeria section" id="galeria">
@@ -853,6 +931,7 @@
         <a href="#grupo">El Grupo</a>
         <a href="#integrantes">Integrantes</a>
         <a href="#repertorio">Repertorio</a>
+        <a href="#disco">El Disco</a>
         <a href="#agenda">Agenda</a>
       </div>
       <div class="footer__col">
@@ -888,6 +967,12 @@
        maneja lineas/palabras/letras y se re-parte solo al cambiar el ancho.
        Si el CDN no carga, el sitio sigue andando: hay camino de respaldo en
        CSS + el splitHeroTitle() propio de script.js. -->
+  <!-- Lenis: scroll suave. Anima la posición de scroll REAL en vez de
+       transformar un wrapper, que es lo que hace ScrollSmoother; por eso
+       los 11 elementos position:fixed del sitio (nav, grano, viñeta,
+       brasas, barra de progreso, botón de subir) siguen funcionando sin
+       tocar una línea del HTML. -->
+  <script src="https://cdn.jsdelivr.net/npm/lenis@1.3.25/dist/lenis.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/gsap@3.15.0/dist/gsap.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/gsap@3.15.0/dist/ScrollTrigger.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/gsap@3.15.0/dist/SplitText.min.js"></script>

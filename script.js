@@ -7,6 +7,31 @@ document.addEventListener("DOMContentLoaded", () => {
   const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   const finePointer  = window.matchMedia("(hover: hover) and (pointer: fine)").matches;
 
+  /* ---- Scroll suave (Lenis) ----
+     NO se inicia con reduced-motion: el scroll suave es justamente una de
+     las cosas que marea a quien pidió menos movimiento, y ademas desincroniza
+     lo que ve del gesto que hizo. Sin la libreria queda el scroll nativo. */
+  let lenis = null;
+  if (!reduceMotion && window.Lenis) {
+    lenis = new Lenis({ duration: 1.05, smoothWheel: true });
+
+    // Un SOLO reloj para Lenis y GSAP. Si cada uno corre su propio
+    // requestAnimationFrame quedan desfasados un cuadro y los scrub del
+    // hero se ven con micro-tirones.
+    if (window.gsap) {
+      if (window.ScrollTrigger) lenis.on("scroll", ScrollTrigger.update);
+      gsap.ticker.add((t) => lenis.raf(t * 1000));
+      gsap.ticker.lagSmoothing(0);
+    } else {
+      const loop = (t) => { lenis.raf(t); requestAnimationFrame(loop); };
+      requestAnimationFrame(loop);
+    }
+  }
+  // Bloquear/soltar el scroll (intro y menú móvil). Con Lenis no alcanza el
+  // overflow:hidden del body: la libreria sigue animando por su cuenta.
+  const lockScroll   = () => lenis && lenis.stop();
+  const unlockScroll = () => lenis && lenis.start();
+
   /* ---- Año dinámico en el footer ---- */
   const yearEl = document.getElementById("year");
   if (yearEl) yearEl.textContent = new Date().getFullYear();
@@ -157,6 +182,7 @@ document.addEventListener("DOMContentLoaded", () => {
     clearTimeout(freezeTimer); clearTimeout(endTimer); clearTimeout(capTimer);
     intro.classList.add("is-hidden");
     document.body.classList.remove("intro-open");
+    unlockScroll();
     sessionStorage.setItem("introSeen", "1");
     startHero();
     setTimeout(() => intro.remove(), 1000);
@@ -174,6 +200,7 @@ document.addEventListener("DOMContentLoaded", () => {
     startHero();
   } else {
     document.body.classList.add("intro-open");
+    lockScroll();
 
     const CUT = 6; // reproducir los primeros 6 s del video, luego esfumar
 
@@ -236,9 +263,12 @@ document.addEventListener("DOMContentLoaded", () => {
   };
   onScroll();
   window.addEventListener("scroll", onScroll, { passive: true });
-  toTop?.addEventListener("click", () =>
-    window.scrollTo({ top: 0, behavior: reduceMotion ? "auto" : "smooth" })
-  );
+  toTop?.addEventListener("click", () => {
+    // Con Lenis hay que pedirselo a el: un window.scrollTo nativo salta de
+    // golpe y ademas le deja la posicion desincronizada.
+    if (lenis) lenis.scrollTo(0);
+    else window.scrollTo({ top: 0, behavior: reduceMotion ? "auto" : "smooth" });
+  });
 
   /* ---- Nav inteligente: resalta la sección actual (scrollspy) ---- */
   const navLinkMap = new Map();
@@ -269,6 +299,7 @@ document.addEventListener("DOMContentLoaded", () => {
     burger.classList.toggle("is-open", isOpen);
     burger.setAttribute("aria-expanded", String(isOpen));
     document.body.classList.toggle("menu-open", isOpen);
+    isOpen ? lockScroll() : unlockScroll();
     // Al abrir, el foco entra al panel; al cerrar, vuelve al botón que lo abrió
     if (isOpen) links.querySelector("a")?.focus();
     else if (document.activeElement && links.contains(document.activeElement)) burger.focus();
@@ -297,6 +328,35 @@ document.addEventListener("DOMContentLoaded", () => {
     if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
     else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
   });
+
+  /* ---- Anclajes con scroll suave ----
+     Va DESPUÉS del bloque del menú a propósito: así, al tocar un link del
+     menú móvil, primero corre el listener que lo cierra (y suelta el scroll)
+     y recién después éste, que mueve la página. Al revés, Lenis intentaría
+     desplazarse mientras todavía está frenado. */
+  if (lenis) {
+    document.querySelectorAll('a[href^="#"]').forEach((a) => {
+      a.addEventListener("click", (e) => {
+        const href = a.getAttribute("href");
+        if (!href || href === "#") return;
+        const target = document.querySelector(href);
+        if (!target) return;
+        e.preventDefault();
+        // SIN offset a mano: Lenis ya respeta el `scroll-margin-top` que el
+        // CSS le pone a section[id] (= --nav-h). Restar el nav aca de nuevo
+        // lo contaba DOS veces y las secciones caian 132px mas abajo de la
+        // cuenta. El CSS queda como unica fuente, y asi el valor distinto de
+        // --nav-h en movil se respeta solo.
+        lenis.scrollTo(target);
+        history.pushState(null, "", href);
+        // Al cancelar el salto nativo se pierde el movimiento de foco, y con
+        // él la utilidad del "Ir al contenido" y de los lectores de pantalla:
+        // hay que reponerlo a mano.
+        if (!target.hasAttribute("tabindex")) target.setAttribute("tabindex", "-1");
+        target.focus({ preventScroll: true });
+      });
+    });
+  }
 
   /* ---- Revelados al hacer scroll (IntersectionObserver, siempre) ---- */
   const reveals = document.querySelectorAll(".reveal");
@@ -362,32 +422,9 @@ document.addEventListener("DOMContentLoaded", () => {
     b.addEventListener("pointerleave", reset);
   });
 
-  /* ---- Vinilo: siempre girando + el scroll lo acelera ----
-     Giro base continuo (como un disco andando) y, al scrollear, suma
-     rotación según la velocidad. El loop sólo corre cuando la sección
-     está a la vista (eficiencia). Con reduced-motion queda el spin CSS. */
-  const vinylDisc = document.querySelector(".vinyl__disc");
-  const discoSec  = document.getElementById("disco");
-  if (vinylDisc && discoSec && !reduceMotion) {
-    vinylDisc.style.animation = "none";
-    let angle = 0, lastY = window.scrollY;
-    // El navegador ya congela rAF cuando la pestaña está oculta y lo
-    // reanuda al volver: no hace falta pausar a mano.
-    const loop = () => {
-      const rect = discoSec.getBoundingClientRect();
-      const near = rect.bottom > -200 && rect.top < window.innerHeight + 200;
-      if (near) {
-        const y = window.scrollY;
-        const dv = y - lastY; lastY = y;
-        angle += 0.5 + dv * 0.35;              // giro base + aporte del scroll
-        vinylDisc.style.transform = `rotate(${angle}deg)`;
-      } else {
-        lastY = window.scrollY;                // fuera de vista: sólo sigue el scroll
-      }
-      requestAnimationFrame(loop);
-    };
-    requestAnimationFrame(loop);
-  }
+  /* (Aca vivia el loop del vinilo dibujado en CSS, que giraba y aceleraba
+     con el scroll. Se fue junto con la seccion "Se viene el disco": ahora
+     hay una foto del disco real, asi que no habia nada que girar.) */
 
   /* ---- Videos de YouTube: miniatura (facade) → player al clickear ----
      No carga el iframe hasta el click: página más liviana y sin cookies
