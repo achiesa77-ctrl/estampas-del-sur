@@ -1,7 +1,54 @@
 ---
 import Base from "../layouts/Base.astro";
+import Nav from "../components/Nav.astro";
+
+// Secciones provisorias (Task 5): cada tarea posterior reemplaza su stub
+// por el componente real. Ambientes según spec §3.
+const escenas = [
+  { id: "inicio", titulo: "Inicio", ambiente: "oscuro" },
+  { id: "grupo", titulo: "El Grupo", ambiente: "papel" },
+  { id: "integrantes", titulo: "Integrantes", ambiente: "oscuro" },
+  { id: "historia", titulo: "Historia", ambiente: "papel" },
+  { id: "repertorio", titulo: "Repertorio", ambiente: "oscuro" },
+  { id: "disco", titulo: "El Disco", ambiente: "papel" },
+  { id: "videos", titulo: "Videos", ambiente: "oscuro" },
+  { id: "trayectoria", titulo: "Trayectoria", ambiente: "papel" },
+  { id: "agenda", titulo: "Próximas fechas", ambiente: "papel" },
+  { id: "galeria", titulo: "Galería", ambiente: "oscuro" },
+  { id: "contacto", titulo: "Contrataciones", ambiente: "oscuro" },
+] as const;
 ---
 
 <Base>
-  <main id="contenido"></main>
+  <Nav />
+  <main id="contenido">
+    {
+      escenas.map(({ id, titulo, ambiente }) => (
+        <section id={id} data-ambiente={ambiente} class={`ambiente-${ambiente} escena-provisoria`}>
+          <h2 class="titulo">{titulo}</h2>
+        </section>
+      ))
+    }
+  </main>
 </Base>
+
+<style>
+  .escena-provisoria {
+    min-height: 100vh;
+    padding: calc(var(--nav-h) + 2rem) clamp(1rem, 4vw, 3rem) 2rem;
+  }
+
+  .escena-provisoria .titulo {
+    margin: 0;
+    font-size: clamp(var(--paso-2), 8vw, var(--paso-5));
+    overflow-wrap: anywhere;
+  }
+</style>
+
+<script>
+  import { initMotion } from "../scripts/motion";
+  import { initNav } from "../scripts/nav";
+
+  initMotion();
+  initNav();
+</script>

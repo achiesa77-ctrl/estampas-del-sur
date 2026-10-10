@@ -12,6 +12,21 @@ html {
   -webkit-text-size-adjust: 100%;
 }
 
+/* Lenis maneja el scroll: el suave nativo pelearía con él. Se ancla a
+   .lenis (fijo mientras Lenis vive), no a .lenis-smooth (cambia en cada
+   scroll). No se copia la regla oficial iframe{pointer-events:none}: rompe
+   los embeds de YouTube. */
+html.lenis {
+  scroll-behavior: auto !important;
+}
+
+/* Destinos de anclaje enfocados por script (tabindex="-1"): son regiones,
+   no controles; el foco se anuncia pero no se dibuja un marco de 100vh. */
+main[tabindex="-1"]:focus,
+section[tabindex="-1"]:focus {
+  outline: none;
+}
+
 body {
   margin: 0;
   min-height: 100vh;

@@ -1,0 +1,263 @@
+---
+// Nav fijo sobre ambos ambientes (spec §3, fila 0; ruling R3: 9 enlaces +
+// CTA). Comportamiento en src/scripts/nav.ts. Sin JS, en angosto los
+// enlaces quedan en una tira con scroll horizontal (siguen funcionando).
+import { Image } from "astro:assets";
+import logo from "../../fotos/logo-nuevo.jpg";
+
+const enlaces = [
+  { href: "#grupo", texto: "El Grupo" },
+  { href: "#integrantes", texto: "Integrantes" },
+  { href: "#historia", texto: "Historia" },
+  { href: "#repertorio", texto: "Repertorio" },
+  { href: "#disco", texto: "El Disco" },
+  { href: "#videos", texto: "Videos" },
+  { href: "#trayectoria", texto: "Trayectoria" },
+  { href: "#agenda", texto: "Próximas fechas" },
+  { href: "#galeria", texto: "Galería" },
+];
+---
+
+<nav class="nav" aria-label="Principal">
+  <a class="nav__emblema" href="#inicio">
+    <Image src={logo} alt="Estampas del Sur" height={44} densities={[1, 2]} loading="eager" />
+  </a>
+
+  <button class="nav__boton" type="button" aria-expanded="false" aria-controls="nav-menu">
+    <span class="nav__boton-icono" aria-hidden="true"><span></span><span></span></span>
+    Menú
+  </button>
+
+  <ul class="nav__lista" id="nav-menu">
+    {
+      enlaces.map(({ href, texto }, i) => (
+        <li style={`--i: ${i}`}>
+          <a class="nav__enlace" href={href}>
+            {texto}
+          </a>
+        </li>
+      ))
+    }
+    <li class="nav__item-cta" style={`--i: ${enlaces.length}`}>
+      <a class="boton boton--primario nav__cta" href="#contacto">Contrataciones</a>
+    </li>
+  </ul>
+</nav>
+
+<style>
+  .nav {
+    position: fixed;
+    inset: 0 0 auto;
+    z-index: var(--z-nav);
+    display: flex;
+    align-items: center;
+    gap: 2rem;
+    height: var(--nav-h);
+    padding-inline: clamp(1rem, 3vw, 2.5rem);
+    background: var(--oscuro);
+    border-bottom: 1px solid color-mix(in srgb, var(--plata) 22%, transparent);
+    color: var(--papel);
+    --color-foco: var(--oro);
+    transition: transform 0.35s cubic-bezier(0.2, 0.7, 0.2, 1);
+  }
+
+  .nav--oculta {
+    transform: translateY(-100%);
+  }
+
+  .nav__emblema {
+    flex: none;
+    display: block;
+    border-radius: 2px;
+  }
+
+  .nav__emblema img {
+    width: auto;
+    height: 44px;
+  }
+
+  .nav__lista {
+    display: flex;
+    align-items: center;
+    gap: clamp(0.9rem, 1.6vw, 1.6rem);
+    margin: 0 0 0 auto;
+    padding: 0;
+    list-style: none;
+  }
+
+  .nav__enlace {
+    position: relative;
+    display: inline-block;
+    padding-block: 0.5rem;
+    font-family: var(--fuente-dato);
+    font-stretch: 72%;
+    font-weight: 600;
+    font-size: 1rem;
+    letter-spacing: 0.02em;
+    text-decoration: none;
+    white-space: nowrap;
+  }
+
+  /* Subrayado de lápiz: entra con transform; marca también la sección actual */
+  .nav__enlace::after {
+    content: "";
+    position: absolute;
+    inset: auto 0 0.2rem;
+    height: 2px;
+    background: var(--oro);
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 0.25s ease;
+  }
+
+  .nav__enlace:hover::after,
+  .nav__enlace:focus-visible::after,
+  .nav__enlace[aria-current="true"]::after {
+    transform: scaleX(1);
+  }
+
+  .nav__enlace[aria-current="true"] {
+    color: var(--oro);
+  }
+
+  .nav__cta {
+    min-height: 40px;
+    padding: 0.5em 1.1em;
+    margin-left: 0.5rem;
+    font-size: 1rem;
+    white-space: nowrap;
+  }
+
+  .nav__cta[aria-current="true"] {
+    box-shadow: 0 0 0 1px var(--oscuro), 0 0 0 2px var(--oro);
+  }
+
+  .nav__boton {
+    display: none;
+  }
+
+  /* Angosto (< 1100px) */
+  @media (max-width: 1099px) {
+    /* Sin JS: tira con scroll horizontal, todos los enlaces alcanzables */
+    .nav:not([data-js]) .nav__lista {
+      overflow-x: auto;
+      scrollbar-width: none;
+    }
+
+    .nav:not([data-js]) .nav__item-cta {
+      display: none;
+    }
+
+    .nav[data-js] .nav__boton {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.6rem;
+      min-height: 44px;
+      margin-left: auto;
+      padding: 0.5rem 0.25rem 0.5rem 0.75rem;
+      background: none;
+      border: 0;
+      color: inherit;
+      font-family: var(--fuente-dato);
+      font-stretch: 72%;
+      font-weight: 600;
+      font-size: var(--paso-1);
+      cursor: pointer;
+    }
+
+    .nav__boton-icono {
+      display: grid;
+      gap: 6px;
+      width: 22px;
+    }
+
+    .nav__boton-icono span {
+      height: 2px;
+      background: currentColor;
+      transition: transform 0.25s ease;
+    }
+
+    .nav__boton[aria-expanded="true"] .nav__boton-icono span:first-child {
+      transform: translateY(4px) rotate(45deg);
+    }
+
+    .nav__boton[aria-expanded="true"] .nav__boton-icono span:last-child {
+      transform: translateY(-4px) rotate(-45deg);
+    }
+
+    .nav__boton:hover,
+    .nav__boton[aria-expanded="true"] {
+      color: var(--oro);
+    }
+
+    /* Menú a pantalla completa (cuarto oscuro) */
+    .nav[data-js] .nav__lista {
+      position: fixed;
+      inset: var(--nav-h) 0 0;
+      flex-direction: column;
+      align-items: flex-start;
+      justify-content: center;
+      gap: 0.35rem;
+      margin: 0;
+      padding: 2rem clamp(1.5rem, 8vw, 4rem);
+      background: var(--oscuro);
+      overflow-y: auto;
+      visibility: hidden;
+      opacity: 0;
+      transition:
+        opacity 0.2s ease,
+        visibility 0s linear 0.2s;
+    }
+
+    .nav[data-abierto] .nav__lista {
+      visibility: visible;
+      opacity: 1;
+      transition: opacity 0.2s ease;
+    }
+
+    .nav[data-js] .nav__enlace {
+      font-family: var(--fuente-titulo);
+      font-stretch: 125%;
+      font-weight: 850;
+      font-size: clamp(var(--paso-2), 6.5vw, var(--paso-4));
+      line-height: 1.05;
+      text-transform: uppercase;
+      letter-spacing: 0;
+    }
+
+    .nav[data-js] .nav__lista li {
+      opacity: 0;
+      transform: translateY(0.75rem);
+      transition:
+        opacity 0.3s ease,
+        transform 0.4s cubic-bezier(0.2, 0.7, 0.2, 1);
+    }
+
+    .nav[data-abierto] .nav__lista li {
+      opacity: 1;
+      transform: none;
+      transition-delay: calc(var(--i) * 35ms + 60ms);
+    }
+
+    .nav[data-js] .nav__cta {
+      margin: 1.5rem 0 0;
+      font-size: var(--paso-1);
+      min-height: 44px;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .nav,
+    .nav__enlace::after,
+    .nav__boton-icono span {
+      transition: none;
+    }
+
+    .nav[data-js] .nav__lista li,
+    .nav[data-abierto] .nav__lista li {
+      transform: none;
+      transition: opacity 0.15s ease;
+      transition-delay: 0s;
+    }
+  }
+</style>
