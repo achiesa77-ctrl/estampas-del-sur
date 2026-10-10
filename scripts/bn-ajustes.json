@@ -1,0 +1,19 @@
+{
+  "portada":           { "mezcla": [0.25, 0.70, 0.05], "contraste": 1.05, "negro": 4,  "blanco": 255 },
+  "hero-franja":       { "mezcla": [0.60, 0.15, 0.25], "contraste": 1.05, "negro": 6,  "blanco": 270 },
+  "acordeon":          { "mezcla": [0.50, 0.45, 0.05], "contraste": 1.20, "negro": 20, "blanco": 265 },
+  "g1":                { "mezcla": [0.50, 0.45, 0.05], "contraste": 1.20, "negro": 20, "blanco": 265 },
+  "g2":                { "mezcla": [0.55, 0.15, 0.30], "contraste": 1.30, "negro": 14, "blanco": 245 },
+  "g3":                { "mezcla": [0.40, 0.50, 0.10], "contraste": 1.20, "negro": 14, "blanco": 255 },
+  "g4":                { "mezcla": [0.50, 0.45, 0.05], "contraste": 1.20, "negro": 10, "blanco": 255 },
+  "g5":                { "mezcla": [0.50, 0.45, 0.05], "contraste": 1.20, "negro": 20, "blanco": 265 },
+  "g6":                { "mezcla": [0.50, 0.45, 0.05], "contraste": 1.20, "negro": 20, "blanco": 265 },
+  "g7":                { "mezcla": [0.40, 0.50, 0.10], "contraste": 1.20, "negro": 14, "blanco": 255 },
+  "g8":                { "mezcla": [0.45, 0.45, 0.10], "contraste": 1.10, "negro": 4,  "blanco": 260 },
+  "g9":                { "mezcla": [0.25, 0.60, 0.15], "contraste": 1.05, "negro": 2,  "blanco": 265 },
+  "guillermo-perez":   { "mezcla": [0.40, 0.50, 0.10], "contraste": 1.10, "negro": 2,  "blanco": 220 },
+  "marcelo-marrero":   { "mezcla": [0.40, 0.50, 0.10], "contraste": 1.10, "negro": 4,  "blanco": 255 },
+  "fernando-saavedra": { "mezcla": [0.45, 0.50, 0.05], "contraste": 1.10, "negro": 10, "blanco": 255 },
+  "henry-acuna":       { "mezcla": [0.40, 0.50, 0.10], "contraste": 1.20, "negro": 14, "blanco": 255 },
+  "diego-rodriguez":   { "mezcla": [0.50, 0.45, 0.05], "contraste": 1.20, "negro": 20, "blanco": 265 }
+}
