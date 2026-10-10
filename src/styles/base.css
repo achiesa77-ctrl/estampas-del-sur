@@ -10,6 +10,9 @@
 
 html {
   -webkit-text-size-adjust: 100%;
+  /* pausarScroll() pone overflow:hidden: sin esto la barra desaparece, el
+     ancho cambia y lo medido (p. ej. el zoom de la portada) queda corrido. */
+  scrollbar-gutter: stable;
 }
 
 /* Lenis maneja el scroll: el suave nativo pelearía con él. Se ancla a

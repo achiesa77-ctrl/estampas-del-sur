@@ -1,0 +1,56 @@
+---
+// Trazo de lápiz graso dorado (spec §2.4): a mano alzada, nunca una
+// figura perfecta. `pathLength="1"` permite dibujarlo animando
+// stroke-dashoffset de 1 a 0. Por defecto (sin JS) se ve dibujado.
+interface Props {
+  forma: "circulo" | "subrayado";
+  clase?: string;
+}
+
+const { forma, clase } = Astro.props;
+
+// El círculo es un lazo irregular: arranca arriba a la izquierda, da la
+// vuelta un poco torcido y se pasa del punto de partida, como cuando se
+// marca la toma elegida en una hoja de contactos.
+const trazos = {
+  circulo: {
+    viewBox: "0 0 200 120",
+    d: "M38 19 C80 3 150 2 183 23 C205 38 201 84 163 102 C120 122 55 120 21 99 C-3 83 -1 43 30 23 C58 6 99 3 129 10",
+  },
+  subrayado: {
+    viewBox: "0 0 200 16",
+    d: "M3 11 C46 5 117 13 197 6",
+  },
+} as const;
+
+const { viewBox, d } = trazos[forma];
+---
+
+<svg
+  class:list={["lapiz", `lapiz--${forma}`, clase]}
+  viewBox={viewBox}
+  preserveAspectRatio="none"
+  aria-hidden="true"
+  focusable="false"
+>
+  <path d={d} pathLength="1"></path>
+</svg>
+
+<style>
+  .lapiz {
+    overflow: visible;
+    fill: none;
+    pointer-events: none;
+  }
+
+  .lapiz path {
+    fill: none;
+    stroke: var(--oro);
+    stroke-width: 3;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    stroke-dasharray: 1;
+    stroke-dashoffset: 0;
+    vector-effect: non-scaling-stroke;
+  }
+</style>

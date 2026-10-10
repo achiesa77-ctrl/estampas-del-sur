@@ -122,6 +122,9 @@ const jsonLd = {
     <meta name="twitter:image" content={urlOgImagen.toString()} />
 
     <script type="application/ld+json" set:html={JSON.stringify(jsonLd)} />
+
+    <!-- Precargas propias de cada página (p. ej. la foto LCP de la portada) -->
+    <slot name="head" />
   </head>
   <body>
     <a class="salto" href="#contenido">Ir al contenido</a>

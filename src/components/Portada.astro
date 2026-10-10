@@ -1,0 +1,378 @@
+---
+// Portada (spec §4): hoja de contactos → lápiz dorado → la cámara entra en
+// la toma elegida → sube el nombre. Comportamiento en src/scripts/portada.ts.
+//
+// Tres estados de CSS:
+// - por defecto (sin JS / movimiento reducido) = ESTADO FINAL: la foto
+//   elegida a pantalla completa, el resto de la hoja oculto.
+// - [data-hoja]: la hoja de contactos maquetada (sólo con JS y movimiento).
+//   El estado final con JS es la hoja con transform: idéntico al de CSS
+//   porque cada cuadro tiene la proporción de la foto elegida.
+// - [data-estado="inicio"]: piezas ocultas antes de la entrada.
+import { Picture } from "astro:assets";
+import Lapiz from "./Lapiz.astro";
+import { fotoElegida } from "./portada-foto";
+import { grupo } from "../data/grupo";
+import { credenciales } from "../data/credenciales";
+import g2 from "../assets/fotos/bn/g2.jpg";
+import g3 from "../assets/fotos/bn/g3.jpg";
+import g4 from "../assets/fotos/bn/g4.jpg";
+import g8 from "../assets/fotos/bn/g8.jpg";
+import g9 from "../assets/fotos/bn/g9.jpg";
+import acordeon from "../assets/fotos/bn/acordeon.jpg";
+import heroFranja from "../assets/fotos/bn/hero-franja.jpg";
+
+// Orden de la tira; `null` marca el lugar de la toma elegida (6.ª: fila 2
+// en escritorio, fila 3 en móvil, para que la cámara viaje).
+const tira = [g2, acordeon, g8, heroFranja, g3, null, g9, g4];
+const PRIMER_CUADRO = 14;
+
+const { width: anchoElegida, height: altoElegida } = fotoElegida.src;
+---
+
+<section
+  id="inicio"
+  class="portada ambiente-oscuro"
+  data-ambiente="oscuro"
+  aria-labelledby="portada-titulo"
+  style={`--proporcion: ${anchoElegida} / ${altoElegida}`}
+>
+  {/* Antes del primer pintado: con movimiento, se arma la hoja (evita ver
+      el estado final un instante antes de la entrada). Si el módulo no
+      llega a correr, a los 6 s se vuelve al estado final. Además anota
+      cualquier interacción temprana para que la entrada se salte. */}
+  <script is:inline>
+    (function () {
+      var p = document.currentScript.parentElement;
+      if (!window.matchMedia("(prefers-reduced-motion: no-preference)").matches) return;
+      p.setAttribute("data-hoja", "");
+      p.setAttribute("data-estado", "inicio");
+      var marcar = function () {
+        window.__portadaSaltar = true;
+      };
+      ["wheel", "touchmove", "keydown", "pointerdown"].forEach(function (t) {
+        window.addEventListener(t, marcar, { once: true, passive: true, capture: true });
+      });
+      setTimeout(function () {
+        if (window.__portada) return;
+        p.removeAttribute("data-hoja");
+        p.setAttribute("data-estado", "final");
+      }, 6000);
+    })();
+  </script>
+
+  <div class="portada__camara">
+    <div class="hoja">
+      {
+        tira.map((foto, i) => {
+          const numero = PRIMER_CUADRO + i;
+          return (
+            <div class:list={["hoja__cuadro", { hoja__elegida: foto === null }]}>
+              <div class="hoja__marco">
+                {foto === null ? (
+                  <Picture
+                    src={fotoElegida.src}
+                    formats={fotoElegida.formats}
+                    widths={fotoElegida.widths}
+                    sizes={fotoElegida.sizes}
+                    alt="Estampas del Sur en vivo: bajo, guitarras y batería frente al público, con la pantalla gigante detrás"
+                    loading="eager"
+                    fetchpriority="high"
+                    decoding="async"
+                  />
+                ) : (
+                  <Picture
+                    src={foto}
+                    formats={["avif", "webp"]}
+                    widths={[400, 800]}
+                    sizes="(min-width: 900px) 25vw, 45vw"
+                    alt=""
+                    loading="lazy"
+                    decoding="async"
+                  />
+                )}
+                <span class="hoja__exposicion" aria-hidden="true" />
+                {foto === null && <Lapiz forma="circulo" clase="hoja__lapiz" />}
+              </div>
+              <div class="hoja__numero" aria-hidden="true">
+                <span>▸ {numero}</span>
+                <span>{numero}A</span>
+              </div>
+            </div>
+          );
+        })
+      }
+    </div>
+  </div>
+
+  <div class="portada__velo" aria-hidden="true"></div>
+
+  <div class="portada__texto">
+    <h1 class="titulo portada__titulo" id="portada-titulo">Estampas <br />del Sur</h1>
+    <div class="portada__pie">
+      <div class="portada__llamada">
+        <p class="portada__bajada">Folklore uruguayo desde {grupo.ciudad}, {grupo.departamento}</p>
+        <div class="portada__acciones">
+          <a class="boton boton--primario" href="#contacto">Contratar al grupo</a>
+          <a class="boton boton--secundario" href="#repertorio">Escuchar</a>
+        </div>
+      </div>
+      <ul class="portada__credenciales" aria-label="Reconocimientos">
+        {
+          credenciales.map(({ titulo, anio }) => (
+            <li>
+              <span class="portada__anio">{anio}</span>
+              <span>{titulo}</span>
+            </li>
+          ))
+        }
+      </ul>
+    </div>
+  </div>
+</section>
+
+<style>
+  .portada {
+    position: relative;
+    display: grid;
+    align-items: end;
+    min-height: 100svh;
+    overflow: clip;
+    isolation: isolate;
+  }
+
+  /* ---------- Cámara y hoja ---------- */
+
+  .portada__camara {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+  }
+
+  /* Estado final (por defecto): sólo la toma elegida, a sangre. */
+  .hoja,
+  .hoja__elegida,
+  .hoja__elegida .hoja__marco {
+    position: absolute;
+    inset: 0;
+  }
+
+  .hoja__cuadro:not(.hoja__elegida),
+  .hoja__numero,
+  .hoja__exposicion,
+  .hoja :global(.hoja__lapiz) {
+    display: none;
+  }
+
+  .hoja__marco :global(picture),
+  .hoja__marco :global(img) {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+  }
+
+  .hoja__marco :global(img) {
+    object-fit: cover;
+    object-position: center;
+  }
+
+  /* Hoja de contactos (con JS y movimiento). Cada cuadro tiene la
+     proporción de la elegida: al escalar hasta cubrir la portada queda
+     exactamente igual que el estado final de CSS. */
+  .portada[data-hoja] .portada__camara {
+    display: grid;
+    place-items: center;
+    padding: calc(var(--nav-h) + 1rem) 1rem 1rem;
+  }
+
+  .portada[data-hoja] .hoja {
+    position: relative;
+    inset: auto;
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 0.75rem 0.375rem;
+    width: min(1120px, 86vw, (100svh - var(--nav-h) - 9rem) * 3.3);
+    padding: 0.875rem 0.875rem 0.5rem;
+    /* Papel fotográfico velado: un negro apenas más profundo que el fondo */
+    background: color-mix(in srgb, var(--oscuro) 55%, black);
+    border: 1px solid color-mix(in srgb, var(--plata) 16%, transparent);
+    transform-origin: 0 0;
+  }
+
+  .portada[data-hoja] .hoja__cuadro {
+    position: relative;
+    inset: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+
+  .portada[data-hoja] .hoja__marco {
+    position: relative;
+    inset: auto;
+    aspect-ratio: var(--proporcion);
+    background: var(--oscuro);
+  }
+
+  .portada[data-hoja] .hoja__numero {
+    display: flex;
+    justify-content: space-between;
+    padding-inline: 0.125rem;
+    font-family: var(--fuente-dato);
+    font-stretch: 72%;
+    font-weight: 600;
+    font-size: 1rem; /* R5: dato condensado a 16px */
+    line-height: 1.2;
+    letter-spacing: 0.04em;
+    color: var(--plata);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .portada[data-hoja] .hoja__exposicion {
+    display: block;
+    position: absolute;
+    inset: 0;
+    background: var(--papel);
+    opacity: 0;
+  }
+
+  .portada[data-hoja] .hoja :global(.hoja__lapiz) {
+    display: block;
+    position: absolute;
+    inset: -16% -7% -14% -6%;
+    width: 113%;
+    height: 130%;
+  }
+
+  @media (max-width: 899px) {
+    .portada[data-hoja] .hoja {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 0.625rem 0.3125rem;
+      width: min(100%, 26rem, (100svh - var(--nav-h) - 10rem) * 0.86);
+      padding: 0.625rem 0.625rem 0.375rem;
+    }
+  }
+
+  /* Antes de la entrada */
+  .portada[data-estado="inicio"] .hoja__cuadro,
+  .portada[data-estado="inicio"] .portada__velo,
+  .portada[data-estado="inicio"] .portada__titulo,
+  .portada[data-estado="inicio"] .portada__bajada,
+  .portada[data-estado="inicio"] .portada__acciones,
+  .portada[data-estado="inicio"] .portada__credenciales {
+    opacity: 0;
+  }
+
+  .portada[data-estado="inicio"] .hoja__exposicion {
+    opacity: 1;
+  }
+
+  .portada[data-estado="inicio"] .hoja :global(.hoja__lapiz path) {
+    stroke-dashoffset: 1;
+  }
+
+  /* ---------- Texto sobre la foto ---------- */
+
+  /* Velo de legibilidad (excepción permitida de gradiente, spec §2.2) */
+  .portada__velo {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    pointer-events: none;
+    background: linear-gradient(
+      to top,
+      color-mix(in srgb, var(--oscuro) 94%, transparent) 0%,
+      color-mix(in srgb, var(--oscuro) 72%, transparent) 30%,
+      color-mix(in srgb, var(--oscuro) 0%, transparent) 62%
+    );
+  }
+
+  .portada__texto {
+    position: relative;
+    z-index: 2;
+    min-width: 0;
+    padding: calc(var(--nav-h) + 2rem) clamp(1rem, 4vw, 3.5rem) clamp(1.75rem, 6svh, 4rem);
+  }
+
+  .portada__titulo {
+    margin: 0;
+    /* Nunca más ancho que el viewport: «ESTAMPAS» mide ~7.1em, así que
+       12.4vw deja el gutter de 16px libre aun a 390px. */
+    font-size: min(10rem, 12.4vw);
+    line-height: 0.86;
+    letter-spacing: -0.01em;
+    white-space: nowrap;
+    color: var(--papel);
+  }
+
+  .portada__pie {
+    display: grid;
+    gap: 1.75rem;
+    margin-top: clamp(1.25rem, 3svh, 2rem);
+  }
+
+  .portada__bajada {
+    margin: 0 0 1.25rem;
+    font-family: var(--fuente-cuerpo);
+    font-style: italic;
+    font-size: var(--paso-2);
+    line-height: 1.3;
+  }
+
+  .portada__acciones {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+  }
+
+  .portada__credenciales {
+    display: grid;
+    gap: 0.375rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    font-family: var(--fuente-dato);
+    font-stretch: 72%;
+    font-weight: 500;
+    font-size: 1rem; /* R5 */
+    line-height: 1.35;
+    color: var(--plata);
+  }
+
+  .portada__credenciales li {
+    display: grid;
+    grid-template-columns: 2.75rem 1fr;
+    gap: 0.5rem;
+  }
+
+  .portada__anio {
+    font-weight: 700;
+    color: var(--papel);
+    font-variant-numeric: tabular-nums;
+  }
+
+  @media (min-width: 900px) {
+    .portada__pie {
+      grid-template-columns: 1fr auto;
+      align-items: end;
+      gap: 3rem;
+    }
+
+    .portada__credenciales {
+      padding-left: 1.5rem;
+      border-left: 1px solid color-mix(in srgb, var(--plata) 40%, transparent);
+    }
+  }
+
+  @media (max-width: 899px) {
+    .portada__velo {
+      background: linear-gradient(
+        to top,
+        color-mix(in srgb, var(--oscuro) 95%, transparent) 0%,
+        color-mix(in srgb, var(--oscuro) 80%, transparent) 45%,
+        color-mix(in srgb, var(--oscuro) 0%, transparent) 78%
+      );
+    }
+  }
+</style>
