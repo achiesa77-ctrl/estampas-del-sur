@@ -112,6 +112,24 @@ test.describe("Repertorio", () => {
     await expect(boton).toHaveAttribute("aria-pressed", "true", { timeout: 3000 });
   });
 
+  test("llegar a la sección sin hacer clic no pide ningún archivo de audio (no hay sondeo de metadata)", async ({
+    page,
+  }) => {
+    const pedidos: string[] = [];
+    page.on("request", (req) => {
+      if (req.url().includes("/repertorio/")) pedidos.push(req.url());
+    });
+
+    await irAFin(page);
+    await repertorio(page).scrollIntoViewIfNeeded();
+    // Ventana de observación generosa: si hubiera un sondeo perezoso (p. ej.
+    // disparado por un IntersectionObserver o un timeout de respaldo),
+    // tendría tiempo de sobra para iniciar su pedido acá.
+    await page.waitForTimeout(7000);
+
+    expect(pedidos).toEqual([]);
+  });
+
   test.describe("sin JavaScript", () => {
     test.use({ javaScriptEnabled: false });
 
@@ -120,6 +138,20 @@ test.describe("Repertorio", () => {
       await expect(repertorio(page).getByRole("heading", { name: "Repertorio" })).toBeVisible();
       const audios = repertorio(page).locator("noscript audio");
       await expect(audios).toHaveCount(3);
+    });
+
+    test("el botón de play y la barra de posición quedan ocultos (inertes sin el script)", async ({
+      page,
+    }) => {
+      await page.goto("/");
+      const fila = filaDe(page, "Oficios");
+      await expect(fila.locator(".tema__play")).toBeHidden();
+      await expect(fila.locator(".tema__seek")).toBeHidden();
+
+      // Tampoco deben quedar en el árbol de accesibilidad (Playwright
+      // excluye por defecto los elementos ocultos de getByRole).
+      await expect(page.getByRole("button", { name: /Reproducir/ })).toHaveCount(0);
+      await expect(page.getByRole("slider")).toHaveCount(0);
     });
   });
 });

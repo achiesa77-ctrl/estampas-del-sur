@@ -41,9 +41,15 @@ function morph(boton: HTMLElement, aPausa: boolean): void {
 }
 
 export function initReproductor(): void {
+  const seccion = document.getElementById("repertorio");
   const filas = Array.from(document.querySelectorAll<HTMLLIElement>(".tema"));
   const audio = document.getElementById("repertorio-audio") as HTMLAudioElement | null;
-  if (!filas.length || !audio) return;
+  if (!seccion || !filas.length || !audio) return;
+
+  // Revela los controles que sólo sirven con JS (botón y barra; el
+  // <audio controls> nativo de <noscript> queda oculto por CSS en cuanto
+  // esto corre). Mismo patrón que nav.ts.
+  seccion.setAttribute("data-js", "");
 
   const botonDe = (fila: HTMLElement) => fila.querySelector<HTMLButtonElement>(".tema__play")!;
   const seekDe = (fila: HTMLElement) => fila.querySelector<HTMLInputElement>(".tema__seek")!;
@@ -51,46 +57,14 @@ export function initReproductor(): void {
   const duracionDe = (fila: HTMLElement) => fila.querySelector<HTMLElement>("[data-duracion]");
   const tituloDe = (fila: HTMLElement) => fila.querySelector(".tema__titulo")?.textContent?.trim() ?? "";
 
-  // ---- Duración real: sondeo perezoso de metadata ----
-  // No se precargan los tres archivos al cargar la página (preload="none"
-  // en el markup); recién cuando la sección se acerca a pantalla se crea
-  // un <audio> descartable por tema sólo para leer su duración real. Si el
-  // observer nunca llega a disparar (p. ej. nadie scrollea), una red de
-  // seguridad sondea igual a los 6s, una vez que la página ya terminó de
-  // arrancar.
-  let sondeado = false;
-  const sondearDuraciones = () => {
-    if (sondeado) return;
-    sondeado = true;
-    for (const fila of filas) {
-      const archivo = fila.dataset.archivo;
-      const destino = duracionDe(fila);
-      if (!archivo || !destino) continue;
-      const sonda = new Audio();
-      sonda.preload = "metadata";
-      sonda.src = archivo;
-      sonda.addEventListener("loadedmetadata", () => {
-        destino.textContent = formatoTiempo(sonda.duration);
-      });
-    }
-  };
-  const seccion = document.getElementById("repertorio");
-  if (seccion && "IntersectionObserver" in window) {
-    const observador = new IntersectionObserver(
-      (entradas) => {
-        if (!entradas.some((e) => e.isIntersecting)) return;
-        observador.disconnect();
-        sondearDuraciones();
-      },
-      { rootMargin: "600px 0px" },
-    );
-    observador.observe(seccion);
-    setTimeout(sondearDuraciones, 6000);
-  } else {
-    sondearDuraciones();
-  }
-
   // ---- Reproducción ----
+  // La duración mostrada es el dato de src/data/temas.ts (ya exacto) hasta
+  // que el usuario reproduce de verdad un tema: recién ahí el "loadedmetadata"
+  // del <audio> compartido (más abajo) la actualiza con el valor real.
+  // A propósito NO se sondea la duración real por adelantado (ni con
+  // IntersectionObserver ni con un timeout de respaldo): sondear metadata
+  // igual dispara un pedido de red por archivo (varios MB cada uno) en
+  // casi cualquier visita que llegue a ver la sección, haya o no play.
   let actual: HTMLLIElement | null = null;
   let arrastrando = false;
 

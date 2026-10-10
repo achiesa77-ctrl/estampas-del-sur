@@ -3,8 +3,11 @@
 // contactos (número + título + duración) con un reproductor de audio.
 // Comportamiento completo en src/scripts/reproductor.ts (puerto de
 // `git show main:script.js:489-648`); acá sólo queda el estado final
-// visible sin JS: ícono en "reproducir" y, por si el script no corre, un
-// <audio controls> nativo por fila dentro de <noscript>.
+// visible sin JS: el botón de play y la barra de posición (inertes sin el
+// script) quedan ocultos por CSS hasta que reproductor.ts marca data-js en
+// la sección (mismo patrón que nav.ts); mientras tanto, por si el script
+// no corre, cada fila trae su <audio controls> nativo dentro de
+// <noscript>.
 //
 // Los paths del ícono SVG se importan desde reproductor.ts (no se
 // duplican como literales acá): el morph GSAP anima ESE mismo "d" hacia
@@ -284,5 +287,21 @@ import { PLAY_DER, PLAY_IZQ } from "../scripts/reproductor";
     .tema__duracion {
       justify-self: start;
     }
+  }
+
+  /* Sin JS: el botón de play y la barra de posición son inertes (el botón
+     no reacciona a nada, el <input> queda disabled) — compiten en vano con
+     el <audio controls> nativo que ya trae cada <noscript>. Quedan ocultos
+     (fuera del árbol de accesibilidad) hasta que reproductor.ts corre y
+     marca data-js en la sección; mientras tanto la fila es sólo número,
+     título y duración. */
+  .repertorio:not([data-js]) .tema {
+    grid-template-columns: 2.25rem 1fr auto;
+    grid-template-areas: "numero titulo duracion";
+  }
+
+  .repertorio:not([data-js]) .tema__play,
+  .repertorio:not([data-js]) .tema__progreso {
+    display: none;
   }
 </style>
