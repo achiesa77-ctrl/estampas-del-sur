@@ -219,3 +219,10 @@ section[id] {
     transition: none;
   }
 }
+
+/* Secciones breves (Agenda y similares): mismo ritmo horizontal que el
+   resto, menos aire vertical porque su contenido no llena pantalla. */
+.section--compacta {
+  padding-top: calc(var(--nav-h) + 1.5rem);
+  padding-bottom: clamp(2rem, 5vh, 3rem);
+}

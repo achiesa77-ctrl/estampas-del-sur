@@ -4,19 +4,23 @@ import Nav from "../components/Nav.astro";
 import Portada from "../components/Portada.astro";
 import Grupo from "../components/Grupo.astro";
 import Integrantes from "../components/Integrantes.astro";
+import Historia from "../components/Historia.astro";
+import Agenda from "../components/Agenda.astro";
 import { precargaElegida } from "../components/portada-foto";
 
 const precarga = await precargaElegida();
 
 // Secciones provisorias (Task 5): cada tarea posterior reemplaza su stub
-// por el componente real. Ambientes según spec §3.
-const escenas = [
-  { id: "historia", titulo: "Historia", ambiente: "papel" },
+// por el componente real. Ambientes según spec §3. Se parte en dos grupos
+// porque Agenda (Tarea 9, componente real) va entre Trayectoria y Galería.
+const escenasAntesDeAgenda = [
   { id: "repertorio", titulo: "Repertorio", ambiente: "oscuro" },
   { id: "disco", titulo: "El Disco", ambiente: "papel" },
   { id: "videos", titulo: "Videos", ambiente: "oscuro" },
   { id: "trayectoria", titulo: "Trayectoria", ambiente: "papel" },
-  { id: "agenda", titulo: "Próximas fechas", ambiente: "papel" },
+] as const;
+
+const escenasDespuesDeAgenda = [
   { id: "galeria", titulo: "Galería", ambiente: "oscuro" },
   { id: "contacto", titulo: "Contrataciones", ambiente: "oscuro" },
 ] as const;
@@ -37,8 +41,17 @@ const escenas = [
     <Portada />
     <Grupo />
     <Integrantes />
+    <Historia />
     {
-      escenas.map(({ id, titulo, ambiente }) => (
+      escenasAntesDeAgenda.map(({ id, titulo, ambiente }) => (
+        <section id={id} data-ambiente={ambiente} class={`ambiente-${ambiente} escena-provisoria`}>
+          <h2 class="titulo">{titulo}</h2>
+        </section>
+      ))
+    }
+    <Agenda />
+    {
+      escenasDespuesDeAgenda.map(({ id, titulo, ambiente }) => (
         <section id={id} data-ambiente={ambiente} class={`ambiente-${ambiente} escena-provisoria`}>
           <h2 class="titulo">{titulo}</h2>
         </section>

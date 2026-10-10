@@ -144,8 +144,66 @@ function revelarSimple(): void {
   });
 }
 
+/** [data-revelar="copia"]: copias impresas (Historia, spec §2.4/§3 fila 4)
+ *  que caen a su rotación fija y «hacen foco» al entrar en pantalla. La
+ *  rotación final y el CSS (--copia, sombra) ya dejan la copia en su
+ *  estado final sin JS; acá sólo se anima la entrada. El foco se simula
+ *  con una capa superior (`.copia__foco`, tono papel) que funde su
+ *  opacidad de 1 a 0 — nunca `filter: blur` (prohibido por el contrato:
+ *  blur en cada frame de scroll es carísimo y además re-flashea con
+ *  movimiento reducido). */
+function revelarCopias(): void {
+  const copias = gsap.utils.toArray<HTMLElement>('[data-revelar="copia"]');
+  if (!copias.length) return;
+
+  mm.add({ motionOK: condiciones.motionOK, reduce: condiciones.reduce }, (ctx) => {
+    const { motionOK } = ctx.conditions ?? {};
+
+    for (const copia of copias) {
+      const foco = copia.querySelector<HTMLElement>(".copia__foco");
+      const rotacionFinal = Number(copia.dataset.rotacion ?? "0");
+
+      if (!motionOK) {
+        // Reduce: sólo opacidad, ≤200ms; sin caída ni rotación de más, y
+        // la capa de foco no llega a mostrarse.
+        if (foco) gsap.set(foco, { opacity: 0 });
+        gsap.fromTo(
+          copia,
+          { opacity: 0 },
+          {
+            opacity: 1,
+            duration: 0.2,
+            ease: "none",
+            scrollTrigger: { trigger: copia, start: "top 90%", once: true },
+          },
+        );
+        continue;
+      }
+
+      if (foco) gsap.set(foco, { opacity: 1 });
+
+      ScrollTrigger.create({
+        trigger: copia,
+        start: "top 85%",
+        once: true,
+        onEnter: () => {
+          gsap.fromTo(
+            copia,
+            { y: -40, rotation: rotacionFinal + 4 },
+            { y: 0, rotation: rotacionFinal, duration: 0.9, ease: "power2.out" },
+          );
+          if (foco) {
+            gsap.to(foco, { opacity: 0, duration: 0.6, delay: 0.25, ease: "power1.out" });
+          }
+        },
+      });
+    }
+  });
+}
+
 export function initRevelado(): void {
   revelarLineas();
   revelarContadores();
   revelarSimple();
+  revelarCopias();
 }

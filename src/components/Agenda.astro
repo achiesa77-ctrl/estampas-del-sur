@@ -1,0 +1,119 @@
+---
+// Agenda (spec §3 fila 9, papel, section--compacta): mientras
+// src/data/fechas.ts esté vacío (spec §9: no hay fechas reales todavía) se
+// muestra un estado vacío con CTA de contacto; el día que se cargue una
+// fecha, la lista de abajo ya queda lista para usarla sin tocar este
+// componente. Revelado simple (src/scripts/revelado.ts) en ambas ramas.
+import { fechas } from "../data/fechas";
+import { redes } from "../data/redes";
+
+/** El dato `fecha` es un string de fecha ISO (p. ej. "2026-11-15"): sirve
+ * tal cual como `datetime` del <time> y se formatea para mostrar. Si algún
+ * día llega un valor no parseable, se muestra tal cual en vez de "Invalid
+ * Date" (grado de defensa mínimo, no agrega campos al tipo). */
+function formatear(fecha: string): string {
+  const valor = new Date(fecha);
+  if (Number.isNaN(valor.getTime())) return fecha;
+  return valor.toLocaleDateString("es-UY", { day: "numeric", month: "long", year: "numeric" });
+}
+---
+
+<section
+  id="agenda"
+  class="agenda ambiente-papel section--compacta"
+  data-ambiente="papel"
+  aria-labelledby="agenda-titulo"
+>
+  <h2 class="titulo agenda__titulo" id="agenda-titulo">Próximas fechas</h2>
+
+  {
+    fechas.length === 0 ? (
+      <div class="agenda__vacio" data-revelar="simple">
+        <p class="medida">No hay fechas anunciadas en este momento.</p>
+        <p class="medida">Para contratar o consultar por una fecha, escribinos.</p>
+        <div class="agenda__acciones">
+          <a
+            class="boton boton--primario"
+            href={redes.whatsapp.url}
+            target="_blank"
+            rel="noopener"
+          >
+            Escribir por WhatsApp
+          </a>
+          <a class="boton boton--secundario" href={redes.instagram} target="_blank" rel="noopener">
+            Ver Instagram
+          </a>
+        </div>
+      </div>
+    ) : (
+      <ul class="agenda__lista" data-revelar="simple" aria-label="Próximas presentaciones">
+        {fechas.map((f) => (
+          <li class="agenda__fecha">
+            <time class="dato agenda__fecha-dia" datetime={f.fecha}>
+              {formatear(f.fecha)}
+            </time>
+            <span class="agenda__fecha-lugar">
+              {f.lugar}, {f.ciudad}
+            </span>
+          </li>
+        ))}
+      </ul>
+    )
+  }
+</section>
+
+<style>
+  .agenda {
+    position: relative;
+    isolation: isolate;
+    padding-left: clamp(1.25rem, 5vw, 4rem);
+    padding-right: clamp(1.25rem, 5vw, 4rem);
+  }
+
+  .agenda__titulo {
+    margin: 0 0 clamp(1.25rem, 4vh, 2rem);
+    font-size: clamp(var(--paso-3), 6vw, var(--paso-5));
+  }
+
+  .agenda__vacio {
+    display: grid;
+    gap: 0.75rem;
+  }
+
+  .agenda__vacio p {
+    margin: 0;
+  }
+
+  .agenda__acciones {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    margin-top: 0.75rem;
+  }
+
+  .agenda__lista {
+    display: grid;
+    gap: 1.25rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    max-width: var(--medida-max);
+  }
+
+  .agenda__fecha {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 0.5rem 1rem;
+    padding-bottom: 1.25rem;
+    border-bottom: 1px solid color-mix(in srgb, var(--lapiz) 35%, transparent);
+  }
+
+  .agenda__fecha-dia {
+    color: var(--oro-viejo);
+  }
+
+  .agenda__fecha-lugar {
+    font-family: var(--fuente-cuerpo);
+  }
+</style>

@@ -12,6 +12,9 @@
   --lapiz: #5c574f;
   --oro: #d4ae55;
   --oro-viejo: #7a5d1c;
+  /* Borde de las copias impresas (spec §2.4): papel de impresión, más
+     claro que --papel, nunca usado como texto. */
+  --copia: #f2ede3;
 
   /* Tipografía (spec §2.3) */
   --fuente-titulo: "Archivo Variable", sans-serif;
