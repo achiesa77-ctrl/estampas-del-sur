@@ -70,6 +70,31 @@ test.describe("escritorio (con movimiento)", () => {
       { timeout: 4000 },
     ).toBe(true);
   });
+
+  test("el foco de teclado en el 5º músico desplaza la fila para que quede visible", async ({
+    page,
+  }) => {
+    await irAFin(page);
+    await integrantes(page).scrollIntoViewIfNeeded();
+    await expect.poll(() => tienePinSpacer(page)).toBe(true);
+
+    // El 5º músico está fuera de pantalla (a la derecha) al inicio del pin.
+    // En vez de simular los ~20 Tab que harían falta para llegar hasta ahí,
+    // se enfoca directamente (dispara el mismo evento `focusin` que Tab).
+    const quinto = musicos(page)
+      .nth(4)
+      .getByRole("link", { name: "Instagram de Estampas del Sur" });
+    await quinto.focus();
+
+    await expect.poll(
+      async () => {
+        const caja = await quinto.boundingBox();
+        const ancho = page.viewportSize()!.width;
+        return !!caja && caja.x >= -1 && caja.x < ancho;
+      },
+      { timeout: 4000 },
+    ).toBe(true);
+  });
 });
 
 test.describe("móvil (columna vertical)", () => {

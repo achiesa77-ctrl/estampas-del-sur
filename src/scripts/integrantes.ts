@@ -70,7 +70,27 @@ export function initIntegrantes(): void {
     ScrollTrigger.sort();
     ScrollTrigger.refresh();
 
+    // Foco de teclado dentro de la fila: un músico fuera de pantalla (a la
+    // derecha o la izquierda de la traslación) puede recibir foco igual
+    // (Tab no sabe de `x`); sin esto, el usuario de teclado queda enfocado
+    // en algo que no ve. Cada músico ocupa una fracción igual del recorrido
+    // del pin, así que su posición de scroll es una interpolación lineal
+    // entre el inicio y el fin del ScrollTrigger según su índice.
+    const alEnfocar = (evento: FocusEvent) => {
+      const li = (evento.target as HTMLElement | null)?.closest<HTMLElement>(".musico");
+      if (!li) return;
+      const indice = musicos.indexOf(li);
+      const st = horizontal.scrollTrigger;
+      if (indice < 0 || !st || musicos.length < 2) return;
+
+      const progreso = indice / (musicos.length - 1);
+      const destino = st.start + progreso * (st.end - st.start);
+      window.scrollTo(0, destino);
+    };
+    seccion.addEventListener("focusin", alEnfocar);
+
     return () => {
+      seccion.removeEventListener("focusin", alEnfocar);
       seccion.removeAttribute("data-fila");
       for (let i = 0; i < imagenes.length; i++) {
         const previo = sizesPrevios[i];

@@ -98,7 +98,7 @@ const fotos = {
     display: grid;
     gap: clamp(1.5rem, 4vh, 2.5rem);
     max-width: 28rem;
-    margin: 0;
+    margin: 0 auto;
     padding: 0;
     list-style: none;
   }
@@ -168,9 +168,16 @@ const fotos = {
     padding: 1.25rem 1.5rem 1.5rem;
   }
 
+  /* Columna (por defecto, incl. móvil): la tarjeta mide hasta 28rem, así
+     que el tamaño se acota a ese ancho en vez de a todo el viewport (si no,
+     nombres largos desbordarían la tarjeta en escritorio con movimiento
+     reducido, donde la columna queda angosta sobre un viewport ancho). */
   .musico__nombre {
     margin: 0;
-    font-size: clamp(var(--paso-3), 6vw, var(--paso-4));
+    /* Techo medido contra la palabra más larga (RODRÍGUEZ) en el ancho real
+       disponible dentro de la tarjeta (~287px a 390px de viewport): más
+       grande que esto la rompe a mitad de palabra en vez de en el espacio. */
+    font-size: clamp(1.875rem, 8vw, 2.125rem);
     color: var(--papel);
     overflow-wrap: anywhere;
   }
@@ -244,5 +251,12 @@ const fotos = {
 
   .integrantes[data-fila] .musico__datos {
     padding: 1.5rem clamp(1.5rem, 5vw, 4rem) clamp(2rem, 6vh, 3.5rem);
+  }
+
+  /* En fila cada retrato es un cuadro a pantalla completa: el nombre es el
+     protagonista («nombre en .titulo gigante», spec §3) y debe leerse
+     claramente más grande que el título de la sección. */
+  .integrantes[data-fila] .musico__nombre {
+    font-size: clamp(4rem, 8vw, 8.5rem);
   }
 </style>
