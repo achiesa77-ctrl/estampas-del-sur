@@ -23,7 +23,7 @@ declare global {
 /** Un pelo más que «cubrir» para que ningún medio píxel deje ver el canal. */
 const SOBREESCALA = 1.004;
 const EVENTOS_SALTO = ["wheel", "touchmove", "keydown", "pointerdown"] as const;
-const ESPERA_MAX_FOTOS = 1500; // ms: no retener la entrada por una foto lenta
+const ESPERA_MAX_FOTO = 1500; // ms: no retener la entrada por una foto lenta
 
 interface Zoom {
   x: number;
@@ -55,10 +55,21 @@ function medirZoom(portada: HTMLElement, camara: HTMLElement, hoja: HTMLElement,
   };
 }
 
-function esperarFotos(imagenes: HTMLImageElement[]): Promise<unknown> {
-  const decodificadas = Promise.all(imagenes.map((img) => img.decode().catch(() => undefined)));
-  const plazo = new Promise((listo) => setTimeout(listo, ESPERA_MAX_FOTOS));
-  return Promise.race([decodificadas, plazo]);
+/** Espera sólo a la foto elegida (con tope): las demás no frenan la entrada. */
+function esperarElegida(img: HTMLImageElement | null): Promise<unknown> {
+  if (!img) return Promise.resolve();
+  const decodificada = img.decode().catch(() => undefined);
+  const plazo = new Promise((listo) => setTimeout(listo, ESPERA_MAX_FOTO));
+  return Promise.race([decodificada, plazo]);
+}
+
+/** Las otras tomas se funden (CSS) cuando cada una termina de cargar. */
+function marcarListas(imagenes: HTMLImageElement[]): void {
+  for (const img of imagenes) {
+    const marcar = () => img.setAttribute("data-lista", "");
+    if (img.complete && img.naturalWidth > 0) marcar();
+    else img.addEventListener("load", marcar, { once: true });
+  }
 }
 
 export function initPortada(): gsap.core.Timeline | null {
@@ -80,10 +91,13 @@ export function initPortada(): gsap.core.Timeline | null {
   const acciones = portada.querySelector(".portada__acciones");
   const listaCredenciales = portada.querySelector(".portada__credenciales");
   const credenciales = gsap.utils.toArray<HTMLElement>(".portada__credenciales li", portada);
-  const fotos = gsap.utils.toArray<HTMLImageElement>(".hoja img", portada);
+  const fotoElegida = marco.querySelector("img");
+  marcarListas(otros.flatMap((c) => Array.from(c.querySelectorAll("img"))));
 
   const arnes = new URLSearchParams(location.search).get("t");
-  let yaVista = false; // tras la primera entrada, nunca se repite
+  // Tras la primera entrada nunca se repite. Si el módulo llegó tarde y el
+  // respaldo del script inline ya mostró el estado final, cuenta como vista.
+  let yaVista = portada.getAttribute("data-estado") === "final";
   let linea: gsap.core.Timeline | null = null;
 
   mm.add(condiciones, (ctx) => {
@@ -130,7 +144,9 @@ export function initPortada(): gsap.core.Timeline | null {
       tl.fromTo(
         trazo,
         { strokeDashoffset: 1 },
-        { strokeDashoffset: 0, duration: 0.8, ease: "power2.inOut" },
+        // autoRound:false — con pathLength="1" el valor va de 1 a 0 y GSAP
+        // lo redondearía a px enteros (el trazo saltaría de golpe).
+        { strokeDashoffset: 0, duration: 0.8, ease: "power2.inOut", autoRound: false },
         1.2,
       );
     }
@@ -220,7 +236,8 @@ export function initPortada(): gsap.core.Timeline | null {
           },
         );
         // El zoom quedó fijo al terminar: rehacerlo si cambia el tamaño.
-        reaplicarZoom = () => ctx.add(() => gsap.set(hoja, medir()));
+        // gsap.set directo: el clearProps del revert lo limpia.
+        reaplicarZoom = () => gsap.set(hoja, medir());
         ScrollTrigger.addEventListener("refresh", reaplicarZoom);
       }
     };
@@ -241,7 +258,7 @@ export function initPortada(): gsap.core.Timeline | null {
       for (const tipo of EVENTOS_SALTO) {
         window.addEventListener(tipo, saltar, { capture: true, passive: true });
       }
-      void esperarFotos(fotos).then(() => {
+      void esperarElegida(fotoElegida).then(() => {
         if (vivo && !terminada && tl.progress() === 0) tl.play();
       });
     }

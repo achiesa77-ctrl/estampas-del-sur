@@ -194,8 +194,8 @@ const { width: anchoElegida, height: altoElegida } = fotoElegida.src;
     gap: 0.75rem 0.375rem;
     width: min(1120px, 86vw, (100svh - var(--nav-h) - 9rem) * 3.3);
     padding: 0.875rem 0.875rem 0.5rem;
-    /* Papel fotográfico velado: un negro apenas más profundo que el fondo */
-    background: color-mix(in srgb, var(--oscuro) 55%, black);
+    /* La hoja impresa sobre la mesa: un negro apenas más claro que el fondo */
+    background: color-mix(in srgb, var(--tinta) 65%, var(--oscuro));
     border: 1px solid color-mix(in srgb, var(--plata) 16%, transparent);
     transform-origin: 0 0;
   }
@@ -227,6 +227,21 @@ const { width: anchoElegida, height: altoElegida } = fotoElegida.src;
     letter-spacing: 0.04em;
     color: var(--plata);
     font-variant-numeric: tabular-nums;
+  }
+
+  /* Las tomas no elegidas aparecen cuando cargan, sin frenar la entrada */
+  .portada[data-hoja] .hoja__cuadro:not(.hoja__elegida) :global(img) {
+    transition: opacity 0.4s ease-out;
+  }
+
+  .portada[data-hoja] .hoja__cuadro:not(.hoja__elegida) :global(img:not([data-lista])) {
+    opacity: 0;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .portada[data-hoja] .hoja__cuadro:not(.hoja__elegida) :global(img) {
+      transition: none;
+    }
   }
 
   .portada[data-hoja] .hoja__exposicion {
@@ -300,7 +315,7 @@ const { width: anchoElegida, height: altoElegida } = fotoElegida.src;
     /* Nunca más ancho que el viewport: «ESTAMPAS» mide ~7.1em, así que
        12.4vw deja el gutter de 16px libre aun a 390px. */
     font-size: min(10rem, 12.4vw);
-    line-height: 0.86;
+    line-height: 0.88;
     letter-spacing: -0.01em;
     white-space: nowrap;
     color: var(--papel);

@@ -63,3 +63,57 @@ test("la foto elegida se precarga con el mismo archivo que usa la <img>", async 
   const rutas = precargas.filter(Boolean).map((u) => new URL(u, page.url()).pathname);
   expect(rutas).toContain(actual);
 });
+
+test("si el módulo llega después del respaldo de 6 s, la entrada no se repite", async ({ page }) => {
+  test.setTimeout(45_000);
+  // Retrasa todo JS empaquetado más allá del respaldo del script inline.
+  await page.route("**/_astro/*.js", async (ruta) => {
+    await new Promise((listo) => setTimeout(listo, 9_000));
+    await ruta.continue();
+  });
+  await page.goto("/", { waitUntil: "commit" });
+  await expect(portada(page)).toHaveAttribute("data-estado", "final", { timeout: 8_500 });
+  await expect(portada(page)).not.toHaveAttribute("data-hoja");
+
+  await page.waitForFunction(() => window.__portada !== undefined, null, { timeout: 25_000 });
+  const estado = await page.evaluate(() => ({
+    progreso: window.__portada!.progress(),
+    estado: document.querySelector(".portada")!.getAttribute("data-estado"),
+    overflow: document.documentElement.style.overflow,
+  }));
+  expect(estado).toEqual({ progreso: 1, estado: "final", overflow: "" });
+  await expect(titulo(page)).toBeVisible();
+});
+
+test("con el menú abierto, terminar la entrada no desbloquea el scroll", async ({ page }) => {
+  // Angosto en ambos proyectos para que exista el botón «Menú».
+  await page.setViewportSize({ width: 800, height: 900 });
+  // ?t=1: entrada congelada (con el scroll pausado por la portada).
+  await page.goto("/?t=1");
+  await page.waitForFunction(() => window.__portada !== undefined);
+  const html = page.locator("html");
+  await expect(html).toHaveCSS("overflow", "hidden");
+
+  const boton = page.getByRole("navigation", { name: "Principal" }).getByRole("button", { name: "Menú" });
+  await boton.click();
+  await expect(boton).toHaveAttribute("aria-expanded", "true");
+
+  await page.evaluate(() => window.__portada!.progress(1)); // onComplete → reanudarScroll()
+  await expect(portada(page)).toHaveAttribute("data-estado", "final");
+  await expect(html).toHaveCSS("overflow", "hidden");
+  await expect(html).toHaveClass(/lenis-stopped/);
+
+  await page.keyboard.press("Escape");
+  await expect(boton).toHaveAttribute("aria-expanded", "false");
+  await expect(html).not.toHaveCSS("overflow", "hidden");
+  await expect(html).not.toHaveClass(/lenis-stopped/);
+});
+
+test("el lápiz se dibuja progresivamente (a 1.6 s va por la mitad)", async ({ page }) => {
+  await page.goto("/?t=1.6");
+  const offset = await page
+    .locator(".hoja__lapiz path")
+    .evaluate((p) => parseFloat(getComputedStyle(p).strokeDashoffset));
+  expect(offset).toBeGreaterThan(0.3);
+  expect(offset).toBeLessThan(0.7);
+});

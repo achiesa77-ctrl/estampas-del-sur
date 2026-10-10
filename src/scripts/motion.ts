@@ -25,7 +25,9 @@ export const condiciones = {
 export const mm: gsap.MatchMedia = gsap.matchMedia();
 
 let lenis: Lenis | null = null;
-let pausado = false;
+// Contador de bloqueos de scroll (menú, portada, visor…): el scroll vuelve
+// sólo cuando TODOS los que pausaron reanudaron. Nunca baja de 0.
+let pausas = 0;
 
 export const reduceMotion = (): boolean => window.matchMedia(condiciones.reduce).matches;
 
@@ -40,7 +42,7 @@ export function initMotion(): void {
     gsap.ticker.add(avanzar);
     gsap.ticker.lagSmoothing(0);
     instancia.on("scroll", ScrollTrigger.update);
-    if (pausado) instancia.stop();
+    if (pausas > 0) instancia.stop();
     lenis = instancia;
 
     return () => {
@@ -67,15 +69,19 @@ export function scrollA(destino: Element): void {
   }
 }
 
-/** Bloquea el scroll de la página (menú abierto, visor). */
+/** Bloquea el scroll de la página (menú abierto, visor, entrada de la portada). */
 export function pausarScroll(): void {
-  pausado = true;
+  pausas += 1;
+  if (pausas > 1) return;
   lenis?.stop();
   document.documentElement.style.overflow = "hidden";
 }
 
+/** Devuelve un bloqueo; el scroll vuelve cuando no queda ninguno. */
 export function reanudarScroll(): void {
-  pausado = false;
+  if (pausas === 0) return;
+  pausas -= 1;
+  if (pausas > 0) return;
   document.documentElement.style.overflow = "";
   lenis?.start();
 }
