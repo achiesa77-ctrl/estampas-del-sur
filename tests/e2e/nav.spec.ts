@@ -59,11 +59,13 @@ test.describe("navegación con movimiento", () => {
     await page.goto("/");
     await abrirMenuSiHaceFalta(page);
     await nav(page).getByRole("link", { name: "Historia" }).click();
-    await page.waitForTimeout(1500);
-    const top = await topDe(page, "#historia");
-    expect(top).toBeGreaterThanOrEqual(0);
-    expect(top).toBeLessThanOrEqual(80);
-    expect(await esFoco(page, "historia")).toBe(true);
+    // El desplazamiento debe completarse dentro de 1.5s.
+    await expect(async () => {
+      const top = await topDe(page, "#historia");
+      expect(top).toBeGreaterThanOrEqual(0);
+      expect(top).toBeLessThanOrEqual(80);
+      expect(await esFoco(page, "historia")).toBe(true);
+    }).toPass({ timeout: 1500 });
   });
 
   test("scrollspy marca con aria-current el enlace de la sección visible", async ({ page }) => {
@@ -165,5 +167,20 @@ test.describe("con movimiento reducido", () => {
         .poll(() => page.evaluate(() => getComputedStyle(document.documentElement).overflow))
         .not.toBe("hidden");
     });
+  });
+});
+
+test.describe("sin JavaScript, en angosto", () => {
+  test.use({ javaScriptEnabled: false, viewport: { width: 390, height: 844 } });
+
+  test("los 9 enlaces y «Contrataciones» siguen alcanzables en la tira", async ({ page }) => {
+    await page.goto("/");
+    await expect(botonMenu(page)).toBeHidden();
+    const cta = nav(page).getByRole("link", { name: "Contrataciones" });
+    await expect(cta).toBeVisible();
+    await expect(cta).toHaveAttribute("href", "#contacto");
+    await cta.scrollIntoViewIfNeeded();
+    await expect(cta).toBeInViewport({ ratio: 1 });
+    await expect(nav(page).getByRole("link", { name: "El Grupo" })).toBeVisible();
   });
 });

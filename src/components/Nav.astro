@@ -138,14 +138,10 @@ const enlaces = [
 
   /* Angosto (< 1100px) */
   @media (max-width: 1099px) {
-    /* Sin JS: tira con scroll horizontal, todos los enlaces alcanzables */
+    /* Sin JS: tira con scroll horizontal, los 9 enlaces y el CTA alcanzables */
     .nav:not([data-js]) .nav__lista {
       overflow-x: auto;
       scrollbar-width: none;
-    }
-
-    .nav:not([data-js]) .nav__item-cta {
-      display: none;
     }
 
     .nav[data-js] .nav__boton {
