@@ -1,0 +1,288 @@
+---
+// Repertorio (spec §3 fila 5, oscuro): índice de temas al estilo hoja de
+// contactos (número + título + duración) con un reproductor de audio.
+// Comportamiento completo en src/scripts/reproductor.ts (puerto de
+// `git show main:script.js:489-648`); acá sólo queda el estado final
+// visible sin JS: ícono en "reproducir" y, por si el script no corre, un
+// <audio controls> nativo por fila dentro de <noscript>.
+//
+// Los paths del ícono SVG se importan desde reproductor.ts (no se
+// duplican como literales acá): el morph GSAP anima ESE mismo "d" hacia
+// las formas de pausa, así que el markup inicial tiene que coincidir con
+// la constante que usa el script.
+import { temas } from "../data/temas";
+import { PLAY_DER, PLAY_IZQ } from "../scripts/reproductor";
+---
+
+<section
+  id="repertorio"
+  class="repertorio ambiente-oscuro"
+  data-ambiente="oscuro"
+  aria-labelledby="repertorio-titulo"
+>
+  <h2 class="titulo repertorio__titulo" id="repertorio-titulo">Repertorio</h2>
+
+  <ol class="temas">
+    {
+      temas.map((tema, indice) => (
+        <li class="tema" data-archivo={tema.archivo}>
+          <span class="tema__numero dato" aria-hidden="true">
+            {String(indice + 1).padStart(2, "0")}
+          </span>
+
+          <button
+            type="button"
+            class="tema__play"
+            aria-pressed="false"
+            aria-label={`Reproducir ${tema.titulo}`}
+          >
+            <svg class="tema__icono" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+              <path d={PLAY_IZQ} />
+              <path d={PLAY_DER} />
+            </svg>
+          </button>
+
+          <span class="tema__titulo">{tema.titulo}</span>
+
+          <div class="tema__progreso">
+            <input
+              type="range"
+              class="tema__seek"
+              min="0"
+              max="1"
+              step="0.1"
+              value="0"
+              disabled
+              aria-label={`Posición en ${tema.titulo}`}
+              aria-valuetext={`0:00 de ${tema.duracion}`}
+            />
+          </div>
+
+          <p class="tema__error" hidden>
+            No se pudo cargar el audio
+          </p>
+
+          <span class="tema__duracion dato" data-duracion>
+            {tema.duracion}
+          </span>
+
+          <noscript>
+            <audio controls preload="none" src={tema.archivo}>
+              Tu navegador no admite audio HTML5.
+            </audio>
+          </noscript>
+        </li>
+      ))
+    }
+  </ol>
+
+  <audio id="repertorio-audio" preload="none"></audio>
+</section>
+
+<style>
+  .repertorio {
+    position: relative;
+    isolation: isolate;
+    padding: calc(var(--nav-h) + 3rem) clamp(1.25rem, 5vw, 4rem) clamp(3rem, 8vh, 5rem);
+  }
+
+  .repertorio__titulo {
+    margin: 0 0 clamp(1.75rem, 5vh, 2.75rem);
+    font-size: clamp(var(--paso-3), 6vw, var(--paso-5));
+  }
+
+  .temas {
+    display: grid;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    max-width: 42rem;
+  }
+
+  /* Fila de la hoja de contactos: número de cuadro | botón | título |
+     duración arriba; la tira de progreso ocupa el ancho completo debajo.
+     Un solo filete fino (rampa neutra) separa cada fila, como el borde de
+     un fotograma en la tira. */
+  .tema {
+    position: relative;
+    display: grid;
+    grid-template-columns: 2.25rem 44px 1fr auto;
+    grid-template-areas:
+      "numero play titulo duracion"
+      ".      .    progreso progreso";
+    column-gap: 1rem;
+    row-gap: 0.6rem;
+    align-items: center;
+    padding: 1.1rem 0;
+    border-bottom: 1px solid color-mix(in srgb, var(--plata) 30%, transparent);
+  }
+
+  .tema:first-child {
+    border-top: 1px solid color-mix(in srgb, var(--plata) 30%, transparent);
+  }
+
+  .tema__numero {
+    grid-area: numero;
+    color: var(--plata);
+    font-variant-numeric: tabular-nums;
+    letter-spacing: 0.04em;
+  }
+
+  .tema__play {
+    grid-area: play;
+    display: grid;
+    place-items: center;
+    width: 44px;
+    height: 44px;
+    padding: 0;
+    border: 1px solid color-mix(in srgb, var(--papel) 40%, transparent);
+    border-radius: 50%;
+    background: transparent;
+    color: var(--papel);
+    cursor: pointer;
+  }
+
+  .tema__play:hover {
+    border-color: var(--oro);
+  }
+
+  .tema__icono {
+    width: 16px;
+    height: 16px;
+    fill: currentColor;
+  }
+
+  .tema__titulo {
+    grid-area: titulo;
+    font-family: var(--fuente-cuerpo);
+    font-size: var(--paso-2);
+    overflow-wrap: anywhere;
+  }
+
+  .tema__duracion {
+    grid-area: duracion;
+    color: var(--plata);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .tema__progreso {
+    grid-area: progreso;
+  }
+
+  .tema__error {
+    grid-area: progreso;
+    margin: 0;
+    color: var(--oro);
+    font-family: var(--fuente-dato);
+    font-stretch: 72%;
+    font-weight: 600;
+  }
+
+  /* El error reemplaza la tira de progreso en su mismo lugar de la grilla
+     (nunca se muestran los dos a la vez: uno u otro, nunca superpuestos). */
+  .tema--error .tema__progreso {
+    visibility: hidden;
+  }
+
+  /* Reproduciendo: acento --oro (nunca glow) en número, título y botón. */
+  .tema--reproduciendo .tema__numero,
+  .tema--reproduciendo .tema__titulo {
+    color: var(--oro);
+  }
+
+  .tema--reproduciendo .tema__play {
+    border-color: var(--oro);
+    color: var(--oro);
+  }
+
+  /* Pista cargada pero en pausa: el mismo acento, atenuado, para distinguir
+     "esta es la actual" de "ninguna sonó todavía" sin confundirla con la
+     que está sonando de verdad. */
+  .tema--actual:not(.tema--reproduciendo) .tema__numero {
+    color: color-mix(in srgb, var(--oro) 65%, var(--plata));
+  }
+
+  /* ---------- Barra de progreso: tira de película ---------- */
+  .tema__seek {
+    --pct: 0%;
+    appearance: none;
+    -webkit-appearance: none;
+    width: 100%;
+    height: 44px;
+    margin: 0;
+    background: transparent;
+    cursor: pointer;
+  }
+
+  .tema__seek:disabled {
+    cursor: default;
+  }
+
+  /* Perforaciones estáticas (textura, no decoración): líneas repetidas que
+     simulan los agujeros de una tira de 35mm. El relleno dorado/gris
+     (dos paradas sin degradé) marca lo ya reproducido, igual que cualquier
+     barra de progreso nativa. */
+  .tema__seek::-webkit-slider-runnable-track {
+    height: 10px;
+    border-radius: 1px;
+    background:
+      repeating-linear-gradient(
+        to right,
+        rgb(0 0 0 / 35%) 0 2px,
+        transparent 2px 9px
+      ),
+      linear-gradient(to right, var(--oro) 0 var(--pct), var(--lapiz) var(--pct) 100%);
+  }
+
+  .tema__seek:disabled::-webkit-slider-runnable-track {
+    background:
+      repeating-linear-gradient(to right, rgb(0 0 0 / 35%) 0 2px, transparent 2px 9px),
+      var(--lapiz);
+  }
+
+  .tema__seek::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 14px;
+    height: 14px;
+    margin-top: -2px;
+    border-radius: 50%;
+    border: 2px solid var(--oscuro);
+    background: var(--oro);
+    cursor: pointer;
+  }
+
+  .tema__seek::-moz-range-track {
+    height: 10px;
+    border-radius: 1px;
+    background: repeating-linear-gradient(to right, rgb(0 0 0 / 35%) 0 2px, transparent 2px 9px), var(--lapiz);
+  }
+
+  .tema__seek::-moz-range-progress {
+    height: 10px;
+    border-radius: 1px;
+    background: var(--oro);
+  }
+
+  .tema__seek::-moz-range-thumb {
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    border: 2px solid var(--oscuro);
+    background: var(--oro);
+    cursor: pointer;
+  }
+
+  @media (max-width: 599px) {
+    .tema {
+      grid-template-columns: 2rem 44px 1fr;
+      grid-template-areas:
+        "numero play titulo"
+        "progreso progreso progreso"
+        "duracion duracion duracion";
+    }
+
+    .tema__duracion {
+      justify-self: start;
+    }
+  }
+</style>
