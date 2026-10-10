@@ -6,6 +6,12 @@
 // y el foco de cada copia al entrar en pantalla viven en
 // src/scripts/revelado.ts (modo "copia"); acá sólo se deja el estado final
 // visible sin JS (rotación vía --rot, foco en opacidad 0).
+//
+// alt vs. figcaption: cada <figure> ya trae su descripción completa en el
+// <figcaption> (texto real, visible y leído por cualquier lector de
+// pantalla); el alt del <img> queda vacío para no duplicar el anuncio
+// (WAI: una imagen cuyo contenido ya está descrito por su caption es
+// redundante repetirlo en el alt).
 import { Picture } from "astro:assets";
 import { grupo } from "../data/grupo";
 import g3 from "../assets/fotos/bn/g3.jpg";
@@ -34,14 +40,14 @@ const [p1, p2, p3, p4, p5] = grupo.historia;
             formats={["avif", "webp"]}
             widths={[360, 640]}
             sizes="(min-width: 900px) 360px, 70vw"
-            alt="Los integrantes del grupo reunidos en un living, con guitarras, acordeón y objetos de mate sobre la mesa."
+            alt=""
             loading="lazy"
             decoding="async"
           />
           <span class="copia__foco" aria-hidden="true"></span>
         </div>
         <figcaption class="epigrafe">
-          Los integrantes del grupo reunidos en un living, con guitarras, acordeón y objetos de mate sobre la mesa.
+          Seis músicos posan en un living, con guitarras, acordeón y objetos de mate sobre la mesa.
         </figcaption>
       </figure>
 
@@ -55,7 +61,7 @@ const [p1, p2, p3, p4, p5] = grupo.historia;
             formats={["avif", "webp"]}
             widths={[360, 640]}
             sizes="(min-width: 900px) 360px, 70vw"
-            alt="Primer plano de perfil de un integrante, de noche, con una estructura metálica y luces desenfocadas de fondo."
+            alt=""
             loading="lazy"
             decoding="async"
           />
@@ -75,7 +81,7 @@ const [p1, p2, p3, p4, p5] = grupo.historia;
             formats={["avif", "webp"]}
             widths={[360, 640]}
             sizes="(min-width: 900px) 360px, 70vw"
-            alt="Dos integrantes tocan en un escenario nocturno: uno canta con la guitarra de pie, el otro toca el acordeón sentado."
+            alt=""
             loading="lazy"
             decoding="async"
           />
@@ -108,7 +114,11 @@ const [p1, p2, p3, p4, p5] = grupo.historia;
      angosta junto al cuerpo; en móvil, apilado arriba. */
   @media (min-width: 900px) {
     .historia__grid {
-      grid-template-columns: minmax(10rem, 14rem) 1fr;
+      /* 15rem medido contra "HISTORIA" en Archivo 850/expandido a
+         --paso-3 (32px, ~204px de ancho real): deja ~36px de margen para
+         que nunca rompa dentro de la palabra (columna fija en rem, así
+         que el margen no depende del ancho de viewport ≥900px). */
+      grid-template-columns: minmax(11rem, 15rem) 1fr;
       align-items: start;
     }
 
@@ -120,17 +130,11 @@ const [p1, p2, p3, p4, p5] = grupo.historia;
 
   .historia__titulo {
     margin: 0;
-    font-size: clamp(var(--paso-3), 5vw, var(--paso-5));
-    /* En escritorio, el cabezal es una columna angosta (14rem): sin esto
-       "HISTORIA" en Archivo expandido desborda la columna y se pinta
-       encima del cuerpo (el grid no recorta el overflow de sus hijos). */
-    overflow-wrap: anywhere;
-  }
-
-  @media (min-width: 900px) {
-    .historia__titulo {
-      font-size: clamp(var(--paso-3), 2.6vw, var(--paso-4));
-    }
+    /* Tamaño fijo (no clamp con vw): "HISTORIA" entera, en una sola línea,
+       tanto en la columna angosta de escritorio como en el ancho completo
+       de móvil (ver medición en el reporte de la tarea). Nunca se parte
+       dentro de la palabra. */
+    font-size: var(--paso-3);
   }
 
   .historia__desde {
