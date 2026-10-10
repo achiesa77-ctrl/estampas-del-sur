@@ -29,6 +29,30 @@ test("las cifras cuentan hasta 15, 3 y 4", async ({ page }) => {
   await expect(cifras(page)).toHaveText(["15", "3", "4"]);
 });
 
+test("el revelado de líneas respeta el interlineado del párrafo (no el gap entre párrafos)", async ({
+  page,
+}) => {
+  await irAFin(page);
+  const primerParrafo = grupo(page).locator(".grupo__presentacion p").first();
+  const lineas = primerParrafo.locator(".linea");
+  await expect(lineas.nth(1)).toBeVisible(); // el párrafo ocupa varias líneas
+
+  const { pitch, lineHeight } = await primerParrafo.evaluate((p) => {
+    const cajas = Array.from(p.querySelectorAll<HTMLElement>(".linea")).map(
+      (el) => el.getBoundingClientRect().top,
+    );
+    return {
+      pitch: cajas[1] - cajas[0],
+      lineHeight: parseFloat(getComputedStyle(p).lineHeight),
+    };
+  });
+
+  // Si el SplitText se hiciera sobre el contenedor entero (ambos párrafos
+  // a la vez), el gap del grid se colaría entre cada línea y el pitch
+  // quedaría muy por encima del line-height real del párrafo.
+  expect(Math.abs(pitch - lineHeight) / lineHeight).toBeLessThan(0.1);
+});
+
 test.describe("con movimiento reducido", () => {
   test.use({ reducedMotion: "reduce" });
 

@@ -30,27 +30,42 @@ function revelarLineas(): void {
     const tinta = leerToken("--tinta");
 
     for (const contenedor of contenedores) {
-      SplitText.create(contenedor, {
-        type: "lines",
-        autoSplit: true, // re-split en resize/carga de fuente
-        onSplit(self) {
-          return gsap.fromTo(
-            self.lines,
-            { color: lapiz },
-            {
-              color: tinta,
-              ease: "none",
-              stagger: 0.05,
-              scrollTrigger: {
-                trigger: contenedor,
-                start: "top 80%",
-                end: "bottom 55%",
-                scrub: true,
+      // Un SplitText por bloque (cada <p>), no por el contenedor entero:
+      // si se splittea el contenedor completo, los wrappers de línea
+      // quedan como hijos directos de su grid y el gap entre párrafos se
+      // cuela entre cada línea (hallazgo de revisión); además el
+      // aria-label que arma SplitText concatena el texto de los dos
+      // párrafos sin espacio. Partiendo por bloque, cada línea queda
+      // anidada dentro de su propio párrafo y el espaciado entre líneas
+      // lo da sólo el line-height de ese párrafo.
+      const bloques = contenedor.children.length
+        ? (Array.from(contenedor.children) as HTMLElement[])
+        : [contenedor];
+
+      for (const bloque of bloques) {
+        SplitText.create(bloque, {
+          type: "lines",
+          linesClass: "linea",
+          autoSplit: true, // re-split en resize/carga de fuente
+          onSplit(self) {
+            return gsap.fromTo(
+              self.lines,
+              { color: lapiz },
+              {
+                color: tinta,
+                ease: "none",
+                stagger: 0.05,
+                scrollTrigger: {
+                  trigger: contenedor,
+                  start: "top 80%",
+                  end: "bottom 55%",
+                  scrub: true,
+                },
               },
-            },
-          );
-        },
-      });
+            );
+          },
+        });
+      }
     }
     // autoSplit re-crea su propia animación en cada re-split; el revert
     // de mm (SplitText + ScrollTrigger quedan en el contexto) limpia todo.
