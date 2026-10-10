@@ -1,0 +1,185 @@
+/* Reset mínimo + tipografía base + utilidades (spec §2, §6). Usa sólo los
+   tokens de src/styles/tokens.css: ningún color ni medida se repite acá
+   como literal nuevo. */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  font-family: var(--fuente-cuerpo);
+  font-size: var(--paso-1);
+  line-height: 1.6;
+  background: var(--oscuro);
+  color: var(--papel);
+}
+
+img,
+picture,
+video {
+  max-width: 100%;
+  display: block;
+}
+
+a {
+  color: inherit;
+}
+
+/* Ambientes (ruling R2): la clase da fondo + texto + color de foco sin JS;
+   el atributo data-ambiente en el mismo elemento lo usa ambientes.ts. */
+.ambiente-oscuro {
+  background: var(--oscuro);
+  color: var(--papel);
+  --color-foco: var(--oro);
+}
+
+.ambiente-papel {
+  background: var(--papel);
+  color: var(--tinta);
+  --color-foco: var(--oro-viejo);
+}
+
+/* Tipografía utilitaria (spec §2.3) */
+.titulo {
+  font-family: var(--fuente-titulo);
+  font-stretch: 125%;
+  font-weight: 850;
+  text-transform: uppercase;
+  line-height: 0.9;
+  font-size: var(--paso-5);
+}
+
+.dato {
+  font-family: var(--fuente-dato);
+  font-stretch: 72%;
+  font-weight: 600;
+  font-size: var(--paso-1);
+}
+
+.epigrafe {
+  font-family: var(--fuente-cuerpo);
+  font-style: italic;
+  font-size: var(--paso-1);
+}
+
+.medida {
+  max-width: var(--medida-max);
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* Las secciones ancladas compensan la altura del nav fijo */
+section[id] {
+  scroll-margin-top: var(--nav-h);
+}
+
+/* Foco visible en todo control (spec §6): oro sobre oscuro, oro-viejo
+   sobre papel, según qué .ambiente-* envuelve al elemento enfocado. */
+:focus-visible {
+  outline: 2px solid var(--color-foco, var(--oro));
+  outline-offset: 3px;
+}
+
+/* Enlace «Ir al contenido»: fuera de pantalla hasta recibir foco. Se anima
+   sólo con transform, nunca con top/left (regla de movimiento global). */
+.salto {
+  position: fixed;
+  top: 1rem;
+  left: 1rem;
+  z-index: var(--z-salto);
+  padding: 0.75em 1.25em;
+  background: var(--oro);
+  color: var(--oscuro);
+  text-decoration: none;
+  font-family: var(--fuente-dato);
+  font-weight: 600;
+  transform: translateY(-150%);
+  transition: transform 0.2s ease;
+}
+
+.salto:focus-visible {
+  transform: translateY(0);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .salto {
+    transition: none;
+  }
+}
+
+/* Botones (spec §6: hover/focus-visible/active/disabled en todo control) */
+.boton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5em;
+  min-height: 44px;
+  padding: 0.75em 1.5em;
+  font-family: var(--fuente-dato);
+  font-stretch: 72%;
+  font-weight: 600;
+  text-decoration: none;
+  border-radius: 2px;
+  cursor: pointer;
+  transition: transform 0.15s ease;
+}
+
+.boton:active {
+  transform: scale(0.97);
+}
+
+.boton:disabled,
+.boton[aria-disabled="true"] {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* Primario: oro sobre oscuro (8.97:1), nunca invertido */
+.boton--primario {
+  background: var(--oro);
+  color: var(--oscuro);
+  border: none;
+}
+
+.boton--primario:hover,
+.boton--primario:focus-visible {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 10px rgb(0 0 0 / 25%);
+}
+
+/* Secundario: con filete (borde fino), hereda el color del ambiente */
+.boton--secundario {
+  background: transparent;
+  border: 1px solid currentColor;
+  color: inherit;
+}
+
+.boton--secundario:hover,
+.boton--secundario:focus-visible {
+  text-decoration: underline;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .boton {
+    transition: none;
+  }
+}

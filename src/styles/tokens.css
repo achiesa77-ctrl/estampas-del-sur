@@ -1,0 +1,45 @@
+/* Tokens del sistema visual (spec §2). Toda la paleta y las medidas
+   estructurales viven acá; nada se repite como literal en otros archivos
+   de estilos. */
+
+:root {
+  /* Color (spec §2.2). Regla: --plata nunca sobre papel, --oro nunca como
+     texto sobre papel (usar --oro-viejo en su lugar). */
+  --oscuro: #121110;
+  --papel: #e8e2d5;
+  --tinta: #1c1a17;
+  --plata: #9a948a;
+  --lapiz: #5c574f;
+  --oro: #d4ae55;
+  --oro-viejo: #7a5d1c;
+
+  /* Tipografía (spec §2.3) */
+  --fuente-titulo: "Archivo Variable", sans-serif;
+  --fuente-dato: "Archivo Variable", sans-serif;
+  --fuente-cuerpo: "Newsreader Variable", serif;
+
+  /* Escala 1.333 sobre 18px */
+  --paso-1: 1.125rem; /* 18px */
+  --paso-2: 1.5rem; /* 24px */
+  --paso-3: 2rem; /* 32px */
+  --paso-4: 2.625rem; /* 42px */
+  --paso-5: 3.5rem; /* 56px */
+
+  /* Medida de lectura */
+  --medida-max: 65ch;
+
+  /* Nav fijo: altura real, para compensar con scroll-margin-top */
+  --nav-h: 72px;
+
+  /* Escala de z-index (spec §2.4) */
+  --z-grano: 1;
+  --z-nav: 50;
+  --z-visor: 80;
+  --z-salto: 100;
+}
+
+@media (max-width: 599px) {
+  :root {
+    --nav-h: 60px;
+  }
+}

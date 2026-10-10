@@ -1,0 +1,131 @@
+---
+// Layout base: <head> (SEO, OG/Twitter, JSON-LD, fuentes) + grano global +
+// enlace de salto. El JSON-LD se arma desde src/data (fuente única), no
+// copiando los literales del index.html legacy (ver global.md).
+import "@fontsource-variable/archivo/wdth.css";
+import "@fontsource-variable/newsreader/opsz.css";
+import "@fontsource-variable/newsreader/opsz-italic.css";
+import "../styles/tokens.css";
+import "../styles/base.css";
+import Grano from "../components/Grano.astro";
+import { grupo } from "../data/grupo";
+import { integrantes } from "../data/integrantes";
+import { redes } from "../data/redes";
+import { trayectoria } from "../data/trayectoria";
+
+// Preload de las dos tipografías usadas arriba del pliegue en la portada:
+// Archivo (título) y Newsreader (cuerpo), subconjunto latin, peso base.
+import archivoLatinWoff2 from "@fontsource-variable/archivo/files/archivo-latin-wdth-normal.woff2?url";
+import newsreaderLatinWoff2 from "@fontsource-variable/newsreader/files/newsreader-latin-opsz-normal.woff2?url";
+
+interface Props {
+  title?: string;
+  description?: string;
+}
+
+const {
+  title = `${grupo.nombre} · Folklore uruguayo desde ${grupo.ciudad}`,
+  description = `Grupo de folklore uruguayo de ${grupo.ciudad}, ${grupo.departamento}, desde ${grupo.fundacion}. Milonga, chamarrita, polka y cumbia folklórica con sello propio. Contrataciones para festivales, peñas y eventos.`,
+} = Astro.props;
+
+const urlCanonica = new URL("/", Astro.site);
+const urlOgImagen = new URL("/og/portada-hd.jpg", Astro.site);
+const urlLogo = new URL("/logo-nuevo.jpg", Astro.site);
+
+// redes.whatsapp.numero está en formato local "095 871 148"; el JSON-LD
+// quiere el formato internacional "+598 95 871 148".
+const telefono = `+598 ${redes.whatsapp.numero.replace(/^0/, "")}`;
+
+// Fecha exacta de lanzamiento del disco (spec §7): no está modelada en
+// tipos.ts (trayectoria sólo guarda el año), así que vive acá como el
+// único dato de JSON-LD que no sale de src/data.
+const FECHA_LANZAMIENTO_DISCO = "2026-07-24";
+
+const hitoSaviaNueva = trayectoria.find((h) => h.titulo === "«Savia Nueva»");
+const hitoDiscoNuevo = trayectoria.find((h) => h.titulo === "Disco «Soy Uruguayo»");
+
+const jsonLd = {
+  "@context": "https://schema.org",
+  "@type": "MusicGroup",
+  name: grupo.nombre,
+  url: urlCanonica.toString(),
+  image: urlOgImagen.toString(),
+  logo: urlLogo.toString(),
+  description,
+  genre: ["Folklore", ...grupo.ritmos],
+  foundingDate: String(grupo.fundacion),
+  foundingLocation: {
+    "@type": "Place",
+    name: `${grupo.ciudad}, ${grupo.departamento}, Uruguay`,
+  },
+  email: redes.mail,
+  telephone: telefono,
+  address: {
+    "@type": "PostalAddress",
+    addressLocality: grupo.ciudad,
+    addressRegion: grupo.departamento,
+    addressCountry: "UY",
+  },
+  sameAs: [redes.instagram, redes.facebook],
+  member: integrantes.map((integrante) => ({
+    "@type": "Person",
+    name: integrante.nombre,
+    roleName: integrante.rol,
+  })),
+  album: [
+    hitoSaviaNueva && {
+      "@type": "MusicAlbum",
+      name: "Savia Nueva",
+      datePublished: String(hitoSaviaNueva.anio),
+    },
+    hitoDiscoNuevo && {
+      "@type": "MusicAlbum",
+      name: "Soy Uruguayo",
+      datePublished: FECHA_LANZAMIENTO_DISCO,
+      albumProductionType: "https://schema.org/StudioAlbum",
+      description:
+        "Disco autogestionado de Estampas del Sur, en formato pendrive con souvenir de madera.",
+    },
+  ].filter(Boolean),
+};
+---
+
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content={description} />
+    <meta name="theme-color" content="#121110" />
+    <title>{title}</title>
+    <link rel="canonical" href={urlCanonica.toString()} />
+
+    <link rel="icon" href="/logo-nuevo.jpg" />
+    <link rel="apple-touch-icon" href="/logo-nuevo.jpg" />
+
+    <link rel="preload" as="font" type="font/woff2" href={archivoLatinWoff2} crossorigin />
+    <link rel="preload" as="font" type="font/woff2" href={newsreaderLatinWoff2} crossorigin />
+
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content={grupo.nombre} />
+    <meta property="og:url" content={urlCanonica.toString()} />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:image" content={urlOgImagen.toString()} />
+    <meta property="og:image:width" content="1600" />
+    <meta property="og:image:height" content="928" />
+    <meta property="og:locale" content="es_UY" />
+
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={urlOgImagen.toString()} />
+
+    <script type="application/ld+json" set:html={JSON.stringify(jsonLd)} />
+  </head>
+  <body>
+    <a class="salto" href="#contenido">Ir al contenido</a>
+    <Grano />
+    <slot />
+  </body>
+</html>
