@@ -95,6 +95,42 @@ test.describe("escritorio (con movimiento)", () => {
       { timeout: 4000 },
     ).toBe(true);
   });
+
+  test("foco justo después de soltar la rueda (Lenis a mitad de ease): el 5º músico no rebota fuera de pantalla", async ({
+    page,
+  }) => {
+    await irAFin(page);
+    await integrantes(page).scrollIntoViewIfNeeded();
+    await expect.poll(() => tienePinSpacer(page)).toBe(true);
+
+    // Dispara el ease de Lenis y, SIN esperar a que termine, enfoca el 5º
+    // músico. Si el foco saltara con `window.scrollTo` nativo, Lenis (que
+    // sigue tirando hacia su target viejo en el próximo frame) revertiría
+    // el salto y la fila volvería a mostrar un cuadro vacío.
+    await page.mouse.move(700, 450);
+    await page.mouse.wheel(0, 400);
+
+    const quinto = musicos(page)
+      .nth(4)
+      .getByRole("link", { name: "Instagram de Estampas del Sur" });
+    await quinto.focus();
+
+    const visible = async () => {
+      const caja = await quinto.boundingBox();
+      const ancho = page.viewportSize()!.width;
+      return !!caja && caja.x >= -1 && caja.x < ancho;
+    };
+
+    await expect.poll(visible, { timeout: 4000 }).toBe(true);
+
+    // Se mantiene visible durante el resto del ease viejo de Lenis (no sólo
+    // en el instante en que empezó a cumplirse la condición del poll).
+    const limite = Date.now() + 700;
+    while (Date.now() < limite) {
+      expect(await visible()).toBe(true);
+      await page.waitForTimeout(100);
+    }
+  });
 });
 
 test.describe("móvil (columna vertical)", () => {

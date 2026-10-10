@@ -7,7 +7,7 @@
 // Task 13 (Trayectoria) reutiliza esta misma técnica de pin horizontal.
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { condiciones, mm } from "./motion";
+import { condiciones, mm, scrollAPosicion } from "./motion";
 
 export function initIntegrantes(): void {
   const seccion = document.querySelector<HTMLElement>("#integrantes");
@@ -85,7 +85,10 @@ export function initIntegrantes(): void {
 
       const progreso = indice / (musicos.length - 1);
       const destino = st.start + progreso * (st.end - st.start);
-      window.scrollTo(0, destino);
+      // `scrollAPosicion` (no `window.scrollTo` directo): si Lenis está a
+      // mitad de un ease por una rueda/touch reciente, un salto nativo no
+      // le gana — sigue tirando hacia su target viejo y el pin rebota.
+      scrollAPosicion(destino);
     };
     seccion.addEventListener("focusin", alEnfocar);
 

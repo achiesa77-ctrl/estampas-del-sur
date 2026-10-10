@@ -69,6 +69,24 @@ export function scrollA(destino: Element): void {
   }
 }
 
+/**
+ * Salta el scroll de la página a una posición en píxeles (no a un elemento).
+ * A diferencia de `window.scrollTo` directo, si Lenis está a mitad de un
+ * ease (p. ej. el usuario soltó la rueda hace instantes) un salto nativo
+ * no alcanza: Lenis sigue tirando hacia su `targetScroll` viejo en el
+ * siguiente frame y el salto se revierte solo. `lenis.scrollTo(y, {
+ * immediate: true, force: true })` reemplaza ese target al toque.
+ * Usado por integrantes.ts (foco de teclado en la fila fijada) y pensado
+ * para que Trayectoria (Tarea 13) lo reutilice.
+ */
+export function scrollAPosicion(y: number): void {
+  if (lenis) {
+    lenis.scrollTo(y, { immediate: true, force: true });
+  } else {
+    window.scrollTo(0, y);
+  }
+}
+
 /** Bloquea el scroll de la página (menú abierto, visor, entrada de la portada). */
 export function pausarScroll(): void {
   pausas += 1;
