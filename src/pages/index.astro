@@ -2,6 +2,7 @@
 import Base from "../layouts/Base.astro";
 import Nav from "../components/Nav.astro";
 import Portada from "../components/Portada.astro";
+import Grupo from "../components/Grupo.astro";
 import { precargaElegida } from "../components/portada-foto";
 
 const precarga = await precargaElegida();
@@ -9,7 +10,6 @@ const precarga = await precargaElegida();
 // Secciones provisorias (Task 5): cada tarea posterior reemplaza su stub
 // por el componente real. Ambientes según spec §3.
 const escenas = [
-  { id: "grupo", titulo: "El Grupo", ambiente: "papel" },
   { id: "integrantes", titulo: "Integrantes", ambiente: "oscuro" },
   { id: "historia", titulo: "Historia", ambiente: "papel" },
   { id: "repertorio", titulo: "Repertorio", ambiente: "oscuro" },
@@ -35,6 +35,7 @@ const escenas = [
   <Nav />
   <main id="contenido">
     <Portada />
+    <Grupo />
     {
       escenas.map(({ id, titulo, ambiente }) => (
         <section id={id} data-ambiente={ambiente} class={`ambiente-${ambiente} escena-provisoria`}>
@@ -62,8 +63,12 @@ const escenas = [
   import { initMotion } from "../scripts/motion";
   import { initNav } from "../scripts/nav";
   import { initPortada } from "../scripts/portada";
+  import { initAmbientes } from "../scripts/ambientes";
+  import { initRevelado } from "../scripts/revelado";
 
   initMotion();
   initNav();
   initPortada();
+  initAmbientes();
+  initRevelado();
 </script>

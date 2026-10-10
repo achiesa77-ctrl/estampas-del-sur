@@ -65,6 +65,24 @@ a {
   --color-foco: var(--oro-viejo);
 }
 
+/* Cruce de ambientes (ambientes.ts, sólo motionOK): mientras el body hace
+   el fundido de color con el scroll, cada sección deja pasar ese fondo en
+   vez de pintar el suyo propio. */
+html.ambientes-js section[data-ambiente] {
+  background: transparent;
+}
+
+/* Con movimiento reducido, ambientes.ts alterna estas mismas clases en el
+   body (cruce discreto, sin scrub): un fundido corto en vez de un salto. */
+@media (prefers-reduced-motion: reduce) {
+  body.ambiente-oscuro,
+  body.ambiente-papel {
+    transition:
+      background-color 150ms ease,
+      color 150ms ease;
+  }
+}
+
 /* Tipografía utilitaria (spec §2.3) */
 .titulo {
   font-family: var(--fuente-titulo);
