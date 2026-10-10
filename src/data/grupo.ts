@@ -15,7 +15,7 @@ export const grupo: Grupo = {
   ],
   cifras: [
     { valor: 15, etiqueta: "años en escena" },
-    { valor: 3, etiqueta: "escenarios en Cosquín" },
+    { valor: 3, etiqueta: "videoclips propios" },
     { valor: 4, etiqueta: "ritmos propios" },
   ],
   ritmos: ["Milonga", "Chamarrita", "Polka", "Cumbia folklórica"],

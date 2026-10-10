@@ -17,6 +17,14 @@ describe("grupo", () => {
   it("tiene las cifras 15/3/4", () => {
     expect(grupo.cifras.map((c) => c.valor)).toEqual([15, 3, 4]);
   });
+
+  it("etiqueta las cifras como años, videoclips y ritmos (spec §3 fila 2)", () => {
+    expect(grupo.cifras.map((c) => c.etiqueta)).toEqual([
+      "años en escena",
+      "videoclips propios",
+      "ritmos propios",
+    ]);
+  });
 });
 
 describe("integrantes", () => {
