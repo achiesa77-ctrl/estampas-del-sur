@@ -226,3 +226,51 @@ section[id] {
   padding-top: calc(var(--nav-h) + 1.5rem);
   padding-bottom: clamp(2rem, 5vh, 3rem);
 }
+
+/* Copias impresas (spec §2.4): foto con borde de papel de impresión, leve
+   rotación propia (vía --rot) y sombra de elevación suave de dos capas.
+   Compartido por Historia y Disco (Tareas 4 y 11): cada componente decide
+   acá nomás su ancho, alineación y rotación (--rot, data-rotacion); esta
+   base sólo da la apariencia de "copia" y el marco/foco que anima
+   revelado.ts (modo "copia"). Nunca filter: blur (carísimo por frame de
+   scroll y re-flashea con movimiento reducido): el "foco" se simula con
+   `.copia__foco` fundiendo su opacidad de --copia a transparente. */
+.copia {
+  margin: 0;
+  padding: 0.55rem 0.55rem 0.85rem;
+  background: var(--copia);
+  box-shadow:
+    0 1px 2px rgb(0 0 0 / 20%),
+    0 14px 28px rgb(0 0 0 / 18%);
+  transform: rotate(var(--rot));
+}
+
+.copia__marco {
+  position: relative;
+  overflow: clip;
+  isolation: isolate;
+}
+
+/* El <img> de Picture trae width/height intrínsecos: sin height:auto el
+   alto se queda en el atributo literal y la foto sale estirada. */
+.copia__marco picture,
+.copia__marco img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.copia__foco {
+  position: absolute;
+  inset: 0;
+  background: var(--copia);
+  opacity: 0;
+  pointer-events: none;
+}
+
+.copia figcaption {
+  display: block;
+  margin-top: 0.5rem;
+  color: var(--lapiz);
+  text-align: center;
+}

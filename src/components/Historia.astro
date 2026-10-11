@@ -169,16 +169,13 @@ const [p1, p2, p3, p4, p5] = grupo.historia;
     color: var(--oro-viejo);
   }
 
-  /* ---------- Copias impresas (spec §2.4) ---------- */
+  /* ---------- Copias impresas (spec §2.4) ----------
+     La apariencia compartida (marco, sombra, foco, figcaption) vive en
+     src/styles/base.css (.copia, .copia__marco, .copia__foco); acá sólo el
+     ancho y la alineación propios de esta sección (copias intercaladas a
+     izquierda/derecha/centro-offset para dar ritmo editorial, craft R4). */
   .copia {
-    margin: 0;
     width: clamp(13rem, 70vw, 20rem);
-    padding: 0.55rem 0.55rem 0.85rem;
-    background: var(--copia);
-    box-shadow:
-      0 1px 2px rgb(0 0 0 / 20%),
-      0 14px 28px rgb(0 0 0 / 18%);
-    transform: rotate(var(--rot));
   }
 
   .copia--a {
@@ -192,39 +189,6 @@ const [p1, p2, p3, p4, p5] = grupo.historia;
   .copia--c {
     align-self: center;
     margin-left: clamp(0rem, 6vw, 3rem);
-  }
-
-  .copia__marco {
-    position: relative;
-    overflow: clip;
-    isolation: isolate;
-  }
-
-  /* El <img> de Picture trae width/height intrínsecos (p. ej. 1600×1200):
-     max-width:100% (base.css) sólo acota el ancho, así que sin height:auto
-     el alto se queda en el atributo literal y la foto sale estirada. */
-  .copia__marco :global(picture),
-  .copia__marco :global(img) {
-    display: block;
-    width: 100%;
-    height: auto;
-  }
-
-  /* Capa de foco: funde de --copia (opacidad 1) a transparente al entrar
-     en pantalla (revelado.ts, modo "copia"). Nunca filter: blur. */
-  .copia__foco {
-    position: absolute;
-    inset: 0;
-    background: var(--copia);
-    opacity: 0;
-    pointer-events: none;
-  }
-
-  .copia figcaption {
-    display: block;
-    margin-top: 0.5rem;
-    color: var(--lapiz);
-    text-align: center;
   }
 
   @media (max-width: 599px) {

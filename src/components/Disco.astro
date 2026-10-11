@@ -1,0 +1,161 @@
+---
+// Disco (spec §3 fila 6, papel): «Soy Uruguayo», segundo disco (2026).
+// Texto migrado de `git show main:index.html:567-633` (ver global.md),
+// corregido con el año real (spec §7: "desde el 24/07/2026") y el souvenir
+// descrito como vino en el anuncio original: de madera, con el mapa de
+// Uruguay grabado a fuego — motivo que retoma MapaUruguay.astro ("mapa
+// pirograbado", movimiento de esta sección). La foto del producto
+// (621×470, a color a propósito) se monta como copia impresa (.copia,
+// src/styles/base.css), igual que Historia; nunca se le pide un ancho
+// mayor a su natural (controller: nunca agrandarla).
+import { Picture } from "astro:assets";
+import discoFoto from "../assets/fotos/disco-soy-uruguayo.jpg";
+import { redes } from "../data/redes";
+import MapaUruguay from "./MapaUruguay.astro";
+
+const whatsappHref = `${redes.whatsapp.url}?text=${encodeURIComponent("Hola, quiero el disco Soy Uruguayo")}`;
+---
+
+<section id="disco" class="disco ambiente-papel" data-ambiente="papel" aria-labelledby="disco-titulo">
+  <div class="disco__grid">
+    <div class="disco__texto" data-revelar="simple">
+      <p class="dato disco__eyebrow">Ya disponible</p>
+      <h2 class="titulo disco__titulo" id="disco-titulo">«Soy Uruguayo»</h2>
+      <p class="dato disco__dato">Segundo disco · 2026</p>
+
+      <div class="disco__mapa">
+        <MapaUruguay />
+      </div>
+
+      <p class="medida disco__cuerpo">
+        Después de un tiempo de trabajo, dedicación y mucho compromiso, presentamos nuestro nuevo disco.
+        Un proyecto completamente autogestionado, hecho con cariño y respeto por nuestra música: detrás de
+        cada canción hay horas de ensayo, esfuerzo y el deseo de compartir algo que nos representa
+        profundamente.
+      </p>
+
+      <ul class="disco__specs medida">
+        <li>En formato <strong>pendrive</strong>, para escucharlo desde cualquier dispositivo.</li>
+        <li>
+          Incluye un <strong>souvenir de madera</strong> con el mapa de Uruguay grabado a fuego, hecho
+          especialmente para esta edición.
+        </li>
+      </ul>
+
+      <div class="disco__acciones">
+        <a class="boton boton--primario" href={whatsappHref} target="_blank" rel="noopener">
+          Pedir el disco por WhatsApp
+        </a>
+        <a class="boton boton--secundario" href={redes.instagram} target="_blank" rel="noopener">
+          Escribir por Instagram
+        </a>
+      </div>
+
+      <p class="medida disco__nota">
+        Disponible desde el viernes 24 de julio de 2026 · Pedidos al {redes.whatsapp.numero} o por
+        cualquiera de nuestras redes.
+      </p>
+    </div>
+
+    <figure class="copia disco__copia" data-revelar="copia" data-rotacion="-1.2" style="--rot: -1.2deg">
+      <div class="copia__marco">
+        <Picture
+          src={discoFoto}
+          formats={["avif", "webp"]}
+          widths={[360, 621]}
+          sizes="(min-width: 900px) 360px, 80vw"
+          alt="El disco «Soy Uruguayo» en pendrive con el logo grabado, junto al souvenir de madera con forma del mapa de Uruguay"
+          loading="lazy"
+          decoding="async"
+        />
+        <span class="copia__foco" aria-hidden="true"></span>
+      </div>
+      <figcaption class="epigrafe">
+        «Es una producción independiente, hecha con mucho esfuerzo, dedicación y corazón.»
+      </figcaption>
+    </figure>
+  </div>
+</section>
+
+<style>
+  .disco {
+    position: relative;
+    isolation: isolate;
+    padding: calc(var(--nav-h) + 3rem) clamp(1.25rem, 5vw, 4rem) clamp(3rem, 8vh, 5rem);
+  }
+
+  .disco__grid {
+    display: grid;
+    gap: clamp(2.5rem, 6vh, 3.5rem);
+    align-items: start;
+  }
+
+  @media (min-width: 900px) {
+    .disco__grid {
+      grid-template-columns: 1fr minmax(16rem, 23rem);
+      gap: clamp(2rem, 5vw, 4rem);
+    }
+  }
+
+  .disco__eyebrow {
+    margin: 0 0 0.75rem;
+    color: var(--oro-viejo);
+  }
+
+  .disco__titulo {
+    margin: 0;
+    font-size: clamp(var(--paso-3), 6vw, var(--paso-5));
+  }
+
+  .disco__dato {
+    margin: 0.5rem 0 0;
+    color: var(--lapiz);
+  }
+
+  /* El mapa es un acento, no el protagonista: ancho acotado para que no
+     compita con el título ni con la foto. */
+  .disco__mapa {
+    width: clamp(9rem, 20vw, 12rem);
+    margin: clamp(1.5rem, 4vh, 2rem) 0;
+  }
+
+  .disco__cuerpo {
+    margin: 0 0 clamp(1.5rem, 4vh, 2rem);
+    font-size: clamp(var(--paso-1), 1.6vw, var(--paso-2));
+  }
+
+  .disco__specs {
+    display: grid;
+    gap: 0.75rem;
+    margin: 0 0 clamp(1.75rem, 4vh, 2.25rem);
+    padding-left: 1.25rem;
+  }
+
+  .disco__acciones {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+  }
+
+  .disco__nota {
+    margin: 1.25rem 0 0;
+    color: var(--lapiz);
+  }
+
+  /* ---------- Copia (foto del disco) ----------
+     Base compartida en src/styles/base.css (.copia, .copia__marco,
+     .copia__foco); acá sólo el ancho, acotado a la foto natural
+     (621×470 — nunca se agranda más allá de eso) y la posición. */
+  .disco__copia {
+    width: 100%;
+    max-width: min(90vw, 23.3rem); /* 23.3rem ≈ 373px: el 621px natural ya
+      entra de sobra en cualquier columna ≥ 900px sin pedir un ancho mayor */
+    justify-self: center;
+  }
+
+  @media (min-width: 900px) {
+    .disco__copia {
+      justify-self: end;
+    }
+  }
+</style>

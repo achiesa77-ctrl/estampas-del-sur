@@ -201,9 +201,57 @@ function revelarCopias(): void {
   });
 }
 
+/** [data-revelar="trazo"]: el contorno de Uruguay (Disco, spec §3 fila 6,
+ *  "mapa pirograbado") se dibuja en trazo dorado al entrar en pantalla; el
+ *  punto de Pando aparece recién cuando el trazo termina de dibujarse.
+ *  MapaUruguay.astro ya deja el trazo dibujado y el punto visible como
+ *  estado final sin JS (stroke-dasharray:1 / stroke-dashoffset:0); acá sólo
+ *  se anima la entrada cuando hay movimiento (reduce: se queda con ese
+ *  estado final, igual que sin JS). */
+function revelarTrazo(): void {
+  const trazos = gsap.utils.toArray<SVGPathElement>('[data-revelar="trazo"]');
+  if (!trazos.length) return;
+
+  mm.add({ motionOK: condiciones.motionOK, reduce: condiciones.reduce }, (ctx) => {
+    const { motionOK } = ctx.conditions ?? {};
+    if (!motionOK) return;
+
+    for (const trazo of trazos) {
+      const punto = trazo.closest("svg")?.querySelector<SVGElement>("[data-punto]");
+      if (punto) gsap.set(punto, { opacity: 0 });
+
+      ScrollTrigger.create({
+        trigger: trazo,
+        start: "top 80%",
+        once: true,
+        onEnter: () => {
+          gsap.fromTo(
+            trazo,
+            { strokeDashoffset: 1 },
+            {
+              strokeDashoffset: 0,
+              duration: 2.2,
+              ease: "power2.inOut",
+              // autoRound:false — con pathLength="1" el valor va de 1 a 0;
+              // GSAP redondea strokeDashoffset a entero por defecto, así
+              // que sin esto el trazo queda pegado en 1 y salta a 0 de
+              // golpe (mismo hallazgo que en portada.ts, círculo de lápiz).
+              autoRound: false,
+              onComplete: () => {
+                if (punto) gsap.to(punto, { opacity: 1, duration: 0.3, ease: "power1.out" });
+              },
+            },
+          );
+        },
+      });
+    }
+  });
+}
+
 export function initRevelado(): void {
   revelarLineas();
   revelarContadores();
   revelarSimple();
   revelarCopias();
+  revelarTrazo();
 }

@@ -6,6 +6,7 @@ import Grupo from "../components/Grupo.astro";
 import Integrantes from "../components/Integrantes.astro";
 import Historia from "../components/Historia.astro";
 import Repertorio from "../components/Repertorio.astro";
+import Disco from "../components/Disco.astro";
 import Agenda from "../components/Agenda.astro";
 import { precargaElegida } from "../components/portada-foto";
 
@@ -15,7 +16,6 @@ const precarga = await precargaElegida();
 // por el componente real. Ambientes según spec §3. Se parte en dos grupos
 // porque Agenda (Tarea 9, componente real) va entre Trayectoria y Galería.
 const escenasAntesDeAgenda = [
-  { id: "disco", titulo: "El Disco", ambiente: "papel" },
   { id: "videos", titulo: "Videos", ambiente: "oscuro" },
   { id: "trayectoria", titulo: "Trayectoria", ambiente: "papel" },
 ] as const;
@@ -43,6 +43,7 @@ const escenasDespuesDeAgenda = [
     <Integrantes />
     <Historia />
     <Repertorio />
+    <Disco />
     {
       escenasAntesDeAgenda.map(({ id, titulo, ambiente }) => (
         <section id={id} data-ambiente={ambiente} class={`ambiente-${ambiente} escena-provisoria`}>
