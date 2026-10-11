@@ -56,7 +56,15 @@ export function initMotion(): void {
 
 /** Lleva `destino` bajo el nav (manda su scroll-margin-top) y le pasa el foco. */
 export function scrollA(destino: Element): void {
-  if (lenis) {
+  // Sección con pin (Integrantes, Trayectoria): mientras está fijada o ya
+  // pasada, su propio rect marca dónde está pintada, no dónde EMPIEZA el
+  // pin. El .pin-spacer que la envuelve sí queda en el flujo: se mide ése
+  // y se descuenta el scroll-margin de la sección (Review Focus 3).
+  const spacer = destino.parentElement;
+  if (lenis && spacer?.classList.contains("pin-spacer")) {
+    const margen = Number.parseFloat(getComputedStyle(destino).scrollMarginTop) || 0;
+    lenis.scrollTo(spacer.getBoundingClientRect().top + window.scrollY - margen);
+  } else if (lenis) {
     lenis.scrollTo(destino as HTMLElement);
   } else {
     // Sin Lenis (movimiento reducido): salto nativo, también respeta scroll-margin.

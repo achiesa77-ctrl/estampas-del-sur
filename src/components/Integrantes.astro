@@ -226,6 +226,9 @@ const fotos = {
     display: flex;
     flex-direction: column;
     padding: calc(var(--nav-h) + 1.5rem) 0 0;
+    /* El anclaje del menú debe caer en el inicio del pin (Review Focus 3):
+       el padding de arriba ya deja el título debajo del nav. */
+    scroll-margin-top: 0;
   }
 
   .integrantes[data-fila] .integrantes__titulo {

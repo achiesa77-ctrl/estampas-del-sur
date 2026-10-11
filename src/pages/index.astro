@@ -8,17 +8,15 @@ import Historia from "../components/Historia.astro";
 import Repertorio from "../components/Repertorio.astro";
 import Disco from "../components/Disco.astro";
 import Videos from "../components/Videos.astro";
+import Trayectoria from "../components/Trayectoria.astro";
 import Agenda from "../components/Agenda.astro";
 import { precargaElegida } from "../components/portada-foto";
 
 const precarga = await precargaElegida();
 
 // Secciones provisorias (Task 5): cada tarea posterior reemplaza su stub
-// por el componente real. Ambientes según spec §3. Se parte en dos grupos
-// porque Agenda (Tarea 9, componente real) va entre Trayectoria y Galería.
-const escenasAntesDeAgenda = [{ id: "trayectoria", titulo: "Trayectoria", ambiente: "papel" }] as const;
-
-const escenasDespuesDeAgenda = [
+// por el componente real. Ambientes según spec §3.
+const escenasProvisorias = [
   { id: "galeria", titulo: "Galería", ambiente: "oscuro" },
   { id: "contacto", titulo: "Contrataciones", ambiente: "oscuro" },
 ] as const;
@@ -43,16 +41,10 @@ const escenasDespuesDeAgenda = [
     <Repertorio />
     <Disco />
     <Videos />
-    {
-      escenasAntesDeAgenda.map(({ id, titulo, ambiente }) => (
-        <section id={id} data-ambiente={ambiente} class={`ambiente-${ambiente} escena-provisoria`}>
-          <h2 class="titulo">{titulo}</h2>
-        </section>
-      ))
-    }
+    <Trayectoria />
     <Agenda />
     {
-      escenasDespuesDeAgenda.map(({ id, titulo, ambiente }) => (
+      escenasProvisorias.map(({ id, titulo, ambiente }) => (
         <section id={id} data-ambiente={ambiente} class={`ambiente-${ambiente} escena-provisoria`}>
           <h2 class="titulo">{titulo}</h2>
         </section>
@@ -83,6 +75,7 @@ const escenasDespuesDeAgenda = [
   import { initIntegrantes } from "../scripts/integrantes";
   import { initReproductor } from "../scripts/reproductor";
   import { initVideos } from "../scripts/videos";
+  import { initTrayectoria } from "../scripts/trayectoria";
 
   initMotion();
   initNav();
@@ -92,4 +85,5 @@ const escenasDespuesDeAgenda = [
   initIntegrantes();
   initReproductor();
   initVideos();
+  initTrayectoria();
 </script>

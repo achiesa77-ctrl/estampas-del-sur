@@ -1,0 +1,246 @@
+---
+// Trayectoria (spec §3 fila 8, papel): los 9 hitos como cuadros de una
+// tira de negativos (película oscura con perforaciones sobre el papel).
+// Por defecto (sin JS / móvil / movimiento reducido) la tira corre en
+// vertical — el estado final visible sin JS. Con motionOK && ancho,
+// src/scripts/trayectoria.ts la pone en fila, fija la sección y la desplaza
+// en `x` con scrub (misma técnica que Integrantes); el contador «Cuadro
+// 03 / 09» sólo existe en ese modo.
+import { trayectoria } from "../data/trayectoria";
+
+const dosCifras = (n: number) => String(n).padStart(2, "0");
+const total = dosCifras(trayectoria.length);
+---
+
+<section
+  id="trayectoria"
+  class="trayectoria ambiente-papel"
+  data-ambiente="papel"
+  aria-labelledby="trayectoria-titulo"
+>
+  <div class="trayectoria__cabezal">
+    <h2 class="titulo trayectoria__titulo" id="trayectoria-titulo">Trayectoria</h2>
+    <p class="dato trayectoria__bajada">
+      {trayectoria[0].anio} – {trayectoria[trayectoria.length - 1].anio}
+    </p>
+    <p class="dato tira__contador" aria-hidden="true">
+      Cuadro <span class="tira__actual">01</span> / {total}
+    </p>
+  </div>
+
+  <ol class="tira">
+    {
+      trayectoria.map((hito, indice) => (
+        <li class="cuadro">
+          <span class="dato cuadro__num" aria-hidden="true">
+            {dosCifras(indice + 1)}
+          </span>
+          <p class="titulo cuadro__anio">{hito.anio}</p>
+          <h3 class="dato cuadro__titulo">{hito.titulo}</h3>
+          <p class="cuadro__texto">{hito.texto}</p>
+        </li>
+      ))
+    }
+  </ol>
+</section>
+
+<style>
+  .trayectoria {
+    position: relative;
+    isolation: isolate;
+    padding: calc(var(--nav-h) + 3rem) clamp(1.25rem, 5vw, 4rem) clamp(3rem, 8vh, 5rem);
+    /* Perforación de 35mm: un agujero redondeado por paso. Va como máscara
+       (no como imagen) para que el color salga de un token y no de un hex
+       metido en el SVG. */
+    --perf-h: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='22' height='14'%3E%3Crect x='6' y='3' width='10' height='8' rx='1.5'/%3E%3C/svg%3E");
+    --perf-v: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='22'%3E%3Crect x='3' y='6' width='8' height='10' rx='1.5'/%3E%3C/svg%3E");
+  }
+
+  .trayectoria__cabezal {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 0.5rem 1.5rem;
+    margin: 0 0 clamp(1.75rem, 5vh, 2.75rem);
+  }
+
+  .trayectoria__titulo {
+    margin: 0;
+    font-size: clamp(var(--paso-3), 6vw, var(--paso-5));
+  }
+
+  .trayectoria__bajada,
+  .tira__contador {
+    margin: 0;
+    color: var(--lapiz);
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* El contador sólo tiene sentido con la tira fijada: en vertical el orden
+     ya se lee solo y un «Cuadro 01» quieto mentiría. */
+  .tira__contador {
+    display: none;
+    margin-left: auto;
+  }
+
+  .tira__actual {
+    display: inline-block;
+    color: var(--tinta);
+  }
+
+  /* ---------- Tira (estado final visible sin JS): vertical ---------- */
+  .tira {
+    position: relative;
+    display: grid;
+    gap: 6px; /* línea de cuadro: la película asoma entre fotogramas */
+    max-width: 44rem;
+    margin: 0 auto;
+    padding: 6px 2.25rem;
+    list-style: none;
+    background: var(--tinta);
+    color: var(--papel);
+  }
+
+  /* Bandas de perforaciones a los costados (en fila pasan arriba/abajo). */
+  .tira::before,
+  .tira::after {
+    content: "";
+    position: absolute;
+    inset-block: 0;
+    width: 14px;
+    background: var(--papel);
+    -webkit-mask: var(--perf-v) repeat-y center top;
+    mask: var(--perf-v) repeat-y center top;
+    pointer-events: none;
+  }
+
+  .tira::before {
+    left: 11px;
+  }
+
+  .tira::after {
+    right: 11px;
+  }
+
+  .cuadro {
+    position: relative;
+    display: grid;
+    align-content: end;
+    gap: 0.5rem;
+    padding: clamp(1.25rem, 4vw, 2rem);
+    background: color-mix(in srgb, var(--tinta) 90%, var(--papel));
+    overflow: clip;
+  }
+
+  .cuadro__num {
+    position: absolute;
+    top: 0.75rem;
+    right: 1rem;
+    font-size: 0.875rem;
+    color: var(--plata);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .cuadro__anio {
+    margin: 0 0 0.25rem;
+    font-size: clamp(3.5rem, 14vw, 5.5rem);
+    line-height: 0.85;
+    color: var(--papel);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .cuadro__titulo {
+    margin: 0;
+    font-size: var(--paso-2);
+    font-weight: 700;
+    color: var(--oro);
+  }
+
+  .cuadro__texto {
+    margin: 0;
+    max-width: 38ch;
+    font-family: var(--fuente-cuerpo);
+    font-size: var(--paso-1);
+    line-height: 1.55;
+    color: var(--papel);
+  }
+
+  /* ---------- Fila fijada (trayectoria.ts, motionOK && ancho) ----------
+     [data-tira] lo pone/quita el controlador: cruzar los 900px o activar
+     movimiento reducido revierte a la tira vertical sin restos. */
+  .trayectoria[data-tira] {
+    height: 100svh;
+    display: flex;
+    flex-direction: column;
+    overflow: clip;
+    padding: calc(var(--nav-h) + 1.5rem) 0 clamp(1.5rem, 5vh, 3rem);
+    /* El anclaje del menú debe caer en el inicio del pin (Review Focus 3):
+       el padding de arriba ya deja el título debajo del nav. */
+    scroll-margin-top: 0;
+  }
+
+  .trayectoria[data-tira] .trayectoria__cabezal {
+    flex: none;
+    margin: 0 clamp(1.25rem, 5vw, 4rem) clamp(1rem, 3vh, 1.75rem);
+  }
+
+  .trayectoria[data-tira] .tira__contador {
+    display: block;
+    font-size: var(--paso-2);
+  }
+
+  .trayectoria[data-tira] .tira {
+    flex: 1 1 auto;
+    display: flex;
+    width: max-content;
+    max-width: none;
+    min-height: 0;
+    margin: 0;
+    padding: 2rem clamp(1.25rem, 5vw, 4rem);
+  }
+
+  .trayectoria[data-tira] .tira::before,
+  .trayectoria[data-tira] .tira::after {
+    inset-block: auto;
+    inset-inline: 0;
+    width: auto;
+    height: 14px;
+    -webkit-mask: var(--perf-h) repeat-x left center;
+    mask: var(--perf-h) repeat-x left center;
+  }
+
+  .trayectoria[data-tira] .tira::before {
+    top: 9px;
+  }
+
+  .trayectoria[data-tira] .tira::after {
+    top: auto;
+    bottom: 9px;
+  }
+
+  /* Cuadro alto a pantalla: el año arriba y el rótulo abajo, para que el
+     fotograma no quede con media altura vacía. */
+  .trayectoria[data-tira] .cuadro {
+    flex: none;
+    grid-template-rows: auto 1fr auto auto;
+    align-content: stretch;
+    width: clamp(24rem, 34vw, 32rem);
+    padding: clamp(2.25rem, 5vh, 3rem) 2rem clamp(1.5rem, 3vh, 2.25rem);
+  }
+
+  /* Techo medido contra el año más ancho («2016») en el cuadro más
+     angosto: más grande, el año se corta contra la línea de cuadro. */
+  .trayectoria[data-tira] .cuadro__anio {
+    grid-row: 1;
+    font-size: clamp(5rem, 7.5vw, 7.5rem);
+    will-change: transform;
+  }
+
+  .trayectoria[data-tira] .cuadro__titulo {
+    grid-row: 3;
+  }
+
+  .trayectoria[data-tira] .cuadro__texto {
+    grid-row: 4;
+  }
+</style>
