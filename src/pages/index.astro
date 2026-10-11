@@ -7,6 +7,7 @@ import Integrantes from "../components/Integrantes.astro";
 import Historia from "../components/Historia.astro";
 import Repertorio from "../components/Repertorio.astro";
 import Disco from "../components/Disco.astro";
+import Videos from "../components/Videos.astro";
 import Agenda from "../components/Agenda.astro";
 import { precargaElegida } from "../components/portada-foto";
 
@@ -15,10 +16,7 @@ const precarga = await precargaElegida();
 // Secciones provisorias (Task 5): cada tarea posterior reemplaza su stub
 // por el componente real. Ambientes según spec §3. Se parte en dos grupos
 // porque Agenda (Tarea 9, componente real) va entre Trayectoria y Galería.
-const escenasAntesDeAgenda = [
-  { id: "videos", titulo: "Videos", ambiente: "oscuro" },
-  { id: "trayectoria", titulo: "Trayectoria", ambiente: "papel" },
-] as const;
+const escenasAntesDeAgenda = [{ id: "trayectoria", titulo: "Trayectoria", ambiente: "papel" }] as const;
 
 const escenasDespuesDeAgenda = [
   { id: "galeria", titulo: "Galería", ambiente: "oscuro" },
@@ -44,6 +42,7 @@ const escenasDespuesDeAgenda = [
     <Historia />
     <Repertorio />
     <Disco />
+    <Videos />
     {
       escenasAntesDeAgenda.map(({ id, titulo, ambiente }) => (
         <section id={id} data-ambiente={ambiente} class={`ambiente-${ambiente} escena-provisoria`}>
@@ -83,6 +82,7 @@ const escenasDespuesDeAgenda = [
   import { initRevelado } from "../scripts/revelado";
   import { initIntegrantes } from "../scripts/integrantes";
   import { initReproductor } from "../scripts/reproductor";
+  import { initVideos } from "../scripts/videos";
 
   initMotion();
   initNav();
@@ -91,4 +91,5 @@ const escenasDespuesDeAgenda = [
   initRevelado();
   initIntegrantes();
   initReproductor();
+  initVideos();
 </script>

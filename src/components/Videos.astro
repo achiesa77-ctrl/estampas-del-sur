@@ -1,0 +1,201 @@
+---
+// Videos (spec §3 fila 7, oscuro): videoclips de YouTube, el primero
+// destacado a ancho completo y los otros dos en 2 columnas (1 en móvil).
+// Texto/IDs migrados de `git show main:index.html:636-700` (ver
+// src/data/videos.ts); orden del más reciente al más viejo con el primero
+// destacado, igual que el original.
+//
+// Progresión sin JS → con JS (decisión del controlador): cada tarjeta se
+// sirve como un <a href="https://www.youtube.com/watch?v={id}">, un enlace
+// real que funciona sin script. `role="button"` sobre un <a> no alcanza
+// (activación por Enter únicamente, sin Espacio, y el navegador igual
+// navegaría al href en vez de abrir el facade): initVideos() (src/scripts
+// /videos.ts) REEMPLAZA cada <a> por un <button> real del mismo contenido,
+// en vez de servir los dos a la vez y ocultar uno con CSS (patrón de
+// Repertorio): acá no hace falta — el enlace y el botón son el *mismo*
+// control con el mismo texto/clases, sólo cambia qué pasa al activarlo, así
+// que duplicar el marcado sólo agregaría dos miniaturas descargándose en
+// vez de una. El botón resultante abre el iframe facade (ver videos.ts).
+import type { Video } from "../data/tipos";
+import { videos } from "../data/videos";
+
+const miniaturaDe = (video: Video) => `https://i.ytimg.com/vi/${video.id}/hqdefault.jpg`;
+const watchDe = (video: Video) => `https://www.youtube.com/watch?v=${video.id}`;
+---
+
+<section
+  id="videos"
+  class="videos ambiente-oscuro"
+  data-ambiente="oscuro"
+  aria-labelledby="videos-titulo"
+>
+  <h2 class="titulo videos__titulo" id="videos-titulo">Videos</h2>
+
+  <ul class="videos__grid">
+    {
+      videos.map((video, indice) => (
+        <li class={`videos__item${indice === 0 ? " videos__item--feat" : ""}`}>
+          <a
+            class={`video${indice === 0 ? " video--feat" : ""}`}
+            href={watchDe(video)}
+            aria-label={`Reproducir video: ${video.titulo}`}
+            data-yt={video.id}
+            data-titulo={video.titulo}
+          >
+            <span class="video__marco">
+              <img
+                class="video__img"
+                src={miniaturaDe(video)}
+                alt=""
+                loading="lazy"
+                width="480"
+                height="360"
+              />
+            </span>
+            <span class="video__titulo dato">
+              {video.titulo}
+              {video.anio ? ` · ${video.anio}` : ""}
+            </span>
+          </a>
+        </li>
+      ))
+    }
+  </ul>
+</section>
+
+<style>
+  .videos {
+    position: relative;
+    isolation: isolate;
+    padding: calc(var(--nav-h) + 3rem) clamp(1.25rem, 5vw, 4rem) clamp(3rem, 8vh, 5rem);
+  }
+
+  .videos__titulo {
+    margin: 0 0 clamp(1.75rem, 5vh, 2.75rem);
+    font-size: clamp(var(--paso-3), 6vw, var(--paso-5));
+  }
+
+  .videos__grid {
+    display: grid;
+    gap: clamp(1.75rem, 4vw, 2.75rem);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    grid-template-columns: 1fr;
+  }
+
+  @media (min-width: 640px) {
+    .videos__grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+
+    /* El destacado ocupa las dos columnas; los otros dos quedan de a uno
+       por columna (spec: "los otros dos en 2 columnas"). */
+    .videos__item--feat {
+      grid-column: 1 / -1;
+    }
+  }
+
+  /* Reset de botón/enlace: el mismo aspecto sirva de <a> (sin JS) o de
+     <button> (con JS, ver videos.ts) — nunca transition:all. */
+  .video {
+    display: block;
+    width: 100%;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: inherit;
+    font: inherit;
+    text-align: left;
+    text-decoration: none;
+    cursor: pointer;
+  }
+
+  /* Al fijar `display` arriba se pierde la regla nativa `[hidden]{display:
+     none}` del navegador (el estilo de autor gana por origen de cascada,
+     aunque la especificidad sea la misma): videos.ts oculta con `hidden` el
+     botón cuyo iframe está sonando, así que hay que restaurarla a mano. */
+  .video[hidden] {
+    display: none;
+  }
+
+  /* Marco con proporción reservada (hqdefault.jpg es siempre 480×360): evita
+     CLS aunque la miniatura tarde en cargar (loading="lazy"). */
+  .video__marco {
+    position: relative;
+    isolation: isolate;
+    overflow: hidden;
+    aspect-ratio: 480 / 360;
+    background: var(--oscuro);
+  }
+
+  /* R4: miniatura externa de YouTube en B/N por CSS (excepción aceptada;
+     las fotos propias nunca llevan filtro, se gradúan en build). */
+  .video__img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    filter: grayscale(1);
+    transition: transform 400ms cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  /* Franjas de cine: pseudo-elementos sobre el MARCO (nunca sobre la
+     miniatura), 10% de alto cada una, color --oscuro. Al no tener
+     `position` la miniatura queda "estática" y se pinta antes que estas
+     capas absolutas, así que las franjas siempre quedan por encima sin
+     necesitar z-index. */
+  .video__marco::before,
+  .video__marco::after {
+    content: "";
+    position: absolute;
+    inset-inline: 0;
+    height: 10%;
+    background: var(--oscuro);
+    pointer-events: none;
+    transition: transform 400ms cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .video__marco::before {
+    top: 0;
+    transform-origin: top;
+  }
+
+  .video__marco::after {
+    bottom: 0;
+    transform-origin: bottom;
+  }
+
+  .video__titulo {
+    display: block;
+    margin-top: 0.75rem;
+  }
+
+  .video--feat .video__titulo {
+    font-size: clamp(var(--paso-1), 1.6vw, var(--paso-2));
+  }
+
+  /* Acercamiento al pasar el mouse: sólo puntero fino + motionOK (hover
+     táctil no cuenta como hover de verdad, y con movimiento reducido no hay
+     zoom). Sólo transform, ≤400ms, propiedades nombradas. */
+  @media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
+    .video:hover .video__img {
+      transform: scale(1.04);
+    }
+
+    .video:hover .video__marco::before,
+    .video:hover .video__marco::after {
+      transform: scaleY(0.6);
+    }
+  }
+
+  /* Facade → iframe (videos.ts): mismo marco que la miniatura, sin bordes.
+     A propósito NO se agrega `pointer-events:none` acá (romperían los
+     controles nativos de YouTube y el scroll vía Lenis ya convive con
+     iframes en el resto del sitio). */
+  .video__frame {
+    display: block;
+    width: 100%;
+    aspect-ratio: 480 / 360;
+    border: 0;
+  }
+</style>
