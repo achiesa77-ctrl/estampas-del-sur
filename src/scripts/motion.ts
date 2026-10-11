@@ -34,6 +34,22 @@ export const reduceMotion = (): boolean => window.matchMedia(condiciones.reduce)
 export function initMotion(): void {
   gsap.registerPlugin(ScrollTrigger, SplitText, Flip);
 
+  // Fuentes con font-display: swap: ScrollTrigger mide todo en el `load`,
+  // pero las variables de Archivo/Newsreader pueden llegar DESPUÉS (medido:
+  // load a 220ms, fuentes a 246ms; en red lenta, mucho más tarde). La
+  // fuente de reemplazo es más alta, así que la página se achicaba ~135px
+  // en móvil sin que nadie volviera a medir y TODOS los start/end quedaban
+  // corridos — los créditos finales, por ejemplo, nunca terminaban de
+  // entrar. Se vuelve a medir cada vez que termina de cargar una tanda de
+  // fuentes (un refresh por cuadro como máximo).
+  let remedicion = 0;
+  const remedir = () => {
+    cancelAnimationFrame(remedicion);
+    remedicion = requestAnimationFrame(() => ScrollTrigger.refresh());
+  };
+  document.fonts?.addEventListener("loadingdone", remedir);
+  void document.fonts?.ready.then(remedir);
+
   // Sólo depende de motionOK: cruzar los 900px no debe recrear Lenis.
   mm.add(condiciones.motionOK, () => {
     const instancia = new Lenis({ autoRaf: false });
