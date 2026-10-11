@@ -11,15 +11,11 @@ import Videos from "../components/Videos.astro";
 import Trayectoria from "../components/Trayectoria.astro";
 import Agenda from "../components/Agenda.astro";
 import Galeria from "../components/Galeria.astro";
+import Contacto from "../components/Contacto.astro";
+import Creditos from "../components/Creditos.astro";
 import { precargaElegida } from "../components/portada-foto";
 
 const precarga = await precargaElegida();
-
-// Secciones provisorias (Task 5): cada tarea posterior reemplaza su stub
-// por el componente real. Ambientes según spec §3.
-const escenasProvisorias = [
-  { id: "contacto", titulo: "Contrataciones", ambiente: "oscuro" },
-] as const;
 ---
 
 <Base>
@@ -44,28 +40,10 @@ const escenasProvisorias = [
     <Trayectoria />
     <Agenda />
     <Galeria />
-    {
-      escenasProvisorias.map(({ id, titulo, ambiente }) => (
-        <section id={id} data-ambiente={ambiente} class={`ambiente-${ambiente} escena-provisoria`}>
-          <h2 class="titulo">{titulo}</h2>
-        </section>
-      ))
-    }
+    <Contacto />
   </main>
+  <Creditos />
 </Base>
-
-<style>
-  .escena-provisoria {
-    min-height: 100vh;
-    padding: calc(var(--nav-h) + 2rem) clamp(1rem, 4vw, 3rem) 2rem;
-  }
-
-  .escena-provisoria .titulo {
-    margin: 0;
-    font-size: clamp(var(--paso-2), 8vw, var(--paso-5));
-    overflow-wrap: anywhere;
-  }
-</style>
 
 <script>
   import { initMotion } from "../scripts/motion";

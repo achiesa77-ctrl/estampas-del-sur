@@ -294,10 +294,73 @@ function revelarTrazo(): void {
   });
 }
 
+/** [data-revelar="creditos"]: créditos finales (Creditos.astro, spec §3
+ *  fila 11). Cada fila sube (y 60→0) y aparece con scrub a medida que
+ *  entra; el emblema entra al final (scale .9→1 + opacidad). Reduce: sólo
+ *  opacidad, también atada al scroll (no hay desplazamiento que marear).
+ *
+ *  El pie es lo último de la página: un `end` fijo como "top 60%" puede
+ *  quedar MÁS ABAJO del scroll máximo y los créditos se quedarían a medio
+ *  entrar para siempre. `clamp()` (GSAP ≥ 3.12) recorta start/end al
+ *  recorrido posible, así que al tocar fondo todo termina en su estado
+ *  final. */
+function revelarCreditos(): void {
+  const pies = gsap.utils.toArray<HTMLElement>('[data-revelar="creditos"]');
+  if (!pies.length) return;
+
+  mm.add({ motionOK: condiciones.motionOK, reduce: condiciones.reduce }, (ctx) => {
+    const { motionOK } = ctx.conditions ?? {};
+
+    for (const pie of pies) {
+      const filas = gsap.utils.toArray<HTMLElement>(
+        ".creditos__fila-extra, .creditos__fila",
+        pie,
+      );
+      for (const fila of filas) {
+        gsap.fromTo(
+          fila,
+          motionOK ? { y: 60, opacity: 0 } : { opacity: 0 },
+          {
+            ...(motionOK ? { y: 0 } : {}),
+            opacity: 1,
+            ease: "none",
+            scrollTrigger: {
+              trigger: fila,
+              start: "clamp(top bottom)",
+              end: "clamp(top 70%)",
+              scrub: motionOK ? 0.6 : true,
+            },
+          },
+        );
+      }
+
+      const emblema = pie.querySelector<HTMLElement>(".creditos__emblema");
+      if (emblema) {
+        gsap.fromTo(
+          emblema,
+          motionOK ? { scale: 0.9, opacity: 0 } : { opacity: 0 },
+          {
+            ...(motionOK ? { scale: 1 } : {}),
+            opacity: 1,
+            ease: "none",
+            scrollTrigger: {
+              trigger: emblema,
+              start: "clamp(top 95%)",
+              end: "clamp(center 65%)",
+              scrub: motionOK ? 0.6 : true,
+            },
+          },
+        );
+      }
+    }
+  });
+}
+
 export function initRevelado(): void {
   revelarLineas();
   revelarContadores();
   revelarSimple();
   revelarCopias();
   revelarTrazo();
+  revelarCreditos();
 }
