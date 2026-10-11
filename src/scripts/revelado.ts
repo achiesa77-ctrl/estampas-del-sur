@@ -14,6 +14,29 @@ function leerToken(variable: string): string {
   return getComputedStyle(document.documentElement).getPropertyValue(variable).trim();
 }
 
+/** Hallazgo de la ronda 1 de revisión (Tarea 11): si el elemento YA cruzó
+ *  su umbral de entrada en el momento en que se registra el ScrollTrigger
+ *  (la página cargó con un salto directo a la sección — `/#disco` —, o a
+ *  una sección que ya entra en el viewport inicial), `ScrollTrigger` dispara
+ *  `onEnter` casi de inmediato. Esta guarda evita animar lo que ya está a
+ *  la vista (sólo se confirma su estado final, sin transición): sólo se
+ *  anima lo que de verdad está por entrar.
+ *
+ *  Para lo que sí está por entrar, las funciones de abajo NO usan
+ *  `gsap.fromTo` dentro de `onEnter`: `fromTo` renderiza su estado "from"
+ *  recién al crear el tween, y si ese "salto a la vista" ocurre con el
+ *  scroll ya detenido (nav + `prefers-reduced-motion: reduce`, que hace un
+ *  salto nativo en vez de scroll suave — ver `scrollA()` en motion.ts — o
+ *  cualquier salto instantáneo de scroll), el contenido ya está pintado en
+ *  pantalla (opacidad 1, CSS por defecto) un instante antes de que el
+ *  "from" lo apague de golpe: un parpadeo, no una entrada. En cambio, se
+ *  oculta con `gsap.set` apenas se registra (antes de cualquier scroll,
+ *  gradual o instantáneo) y se anima sólo hacia el estado final con
+ *  `gsap.to`, para que nunca exista un cuadro donde algo visible se apague. */
+function yaEntro(el: Element, porcentajeViewport: number): boolean {
+  return el.getBoundingClientRect().top <= window.innerHeight * porcentajeViewport;
+}
+
 /** [data-revelar="lineas"]: cada línea del texto pasa de --lapiz a
  *  --tinta a medida que se desplaza por la franja de lectura. */
 function revelarLineas(): void {
@@ -129,13 +152,23 @@ function revelarSimple(): void {
   mm.add({ motionOK: condiciones.motionOK, reduce: condiciones.reduce }, (ctx) => {
     const { motionOK } = ctx.conditions ?? {};
 
-    ScrollTrigger.batch(elementos, {
+    const yaVisibles = elementos.filter((el) => yaEntro(el, 0.85));
+    const porRevelar = elementos.filter((el) => !yaEntro(el, 0.85));
+    // Ya estaban a la vista (CSS, sin JS): se confirma el estado final sin
+    // transición, nunca se los hace parpadear.
+    if (yaVisibles.length) gsap.set(yaVisibles, { opacity: 1, y: 0 });
+    if (!porRevelar.length) return;
+
+    // Se ocultan de una (antes de cualquier scroll) y sólo se anima hacia
+    // el estado final al entrar — nunca un "from" aplicado de golpe.
+    gsap.set(porRevelar, motionOK ? { opacity: 0, y: 24 } : { opacity: 0 });
+
+    ScrollTrigger.batch(porRevelar, {
       start: "top 85%",
       once: true,
       onEnter: (batch) =>
-        gsap.fromTo(
+        gsap.to(
           batch,
-          motionOK ? { opacity: 0, y: 24 } : { opacity: 0 },
           motionOK
             ? { opacity: 1, y: 0, duration: 0.6, ease: "power2.out", stagger: 0.08 }
             : { opacity: 1, duration: 0.15, ease: "power1.out" },
@@ -167,19 +200,31 @@ function revelarCopias(): void {
         // Reduce: sólo opacidad, ≤200ms; sin caída ni rotación de más, y
         // la capa de foco no llega a mostrarse.
         if (foco) gsap.set(foco, { opacity: 0 });
-        gsap.fromTo(
-          copia,
-          { opacity: 0 },
-          {
-            opacity: 1,
-            duration: 0.2,
-            ease: "none",
-            scrollTrigger: { trigger: copia, start: "top 90%", once: true },
-          },
-        );
+
+        if (yaEntro(copia, 0.9)) {
+          gsap.set(copia, { opacity: 1 });
+          continue;
+        }
+
+        gsap.set(copia, { opacity: 0 });
+        ScrollTrigger.create({
+          trigger: copia,
+          start: "top 90%",
+          once: true,
+          onEnter: () => gsap.to(copia, { opacity: 1, duration: 0.2, ease: "none" }),
+        });
         continue;
       }
 
+      if (yaEntro(copia, 0.85)) {
+        // Ya estaba a la vista: la rotación/posición final (CSS, --rot) ya
+        // es la correcta; sólo se confirma y se apaga el foco sin animar.
+        gsap.set(copia, { y: 0, rotation: rotacionFinal });
+        if (foco) gsap.set(foco, { opacity: 0 });
+        continue;
+      }
+
+      gsap.set(copia, { y: -40, rotation: rotacionFinal + 4 });
       if (foco) gsap.set(foco, { opacity: 1 });
 
       ScrollTrigger.create({
@@ -187,11 +232,7 @@ function revelarCopias(): void {
         start: "top 85%",
         once: true,
         onEnter: () => {
-          gsap.fromTo(
-            copia,
-            { y: -40, rotation: rotacionFinal + 4 },
-            { y: 0, rotation: rotacionFinal, duration: 0.9, ease: "power2.out" },
-          );
+          gsap.to(copia, { y: 0, rotation: rotacionFinal, duration: 0.9, ease: "power2.out" });
           if (foco) {
             gsap.to(foco, { opacity: 0, duration: 0.6, delay: 0.25, ease: "power1.out" });
           }
@@ -218,6 +259,15 @@ function revelarTrazo(): void {
 
     for (const trazo of trazos) {
       const punto = trazo.closest("svg")?.querySelector<SVGElement>("[data-punto]");
+
+      if (yaEntro(trazo, 0.8)) {
+        // Ya estaba a la vista: el trazo ya se ve dibujado por CSS (sin
+        // JS, stroke-dashoffset:0); no lo "borramos" para redibujarlo.
+        if (punto) gsap.set(punto, { opacity: 1 });
+        continue;
+      }
+
+      gsap.set(trazo, { strokeDashoffset: 1 });
       if (punto) gsap.set(punto, { opacity: 0 });
 
       ScrollTrigger.create({
@@ -225,23 +275,19 @@ function revelarTrazo(): void {
         start: "top 80%",
         once: true,
         onEnter: () => {
-          gsap.fromTo(
-            trazo,
-            { strokeDashoffset: 1 },
-            {
-              strokeDashoffset: 0,
-              duration: 2.2,
-              ease: "power2.inOut",
-              // autoRound:false — con pathLength="1" el valor va de 1 a 0;
-              // GSAP redondea strokeDashoffset a entero por defecto, así
-              // que sin esto el trazo queda pegado en 1 y salta a 0 de
-              // golpe (mismo hallazgo que en portada.ts, círculo de lápiz).
-              autoRound: false,
-              onComplete: () => {
-                if (punto) gsap.to(punto, { opacity: 1, duration: 0.3, ease: "power1.out" });
-              },
+          gsap.to(trazo, {
+            strokeDashoffset: 0,
+            duration: 2.2,
+            ease: "power2.inOut",
+            // autoRound:false — con pathLength="1" el valor va de 1 a 0;
+            // GSAP redondea strokeDashoffset a entero por defecto, así
+            // que sin esto el trazo queda pegado en 1 y salta a 0 de
+            // golpe (mismo hallazgo que en portada.ts, círculo de lápiz).
+            autoRound: false,
+            onComplete: () => {
+              if (punto) gsap.to(punto, { opacity: 1, duration: 0.3, ease: "power1.out" });
             },
-          );
+          });
         },
       });
     }

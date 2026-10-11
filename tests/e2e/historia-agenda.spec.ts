@@ -49,6 +49,27 @@ test.describe("Historia", () => {
       const filtro = await copias(page).first().evaluate((el) => getComputedStyle(el).filter);
       expect(filtro).toBe("none");
     });
+
+    // Ronda 1 de revisión de Tarea 11 (Disco): revelarCopias aplicaba su
+    // estado "from" de golpe en onEnter incluso cuando la copia ya estaba
+    // a la vista o el salto de scroll ya había ocurrido, haciéndola
+    // parpadear invisible un instante antes de asentarse — mismo mecanismo
+    // que revelarSimple, afecta a cualquier sección con data-revelar="copia".
+    // Arreglado en src/scripts/revelado.ts; este test fija el contrato acá
+    // también (no sólo en Disco).
+    test("a 1440px, las copias quedan con opacidad asentada en ~1 al scrollear a la sección", async ({
+      page,
+    }) => {
+      await page.setViewportSize({ width: 1440, height: 900 });
+      await irAFin(page);
+      await historia(page).scrollIntoViewIfNeeded();
+
+      const primera = copias(page).first();
+      await expect(primera).toBeVisible();
+      await expect
+        .poll(() => primera.evaluate((el) => parseFloat(getComputedStyle(el).opacity)))
+        .toBeGreaterThanOrEqual(0.99);
+    });
   });
 
   test.describe("sin JavaScript", () => {

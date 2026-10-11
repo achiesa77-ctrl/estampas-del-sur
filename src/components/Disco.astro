@@ -23,10 +23,6 @@ const whatsappHref = `${redes.whatsapp.url}?text=${encodeURIComponent("Hola, qui
       <h2 class="titulo disco__titulo" id="disco-titulo">«Soy Uruguayo»</h2>
       <p class="dato disco__dato">Segundo disco · 2026</p>
 
-      <div class="disco__mapa">
-        <MapaUruguay />
-      </div>
-
       <p class="medida disco__cuerpo">
         Después de un tiempo de trabajo, dedicación y mucho compromiso, presentamos nuestro nuevo disco.
         Un proyecto completamente autogestionado, hecho con cariño y respeto por nuestra música: detrás de
@@ -37,8 +33,8 @@ const whatsappHref = `${redes.whatsapp.url}?text=${encodeURIComponent("Hola, qui
       <ul class="disco__specs medida">
         <li>En formato <strong>pendrive</strong>, para escucharlo desde cualquier dispositivo.</li>
         <li>
-          Incluye un <strong>souvenir de madera</strong> con el mapa de Uruguay grabado a fuego, hecho
-          especialmente para esta edición.
+          Incluye un <strong>souvenir exclusivo</strong>: una pieza de madera con forma del mapa de Uruguay
+          y el logo grabado a fuego.
         </li>
       </ul>
 
@@ -57,23 +53,29 @@ const whatsappHref = `${redes.whatsapp.url}?text=${encodeURIComponent("Hola, qui
       </p>
     </div>
 
-    <figure class="copia disco__copia" data-revelar="copia" data-rotacion="-1.2" style="--rot: -1.2deg">
-      <div class="copia__marco">
-        <Picture
-          src={discoFoto}
-          formats={["avif", "webp"]}
-          widths={[360, 621]}
-          sizes="(min-width: 900px) 360px, 80vw"
-          alt="El disco «Soy Uruguayo» en pendrive con el logo grabado, junto al souvenir de madera con forma del mapa de Uruguay"
-          loading="lazy"
-          decoding="async"
-        />
-        <span class="copia__foco" aria-hidden="true"></span>
+    <div class="disco__visual">
+      <figure class="copia disco__copia" data-revelar="copia" data-rotacion="-1.2" style="--rot: -1.2deg">
+        <div class="copia__marco">
+          <Picture
+            src={discoFoto}
+            formats={["avif", "webp"]}
+            widths={[360, 621]}
+            sizes="(min-width: 900px) 360px, 80vw"
+            alt="El disco «Soy Uruguayo» en pendrive con el logo grabado, junto al souvenir de madera con forma del mapa de Uruguay"
+            loading="lazy"
+            decoding="async"
+          />
+          <span class="copia__foco" aria-hidden="true"></span>
+        </div>
+        <figcaption class="epigrafe">
+          «Es una producción independiente, hecha con mucho esfuerzo, dedicación y corazón.»
+        </figcaption>
+      </figure>
+
+      <div class="disco__mapa">
+        <MapaUruguay />
       </div>
-      <figcaption class="epigrafe">
-        «Es una producción independiente, hecha con mucho esfuerzo, dedicación y corazón.»
-      </figcaption>
-    </figure>
+    </div>
   </div>
 </section>
 
@@ -90,10 +92,15 @@ const whatsappHref = `${redes.whatsapp.url}?text=${encodeURIComponent("Hola, qui
     align-items: start;
   }
 
+  /* En escritorio la columna visual se estira a la altura de la columna de
+     texto (align-items:stretch) para que el mapa pueda anclarse al pie con
+     margin-top:auto — así la foto + el mapa hacen de contrapeso visual en
+     vez de dejar un bloque chico arriba y un hueco grande abajo. */
   @media (min-width: 900px) {
     .disco__grid {
-      grid-template-columns: 1fr minmax(16rem, 23rem);
+      grid-template-columns: 1fr minmax(18rem, 25rem);
       gap: clamp(2rem, 5vw, 4rem);
+      align-items: stretch;
     }
   }
 
@@ -110,13 +117,6 @@ const whatsappHref = `${redes.whatsapp.url}?text=${encodeURIComponent("Hola, qui
   .disco__dato {
     margin: 0.5rem 0 0;
     color: var(--lapiz);
-  }
-
-  /* El mapa es un acento, no el protagonista: ancho acotado para que no
-     compita con el título ni con la foto. */
-  .disco__mapa {
-    width: clamp(9rem, 20vw, 12rem);
-    margin: clamp(1.5rem, 4vh, 2rem) 0;
   }
 
   .disco__cuerpo {
@@ -142,20 +142,45 @@ const whatsappHref = `${redes.whatsapp.url}?text=${encodeURIComponent("Hola, qui
     color: var(--lapiz);
   }
 
+  /* ---------- Columna visual: foto + mapa ----------
+     La foto es la protagonista arriba; el mapa (más grande que antes) hace
+     de contrapeso al pie de la columna (craft: evita el hueco en blanco
+     que dejaba un mapa chico solo, sin nada debajo de la foto). */
+  .disco__visual {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: clamp(2rem, 5vh, 3rem);
+  }
+
+  @media (min-width: 900px) {
+    .disco__visual {
+      align-items: flex-end;
+      height: 100%;
+    }
+  }
+
   /* ---------- Copia (foto del disco) ----------
      Base compartida en src/styles/base.css (.copia, .copia__marco,
      .copia__foco); acá sólo el ancho, acotado a la foto natural
-     (621×470 — nunca se agranda más allá de eso) y la posición. */
+     (621×470 — nunca se agranda más allá de eso). */
   .disco__copia {
     width: 100%;
     max-width: min(90vw, 23.3rem); /* 23.3rem ≈ 373px: el 621px natural ya
       entra de sobra en cualquier columna ≥ 900px sin pedir un ancho mayor */
-    justify-self: center;
+  }
+
+  /* El mapa, más protagonista que en la primera versión: ancla al pie de
+     la columna visual en escritorio (margin-top:auto, contrapeso bajo la
+     foto) y simplemente sigue en el flujo en móvil (una columna, sin
+     estirar la altura). */
+  .disco__mapa {
+    width: clamp(12rem, 30vw, 18rem);
   }
 
   @media (min-width: 900px) {
-    .disco__copia {
-      justify-self: end;
+    .disco__mapa {
+      margin-top: auto;
     }
   }
 </style>

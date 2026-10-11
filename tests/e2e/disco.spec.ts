@@ -1,4 +1,4 @@
-import { expect, test, type Page } from "@playwright/test";
+import { expect, test, type Locator, type Page } from "@playwright/test";
 
 // Disco (spec §3 fila 6, papel): «Soy Uruguayo» 2026, con un mapa de
 // Uruguay que se dibuja en trazo dorado (pirograbado, MapaUruguay.astro +
@@ -12,6 +12,10 @@ const punto = (page: Page) => disco(page).locator("[data-punto]");
 async function irAFin(page: Page) {
   await page.goto("/?t=fin");
   await expect(page.locator('.portada[data-estado="final"]')).toBeAttached();
+}
+
+async function opacidad(el: Locator): Promise<number> {
+  return el.evaluate((n) => parseFloat(getComputedStyle(n).opacity));
 }
 
 test.describe("Disco", () => {
@@ -60,7 +64,11 @@ test.describe("Disco", () => {
 
   test("el mapa se dibuja progresivamente al entrar en pantalla", async ({ page }) => {
     await irAFin(page);
-    await disco(page).scrollIntoViewIfNeeded();
+    // Se scrollea el propio mapa (no sólo la sección): en móvil, al ir al
+    // pie de la columna visual (foto + mapa como contrapeso, ronda 1 de
+    // revisión), el mapa queda más abajo que lo que un scrollIntoView del
+    // <section> entero alcanza a traer a la vista.
+    await trazo(page).scrollIntoViewIfNeeded();
     await expect
       .poll(() => trazo(page).evaluate((p) => parseFloat(getComputedStyle(p).strokeDashoffset)))
       .toBeLessThan(1);
@@ -72,10 +80,56 @@ test.describe("Disco", () => {
     test("el mapa queda dibujado por completo, sin animación", async ({ page }) => {
       await irAFin(page);
       await disco(page).scrollIntoViewIfNeeded();
-      await page.waitForTimeout(300);
-      const offset = await trazo(page).evaluate((p) => parseFloat(getComputedStyle(p).strokeDashoffset));
-      expect(offset).toBe(0);
+      // Poll, no un wait fijo: el revelado "trazo" hace como mucho un
+      // fundido de opacidad del punto (≤300ms); un wait corto puede caer a
+      // mitad (hallazgo de la ronda 1 de revisión de esta tarea).
+      await expect
+        .poll(() => trazo(page).evaluate((p) => parseFloat(getComputedStyle(p).strokeDashoffset)))
+        .toBe(0);
       await expect(punto(page)).toBeVisible();
+    });
+
+    // Ronda 1 de revisión: con reduce, a 1440px, el título/cuerpo/foto de
+    // Disco llegaban a parpadear invisibles un instante (revelarSimple y
+    // revelarCopias aplicaban su estado "from" de golpe incluso cuando el
+    // contenido ya estaba a la vista o el salto de scroll ya había
+    // ocurrido). Arreglado en revelado.ts (función yaEntro + gsap.set en
+    // vez de fromTo); estos tests fijan el contrato: visible y con opacidad
+    // asentada en ~1 apenas entra en pantalla, sea cual sea el camino.
+    test.describe("a 1440px", () => {
+      test.use({ viewport: { width: 1440, height: 900 } });
+
+      async function elementosClave(page: Page) {
+        return {
+          titulo: disco(page).getByRole("heading", { name: "«Soy Uruguayo»" }),
+          cuerpo: disco(page).locator(".disco__cuerpo"),
+          foto: disco(page).locator("figure.copia img"),
+          whatsapp: disco(page).getByRole("link", { name: /pedir el disco por whatsapp/i }),
+        };
+      }
+
+      test("título, cuerpo, foto y CTA de WhatsApp quedan visibles al scrollear a la sección", async ({
+        page,
+      }) => {
+        await irAFin(page);
+        await disco(page).scrollIntoViewIfNeeded();
+
+        const { titulo, cuerpo, foto, whatsapp } = await elementosClave(page);
+        for (const el of [titulo, cuerpo, foto, whatsapp]) {
+          await expect(el).toBeVisible();
+          await expect.poll(() => opacidad(el)).toBeGreaterThanOrEqual(0.99);
+        }
+      });
+
+      test("cargando /#disco directamente, el contenido ya está visible", async ({ page }) => {
+        await page.goto("/#disco");
+
+        const { titulo, cuerpo, foto, whatsapp } = await elementosClave(page);
+        for (const el of [titulo, cuerpo, foto, whatsapp]) {
+          await expect(el).toBeVisible();
+          await expect.poll(() => opacidad(el)).toBeGreaterThanOrEqual(0.99);
+        }
+      });
     });
   });
 
