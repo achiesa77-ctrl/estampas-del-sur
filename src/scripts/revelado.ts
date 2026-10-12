@@ -120,7 +120,10 @@ function revelarContadores(): void {
 
       ScrollTrigger.create({
         trigger: el,
-        start: "top 85%",
+        // Apenas asoma: con "top 85%" la franja de abajo de la pantalla
+        // mostraba «0 años en escena» quieto, un dato falso (verificación
+        // final).
+        start: "top bottom",
         once: true,
         onEnter: () => {
           const proxy = { valor: 0 };

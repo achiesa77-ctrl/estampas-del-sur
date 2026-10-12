@@ -29,6 +29,21 @@ test("las cifras cuentan hasta 15, 3 y 4", async ({ page }) => {
   await expect(cifras(page)).toHaveText(["15", "3", "4"]);
 });
 
+test("cifras apenas visibles en el borde de abajo: cuentan igual, nunca quedan en 0", async ({
+  page,
+}) => {
+  await irAFin(page);
+  // Cifras al 92% del alto: se ven, pero por debajo del viejo umbral
+  // "top 85%" que las dejaba quietas en «0» (verificación final).
+  await page.evaluate(() => {
+    const el = document.querySelector("#grupo [data-contador]")!;
+    window.scrollTo(0, el.getBoundingClientRect().top + window.scrollY - innerHeight * 0.92);
+  });
+  // Sólo importa la que se ve: en móvil las otras van más abajo, fuera
+  // de pantalla, y cuentan cuando asoman.
+  await expect(cifras(page).first()).toHaveText("15", { timeout: 4000 });
+});
+
 test("el revelado de líneas respeta el interlineado del párrafo (no el gap entre párrafos)", async ({
   page,
 }) => {
