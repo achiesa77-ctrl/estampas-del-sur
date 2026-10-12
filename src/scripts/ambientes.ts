@@ -1,27 +1,25 @@
-// Ambientes oscuro/papel (spec §2.1, §3 fila 2+): el fondo del body se
-// funde al cruzar cada frontera de sección («se prende la luz»).
+// Ambientes oscuro/papel (spec §2.1, §3 fila 2+): al cruzar cada frontera
+// de sección el color se funde con el scroll («se prende la luz»).
 //
 // Sin JS, o antes de que este módulo corra, cada sección ya pinta su
 // propio fondo opaco con la clase .ambiente-oscuro/.ambiente-papel
-// (ruling R2): este módulo sólo agrega el cruce de color por encima.
+// (ruling R2): este módulo sólo agrega el cruce por encima.
 //
-// - motionOK: un tween por frontera (scrollTrigger scrub) interpola
-//   background-color/color del body entre los tokens de la sección
-//   anterior y la siguiente. Mientras está activo, las secciones dejan
-//   transparente su propio fondo (clase en <html>) para que se vea el
-//   fundido; useamos el elemento de cada sección como trigger (no
-//   posiciones fijas), así el pin-spacer de la portada no rompe la
-//   medición: el refresh que portada.ts dispara al crear su pin
-//   recalcula estos ScrollTrigger igual que a los suyos.
+// - motionOK: la sección que ENTRA funde su propio fondo y su color de
+//   texto desde el ambiente de la anterior hasta el suyo, con scrub,
+//   mientras sube desde el borde inferior hasta un poco más arriba de la
+//   mitad. La que se está leyendo no se toca: conserva siempre su fondo
+//   opaco. (Verificación final: antes el fundido se hacía en el <body> con
+//   todas las secciones transparentes, y a mitad de camino quedaba un gris
+//   donde ningún texto — ni tinta ni papel — llegaba a contraste AA; con
+//   una sección corta como «Próximas fechas» arriba, ese gris era justo
+//   la posición de lectura.) Se usa el elemento de cada sección como
+//   trigger, así los pin-spacers no rompen la medición.
 // - reduce: sin scrub; un cruce discreto por sección visible (mismo
 //   criterio de línea que el scrollspy del nav) que alterna la clase del
 //   body, con transición CSS de 150ms (base.css).
 import { gsap } from "gsap";
 import { condiciones, mm } from "./motion";
-
-/** Con esta clase en <html>, las secciones dejan transparente su propio
- *  fondo (ver base.css) para que se note el fundido del body. */
-const JS_ACTIVO = "ambientes-js";
 
 type Ambiente = "oscuro" | "papel";
 
@@ -52,8 +50,6 @@ export function initAmbientes(): void {
     const { motionOK } = ctx.conditions ?? {};
 
     if (motionOK) {
-      document.documentElement.classList.add(JS_ACTIVO);
-
       for (let i = 1; i < secciones.length; i++) {
         const anterior = secciones[i - 1].getAttribute("data-ambiente");
         const actual = secciones[i].getAttribute("data-ambiente");
@@ -63,7 +59,7 @@ export function initAmbientes(): void {
         const hasta = coloresDe(actual);
 
         gsap.fromTo(
-          document.body,
+          secciones[i],
           { backgroundColor: desde.fondo, color: desde.texto },
           {
             backgroundColor: hasta.fondo,
@@ -71,18 +67,16 @@ export function initAmbientes(): void {
             ease: "none",
             scrollTrigger: {
               trigger: secciones[i],
-              start: "top 60%",
-              end: "top 20%",
+              start: "top bottom",
+              end: "top 60%",
               scrub: true,
             },
           },
         );
       }
-
-      return () => {
-        document.documentElement.classList.remove(JS_ACTIVO);
-        gsap.set(document.body, { clearProps: "backgroundColor,color" });
-      };
+      // El contexto de mm revierte los tweens (y sus estilos en línea) al
+      // cambiar a movimiento reducido.
+      return;
     }
 
     // Movimiento reducido
