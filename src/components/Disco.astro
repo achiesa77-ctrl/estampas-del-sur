@@ -1,0 +1,186 @@
+---
+// Disco (spec §3 fila 6, papel): «Soy Uruguayo», segundo disco (2026).
+// Texto migrado de `git show main:index.html:567-633` (ver global.md),
+// corregido con el año real (spec §7: "desde el 24/07/2026") y el souvenir
+// descrito como vino en el anuncio original: de madera, con el mapa de
+// Uruguay grabado a fuego — motivo que retoma MapaUruguay.astro ("mapa
+// pirograbado", movimiento de esta sección). La foto del producto
+// (621×470, a color a propósito) se monta como copia impresa (.copia,
+// src/styles/base.css), igual que Historia; nunca se le pide un ancho
+// mayor a su natural (controller: nunca agrandarla).
+import { Picture } from "astro:assets";
+import discoFoto from "../assets/fotos/disco-soy-uruguayo.jpg";
+import { redes } from "../data/redes";
+import MapaUruguay from "./MapaUruguay.astro";
+
+const whatsappHref = `${redes.whatsapp.url}?text=${encodeURIComponent("Hola, quiero el disco Soy Uruguayo")}`;
+---
+
+<section id="disco" class="disco ambiente-papel" data-ambiente="papel" aria-labelledby="disco-titulo">
+  <div class="disco__grid">
+    <div class="disco__texto" data-revelar="simple">
+      <p class="dato disco__eyebrow">Ya disponible</p>
+      <h2 class="titulo disco__titulo" id="disco-titulo">«Soy Uruguayo»</h2>
+      <p class="dato disco__dato">Segundo disco · 2026</p>
+
+      <p class="medida disco__cuerpo">
+        Después de un tiempo de trabajo, dedicación y mucho compromiso, presentamos nuestro nuevo disco.
+        Un proyecto completamente autogestionado, hecho con cariño y respeto por nuestra música: detrás de
+        cada canción hay horas de ensayo, esfuerzo y el deseo de compartir algo que nos representa
+        profundamente.
+      </p>
+
+      <ul class="disco__specs medida">
+        <li>En formato <strong>pendrive</strong>, para escucharlo desde cualquier dispositivo.</li>
+        <li>
+          Incluye un <strong>souvenir exclusivo</strong>: una pieza de madera con forma del mapa de Uruguay
+          y el logo grabado a fuego.
+        </li>
+      </ul>
+
+      <div class="disco__acciones">
+        <a class="boton boton--primario" href={whatsappHref} target="_blank" rel="noopener">
+          Pedir el disco por WhatsApp
+        </a>
+        <a class="boton boton--secundario" href={redes.instagram} target="_blank" rel="noopener">
+          Escribir por Instagram
+        </a>
+      </div>
+
+      <p class="medida disco__nota">
+        Disponible desde el viernes 24 de julio de 2026 · Pedidos al {redes.whatsapp.numero} o por
+        cualquiera de nuestras redes.
+      </p>
+    </div>
+
+    <div class="disco__visual">
+      <figure class="copia disco__copia" data-revelar="copia" data-rotacion="-1.2" style="--rot: -1.2deg">
+        <div class="copia__marco">
+          <Picture
+            src={discoFoto}
+            formats={["avif", "webp"]}
+            widths={[360, 621]}
+            sizes="(min-width: 900px) 360px, 80vw"
+            alt="El disco «Soy Uruguayo» en pendrive con el logo grabado, junto al souvenir de madera con forma del mapa de Uruguay"
+            loading="lazy"
+            decoding="async"
+          />
+          <span class="copia__foco" aria-hidden="true"></span>
+        </div>
+        <figcaption class="epigrafe">
+          «Es una producción independiente, hecha con mucho esfuerzo, dedicación y corazón.»
+        </figcaption>
+      </figure>
+
+      <div class="disco__mapa">
+        <MapaUruguay />
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .disco {
+    position: relative;
+    isolation: isolate;
+    padding: calc(var(--nav-h) + 3rem) clamp(1.25rem, 5vw, 4rem) clamp(3rem, 8vh, 5rem);
+  }
+
+  .disco__grid {
+    display: grid;
+    gap: clamp(2.5rem, 6vh, 3.5rem);
+    align-items: start;
+  }
+
+  /* En escritorio la columna visual se estira a la altura de la columna de
+     texto (align-items:stretch) para que el mapa pueda anclarse al pie con
+     margin-top:auto — así la foto + el mapa hacen de contrapeso visual en
+     vez de dejar un bloque chico arriba y un hueco grande abajo. */
+  @media (min-width: 900px) {
+    .disco__grid {
+      grid-template-columns: 1fr minmax(18rem, 25rem);
+      gap: clamp(2rem, 5vw, 4rem);
+      align-items: stretch;
+    }
+  }
+
+  .disco__eyebrow {
+    margin: 0 0 0.75rem;
+    color: var(--oro-viejo);
+  }
+
+  .disco__titulo {
+    margin: 0;
+    font-size: clamp(var(--paso-3), 6vw, var(--paso-5));
+  }
+
+  .disco__dato {
+    margin: 0.5rem 0 0;
+    color: var(--lapiz);
+  }
+
+  .disco__cuerpo {
+    margin: 0 0 clamp(1.5rem, 4vh, 2rem);
+    font-size: clamp(var(--paso-1), 1.6vw, var(--paso-2));
+  }
+
+  .disco__specs {
+    display: grid;
+    gap: 0.75rem;
+    margin: 0 0 clamp(1.75rem, 4vh, 2.25rem);
+    padding-left: 1.25rem;
+  }
+
+  .disco__acciones {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+  }
+
+  .disco__nota {
+    margin: 1.25rem 0 0;
+    color: var(--lapiz);
+  }
+
+  /* ---------- Columna visual: foto + mapa ----------
+     La foto es la protagonista arriba; el mapa (más grande que antes) hace
+     de contrapeso al pie de la columna (craft: evita el hueco en blanco
+     que dejaba un mapa chico solo, sin nada debajo de la foto). */
+  .disco__visual {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: clamp(2rem, 5vh, 3rem);
+  }
+
+  @media (min-width: 900px) {
+    .disco__visual {
+      align-items: flex-end;
+      height: 100%;
+    }
+  }
+
+  /* ---------- Copia (foto del disco) ----------
+     Base compartida en src/styles/base.css (.copia, .copia__marco,
+     .copia__foco); acá sólo el ancho, acotado a la foto natural
+     (621×470 — nunca se agranda más allá de eso). */
+  .disco__copia {
+    width: 100%;
+    max-width: min(90vw, 23.3rem); /* 23.3rem ≈ 373px: el 621px natural ya
+      entra de sobra en cualquier columna ≥ 900px sin pedir un ancho mayor */
+  }
+
+  /* El mapa, más protagonista que en la primera versión: ancla al pie de
+     la columna visual en escritorio (margin-top:auto, contrapeso bajo la
+     foto) y simplemente sigue en el flujo en móvil (una columna, sin
+     estirar la altura). */
+  .disco__mapa {
+    width: clamp(12rem, 30vw, 18rem);
+  }
+
+  @media (min-width: 900px) {
+    .disco__mapa {
+      margin-top: auto;
+    }
+  }
+</style>

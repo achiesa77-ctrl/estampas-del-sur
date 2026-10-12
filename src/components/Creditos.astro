@@ -1,0 +1,191 @@
+---
+// Créditos finales (spec §3 fila 11, oscuro): el pie como el cierre de una
+// película — rol a la derecha y nombre a la izquierda de un eje central,
+// y el emblema que entra al final. Va FUERA de <main> (landmark
+// contentinfo); el pedido de contratación vive en Contacto.astro.
+// Sin JS todo está visible; la subida con scrub la hace revelado.ts (modo
+// "creditos").
+import { Image } from "astro:assets";
+import { grupo } from "../data/grupo";
+import { integrantes } from "../data/integrantes";
+import { redes } from "../data/redes";
+import logo from "../../fotos/logo-nuevo.jpg";
+
+const anio = new Date().getFullYear();
+---
+
+<footer class="creditos ambiente-oscuro" data-revelar="creditos">
+  <p class="dato creditos__ojo creditos__fila-extra">Con</p>
+  <p class="titulo creditos__grupo creditos__fila-extra">{grupo.nombre}</p>
+
+  <dl class="creditos__lista">
+    {
+      integrantes.map((musico) => (
+        <div class="creditos__fila">
+          <dt class="dato">{musico.rol}</dt>
+          <dd class="dato">{musico.nombre}</dd>
+        </div>
+      ))
+    }
+  </dl>
+
+  <p class="dato creditos__lugar creditos__fila-extra">
+    Desde {grupo.fundacion} · {grupo.ciudad}, {grupo.departamento} · Uruguay
+  </p>
+
+  <div class="creditos__emblema">
+    <Image src={logo} alt={grupo.nombre} width={120} height={120} densities={[1, 2]} fit="cover" />
+  </div>
+
+  <div class="creditos__datos">
+    <ul class="creditos__enlaces" aria-label="Redes">
+      <li><a href={redes.instagram} target="_blank" rel="noopener">Instagram</a></li>
+      <li><a href={redes.facebook} target="_blank" rel="noopener">Facebook</a></li>
+    </ul>
+    <ul class="creditos__enlaces" aria-label="Contacto">
+      <li>
+        <a href={redes.whatsapp.url} target="_blank" rel="noopener">WhatsApp · {redes.whatsapp.numero}</a>
+      </li>
+      <li><a href={`mailto:${redes.mail}`}>{redes.mail}</a></li>
+    </ul>
+  </div>
+
+  <div class="creditos__base dato">
+    <span>© {anio} {grupo.nombre}</span>
+    <span>Creada por Alejandro Chiesa.</span>
+  </div>
+</footer>
+
+<style>
+  .creditos {
+    position: relative;
+    isolation: isolate;
+    display: grid;
+    justify-items: center;
+    gap: 1.25rem;
+    padding: clamp(4rem, 14vh, 8rem) clamp(1.25rem, 5vw, 4rem) 2rem;
+    text-align: center;
+    overflow: clip;
+  }
+
+  .creditos__ojo {
+    margin: 0;
+    color: var(--plata);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+  }
+
+  .creditos__grupo {
+    margin: 0 0 1.5rem;
+    font-size: clamp(var(--paso-3), 5vw, var(--paso-5));
+  }
+
+  /* Eje central: rol alineado a la derecha, nombre a la izquierda, como
+     los créditos de cierre de una película. */
+  .creditos__lista {
+    display: grid;
+    gap: 0.9rem;
+    width: min(100%, 44rem);
+    margin: 0;
+  }
+
+  .creditos__fila {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    align-items: baseline;
+    gap: 1.5rem;
+  }
+
+  .creditos__fila dt {
+    text-align: right;
+    font-weight: 500;
+    color: var(--plata);
+  }
+
+  .creditos__fila dd {
+    margin: 0;
+    text-align: left;
+    font-size: var(--paso-2);
+    font-weight: 700;
+    color: var(--papel);
+  }
+
+  /* En angosto el eje no entra: rol arriba y nombre abajo, centrados. */
+  @media (max-width: 599px) {
+    .creditos__fila {
+      grid-template-columns: 1fr;
+      gap: 0.1rem;
+    }
+
+    .creditos__fila dt,
+    .creditos__fila dd {
+      text-align: center;
+    }
+  }
+
+  .creditos__lugar {
+    margin: 1.5rem 0 0;
+    color: var(--plata);
+  }
+
+  .creditos__emblema {
+    margin-top: clamp(2rem, 6vh, 3.5rem);
+  }
+
+  .creditos__emblema img {
+    display: block;
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    object-fit: cover;
+  }
+
+  .creditos__datos {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.25rem 2.5rem;
+  }
+
+  .creditos__enlaces {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0 1.5rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .creditos__enlaces a {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    font-family: var(--fuente-dato);
+    font-stretch: 72%;
+    font-weight: 600;
+    color: var(--papel);
+    text-decoration: underline;
+    text-decoration-color: color-mix(in srgb, var(--plata) 60%, transparent);
+    text-underline-offset: 0.25em;
+  }
+
+  .creditos__enlaces a:hover {
+    color: var(--oro);
+    text-decoration-color: currentColor;
+  }
+
+  .creditos__base {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.25rem 2rem;
+    width: 100%;
+    margin-top: clamp(2rem, 6vh, 3rem);
+    padding-top: 1.25rem;
+    border-top: 1px solid color-mix(in srgb, var(--plata) 30%, transparent);
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--plata);
+  }
+</style>

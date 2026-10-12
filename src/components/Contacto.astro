@@ -1,0 +1,119 @@
+---
+// Contacto (spec §3 fila 11, oscuro): el pedido de contratación, clímax
+// del sitio antes de los créditos finales (Creditos.astro). Va DENTRO de
+// <main>; el <footer> de créditos va fuera, para seguir siendo el landmark
+// contentinfo — por eso el plan, que los juntaba en un componente, quedó
+// partido en dos.
+//
+// Texto tal cual de `git show main:index.html:900-919` (bajada y los tres
+// puntos). El texto del WhatsApp prellenado también es el original.
+import { grupo } from "../data/grupo";
+import { redes } from "../data/redes";
+
+const whatsappHref = `${redes.whatsapp.url}?text=${encodeURIComponent(
+  "Hola! Quiero consultar por una presentación de Estampas del Sur.",
+)}`;
+
+const puntos = [
+  "Autogestión profesional",
+  "Propuesta a medida del público",
+  "Repertorio propio y original",
+];
+---
+
+<section
+  id="contacto"
+  class="contacto ambiente-oscuro"
+  data-ambiente="oscuro"
+  aria-labelledby="contacto-titulo"
+>
+  <div class="contacto__inner">
+    <p class="dato contacto__ojo" data-revelar="simple">Contrataciones</p>
+    <h2 class="titulo contacto__titulo" id="contacto-titulo" data-revelar="simple">
+      Contratá a {grupo.nombre}
+    </h2>
+    <p class="medida contacto__texto" data-revelar="simple">
+      Festivales, peñas, salas y eventos. Trabajamos como un equipo profesional —con roles claros en
+      redes, contrataciones y administración— para que cada presentación esté cuidada de principio a
+      fin.
+    </p>
+    <ul class="contacto__puntos" data-revelar="simple">
+      {puntos.map((punto) => <li class="dato">{punto}</li>)}
+    </ul>
+    <div class="contacto__acciones" data-revelar="simple">
+      <a class="boton boton--primario" href={whatsappHref} target="_blank" rel="noopener">
+        Escribir por WhatsApp · {redes.whatsapp.numero}
+      </a>
+      <a class="boton boton--secundario" href={`mailto:${redes.mail}`}>Escribir por mail</a>
+      <a class="boton boton--secundario" href={redes.instagram} target="_blank" rel="noopener">
+        Instagram
+      </a>
+    </div>
+  </div>
+</section>
+
+<style>
+  .contacto {
+    position: relative;
+    isolation: isolate;
+    padding: calc(var(--nav-h) + clamp(3rem, 10vh, 6rem)) clamp(1.25rem, 5vw, 4rem)
+      clamp(4rem, 12vh, 7rem);
+  }
+
+  /* Centrado a propósito: es el clímax (mismo criterio que el sitio
+     anterior), el único cabezal centrado del recorrido. */
+  .contacto__inner {
+    display: grid;
+    justify-items: center;
+    gap: 1.25rem;
+    max-width: 56rem;
+    margin: 0 auto;
+    text-align: center;
+  }
+
+  .contacto__ojo {
+    margin: 0;
+    color: var(--oro);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .contacto__titulo {
+    margin: 0;
+    font-size: clamp(2.25rem, 7vw, 5.5rem);
+    text-wrap: balance;
+  }
+
+  .contacto__texto {
+    margin: 0.5rem 0 0;
+    font-family: var(--fuente-cuerpo);
+    font-size: var(--paso-1);
+    line-height: 1.6;
+    color: var(--papel);
+  }
+
+  .contacto__puntos {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.5rem 1.75rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    color: var(--plata);
+  }
+
+  /* Viñeta de fotograma, no de lista genérica. */
+  .contacto__puntos li::before {
+    content: "▸ ";
+    color: var(--oro);
+  }
+
+  .contacto__acciones {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.75rem 1rem;
+    margin-top: 1rem;
+  }
+</style>

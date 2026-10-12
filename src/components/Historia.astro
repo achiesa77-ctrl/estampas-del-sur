@@ -1,0 +1,203 @@
+---
+// Historia (spec §3 fila 4, papel): narrativa con capitular en el primer
+// párrafo + copias impresas (g3, g4, g8) intercaladas entre los párrafos,
+// cada una con rotación fija propia y alineación distinta (izquierda /
+// derecha / centro-offset) para dar ritmo editorial (craft R4). La "caída"
+// y el foco de cada copia al entrar en pantalla viven en
+// src/scripts/revelado.ts (modo "copia"); acá sólo se deja el estado final
+// visible sin JS (rotación vía --rot, foco en opacidad 0).
+//
+// alt vs. figcaption: cada <figure> ya trae su descripción completa en el
+// <figcaption> (texto real, visible y leído por cualquier lector de
+// pantalla); el alt del <img> queda vacío para no duplicar el anuncio
+// (WAI: una imagen cuyo contenido ya está descrito por su caption es
+// redundante repetirlo en el alt).
+import { Picture } from "astro:assets";
+import { grupo } from "../data/grupo";
+import g3 from "../assets/fotos/bn/g3.jpg";
+import g4 from "../assets/fotos/bn/g4.jpg";
+import g8 from "../assets/fotos/bn/g8.jpg";
+
+const [p1, p2, p3, p4, p5] = grupo.historia;
+---
+
+<section id="historia" class="historia ambiente-papel" data-ambiente="papel" aria-labelledby="historia-titulo">
+  <div class="historia__grid">
+    <div class="historia__cabezal">
+      <h2 class="titulo historia__titulo" id="historia-titulo">Historia</h2>
+      <p class="dato historia__desde">
+        Desde {grupo.fundacion} · {grupo.ciudad}, {grupo.departamento}
+      </p>
+    </div>
+
+    <div class="historia__cuerpo">
+      <p class="medida historia__capitular">{p1}</p>
+
+      <figure class="copia copia--a" data-revelar="copia" data-rotacion="-1.5" style="--rot: -1.5deg">
+        <div class="copia__marco">
+          <Picture
+            src={g3}
+            formats={["avif", "webp"]}
+            widths={[360, 640]}
+            sizes="(min-width: 900px) 360px, 70vw"
+            alt=""
+            loading="lazy"
+            decoding="async"
+          />
+          <span class="copia__foco" aria-hidden="true"></span>
+        </div>
+        <figcaption class="epigrafe">
+          Seis músicos posan en un living, con guitarras, acordeón y objetos de mate sobre la mesa.
+        </figcaption>
+      </figure>
+
+      <p class="medida">{p2}</p>
+      <p class="medida">{p3}</p>
+
+      <figure class="copia copia--b" data-revelar="copia" data-rotacion="1" style="--rot: 1deg">
+        <div class="copia__marco">
+          <Picture
+            src={g4}
+            formats={["avif", "webp"]}
+            widths={[360, 640]}
+            sizes="(min-width: 900px) 360px, 70vw"
+            alt=""
+            loading="lazy"
+            decoding="async"
+          />
+          <span class="copia__foco" aria-hidden="true"></span>
+        </div>
+        <figcaption class="epigrafe">
+          Primer plano de perfil de un integrante, de noche, con una estructura metálica y luces desenfocadas de fondo.
+        </figcaption>
+      </figure>
+
+      <p class="medida">{p4}</p>
+
+      <figure class="copia copia--c" data-revelar="copia" data-rotacion="-0.8" style="--rot: -0.8deg">
+        <div class="copia__marco">
+          <Picture
+            src={g8}
+            formats={["avif", "webp"]}
+            widths={[360, 640]}
+            sizes="(min-width: 900px) 360px, 70vw"
+            alt=""
+            loading="lazy"
+            decoding="async"
+          />
+          <span class="copia__foco" aria-hidden="true"></span>
+        </div>
+        <figcaption class="epigrafe">
+          Dos integrantes tocan en un escenario nocturno: uno canta con la guitarra de pie, el otro toca el acordeón
+          sentado.
+        </figcaption>
+      </figure>
+
+      <p class="medida">{p5}</p>
+    </div>
+  </div>
+</section>
+
+<style>
+  .historia {
+    position: relative;
+    isolation: isolate;
+    padding: calc(var(--nav-h) + 3rem) clamp(1.25rem, 5vw, 4rem) clamp(3rem, 8vh, 5rem);
+  }
+
+  .historia__grid {
+    display: grid;
+    gap: clamp(2rem, 6vh, 3rem) clamp(1.5rem, 4vw, 3rem);
+  }
+
+  /* Cabezal editorial a la izquierda (spec): en escritorio, columna fija
+     angosta junto al cuerpo; en móvil, apilado arriba. */
+  @media (min-width: 900px) {
+    .historia__grid {
+      /* 15rem medido contra "HISTORIA" en Archivo 850/expandido a
+         --paso-3 (32px, ~204px de ancho real): deja ~36px de margen para
+         que nunca rompa dentro de la palabra (columna fija en rem, así
+         que el margen no depende del ancho de viewport ≥900px). */
+      grid-template-columns: minmax(11rem, 15rem) 1fr;
+      align-items: start;
+    }
+
+    .historia__cabezal {
+      position: sticky;
+      top: calc(var(--nav-h) + 2rem);
+    }
+  }
+
+  .historia__titulo {
+    margin: 0;
+    /* Tamaño fijo (no clamp con vw): "HISTORIA" entera, en una sola línea,
+       tanto en la columna angosta de escritorio como en el ancho completo
+       de móvil (ver medición en el reporte de la tarea). Nunca se parte
+       dentro de la palabra. */
+    font-size: var(--paso-3);
+  }
+
+  .historia__desde {
+    margin: 0.75rem 0 0;
+    color: var(--lapiz);
+  }
+
+  /* Cuerpo: texto y copias intercalados. El ancho del cuerpo excede 65ch
+     a propósito (deja aire para que las copias se corran a izquierda,
+     derecha o centro sin que el texto, acotado por .medida, lo note). */
+  .historia__cuerpo {
+    display: flex;
+    flex-direction: column;
+    gap: clamp(1.75rem, 5vh, 2.75rem);
+    max-width: calc(var(--medida-max) + 6rem);
+  }
+
+  .historia__cuerpo p {
+    margin: 0;
+    font-size: clamp(var(--paso-1), 1.6vw, var(--paso-2));
+  }
+
+  /* Capitular: sólo el primer párrafo (spec: Archivo 850). */
+  .historia__capitular::first-letter {
+    float: left;
+    margin: 0.02em 0.08em 0 0;
+    font-family: var(--fuente-titulo);
+    font-stretch: 125%;
+    font-weight: 850;
+    font-size: 3.4em;
+    line-height: 0.82;
+    color: var(--oro-viejo);
+  }
+
+  /* ---------- Copias impresas (spec §2.4) ----------
+     La apariencia compartida (marco, sombra, foco, figcaption) vive en
+     src/styles/base.css (.copia, .copia__marco, .copia__foco); acá sólo el
+     ancho y la alineación propios de esta sección (copias intercaladas a
+     izquierda/derecha/centro-offset para dar ritmo editorial, craft R4). */
+  .copia {
+    width: clamp(13rem, 70vw, 20rem);
+  }
+
+  .copia--a {
+    align-self: flex-start;
+  }
+
+  .copia--b {
+    align-self: flex-end;
+  }
+
+  .copia--c {
+    align-self: center;
+    margin-left: clamp(0rem, 6vw, 3rem);
+  }
+
+  @media (max-width: 599px) {
+    .copia {
+      width: 78vw;
+    }
+
+    .copia--c {
+      margin-left: 1rem;
+    }
+  }
+</style>

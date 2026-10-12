@@ -1,0 +1,300 @@
+---
+// Galería (spec §3 fila 10, oscuro): las 9 fotos (g1–g9) como hoja de
+// contactos — cuadros cuadrados de formato medio con su número de
+// fotograma debajo (en una hoja real es información, no adorno).
+// Sin JS cada contacto es un enlace a la foto grande. Con JS
+// (src/scripts/galeria.ts): lupa de fotógrafo con puntero fino y visor
+// <dialog> que se abre ampliando la miniatura (Flip).
+import { Picture, getImage } from "astro:assets";
+import { galeria } from "../data/galeria";
+import g1 from "../assets/fotos/bn/g1.jpg";
+import g2 from "../assets/fotos/bn/g2.jpg";
+import g3 from "../assets/fotos/bn/g3.jpg";
+import g4 from "../assets/fotos/bn/g4.jpg";
+import g5 from "../assets/fotos/bn/g5.jpg";
+import g6 from "../assets/fotos/bn/g6.jpg";
+import g7 from "../assets/fotos/bn/g7.jpg";
+import g8 from "../assets/fotos/bn/g8.jpg";
+import g9 from "../assets/fotos/bn/g9.jpg";
+
+// astro:assets exige imports estáticos: mapa slug → import.
+const fotos = { g1, g2, g3, g4, g5, g6, g7, g8, g9 } as const;
+
+const total = galeria.length;
+const dosCifras = (n: number) => String(n).padStart(2, "0");
+
+// Versión grande para el visor (y destino del enlace sin JS): lado largo
+// ≤ 1600px, que es el máximo que traen los originales graduados.
+const items = await Promise.all(
+  galeria.map(async ({ foto, alt }, i) => {
+    const src = fotos[foto as keyof typeof fotos];
+    const grande = await getImage({
+      src,
+      format: "webp",
+      width: Math.min(src.width, src.width >= src.height ? 1600 : Math.round((1600 * src.width) / src.height)),
+    });
+    return {
+      foto,
+      alt,
+      src,
+      numero: i + 1,
+      grande: grande.src,
+      ancho: grande.attributes.width as number,
+      alto: grande.attributes.height as number,
+    };
+  }),
+);
+---
+
+<section id="galeria" class="galeria ambiente-oscuro" data-ambiente="oscuro" aria-labelledby="galeria-titulo">
+  <div class="galeria__cabezal">
+    <h2 class="titulo galeria__titulo" id="galeria-titulo">Galería</h2>
+    <p class="dato galeria__bajada">Hoja de contactos · {total} fotogramas</p>
+  </div>
+
+  <ol class="hoja">
+    {
+      items.map((item) => (
+        <li class="hoja__cuadro">
+          <a
+            class="contacto"
+            href={item.grande}
+            aria-label={`Ver foto ${item.numero} de ${total}: ${item.alt}`}
+            data-indice={item.numero - 1}
+            data-grande={item.grande}
+            data-ancho={item.ancho}
+            data-alto={item.alto}
+            data-alt={item.alt}
+          >
+            <span class="contacto__marco">
+              <Picture
+                src={item.src}
+                formats={["avif", "webp"]}
+                widths={[320, 640]}
+                sizes="(min-width: 900px) 30vw, 50vw"
+                alt=""
+                loading="lazy"
+                decoding="async"
+              />
+            </span>
+            <span class="dato contacto__num" aria-hidden="true">
+              {dosCifras(item.numero)} ▸ {dosCifras(item.numero)}A
+            </span>
+          </a>
+        </li>
+      ))
+    }
+  </ol>
+
+  <div class="lupa" aria-hidden="true"></div>
+
+  <dialog class="visor ambiente-oscuro" aria-label="Visor de fotos">
+    <button type="button" class="boton boton--secundario visor__cerrar" data-accion="cerrar">
+      Cerrar
+    </button>
+    <figure class="visor__figura">
+      <img class="visor__img" alt="" decoding="async" />
+      <figcaption class="epigrafe visor__pie"></figcaption>
+    </figure>
+    <div class="visor__controles">
+      <button type="button" class="boton boton--secundario" data-accion="anterior">Anterior</button>
+      <p class="dato visor__contador" aria-live="polite"></p>
+      <button type="button" class="boton boton--secundario" data-accion="siguiente">Siguiente</button>
+    </div>
+  </dialog>
+</section>
+
+<style>
+  .galeria {
+    position: relative;
+    isolation: isolate;
+    padding: calc(var(--nav-h) + 3rem) clamp(1.25rem, 5vw, 4rem) clamp(3rem, 8vh, 5rem);
+  }
+
+  .galeria__cabezal {
+    max-width: 72rem;
+    margin-inline: auto;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 0.5rem 1.5rem;
+    margin-bottom: clamp(1.75rem, 5vh, 2.75rem);
+  }
+
+  .galeria__titulo {
+    margin: 0;
+    font-size: clamp(var(--paso-3), 6vw, var(--paso-5));
+  }
+
+  .galeria__bajada {
+    margin: 0;
+    color: var(--plata);
+  }
+
+  /* ---------- Hoja de contactos ---------- */
+  .hoja {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: clamp(0.75rem, 2vw, 1.5rem) clamp(0.5rem, 1.5vw, 1rem);
+    max-width: 72rem;
+    margin: 0 auto;
+    padding: 0;
+    list-style: none;
+  }
+
+  @media (min-width: 900px) {
+    .hoja {
+      grid-template-columns: repeat(3, 1fr);
+    }
+  }
+
+  .contacto {
+    display: block;
+    color: inherit;
+    text-decoration: none;
+    cursor: zoom-in;
+  }
+
+  .contacto__marco {
+    position: relative;
+    display: block;
+    aspect-ratio: 1;
+    overflow: hidden;
+    background: var(--tinta);
+  }
+
+  .contacto__marco :global(picture),
+  .contacto__marco :global(img) {
+    display: block;
+    width: 100%;
+    height: 100%;
+  }
+
+  .contacto__marco :global(img) {
+    object-fit: cover;
+  }
+
+  .contacto__num {
+    display: block;
+    margin-top: 0.4rem;
+    font-size: 0.875rem;
+    color: var(--plata);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .contacto:hover .contacto__num,
+  .contacto:focus-visible .contacto__num {
+    color: var(--oro);
+  }
+
+  /* ---------- Lupa (galeria.ts; sólo puntero fino + motionOK) ---------- */
+  .lupa {
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 2;
+    width: 160px;
+    height: 160px;
+    margin: -80px 0 0 -80px; /* centrada en el puntero */
+    border: 2px solid var(--papel);
+    border-radius: 50%;
+    background-color: var(--tinta);
+    background-repeat: no-repeat;
+    box-shadow:
+      0 2px 4px rgb(0 0 0 / 30%),
+      0 12px 28px rgb(0 0 0 / 35%);
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 150ms ease;
+  }
+
+  .lupa[data-visible] {
+    opacity: 1;
+  }
+
+  /* ---------- Visor ---------- */
+  .visor {
+    width: 100vw;
+    max-width: none;
+    height: 100dvh;
+    max-height: none;
+    margin: 0;
+    padding: clamp(1rem, 3vw, 2rem);
+    border: 0;
+    background: var(--oscuro);
+    color: var(--papel);
+    overflow: hidden;
+    isolation: isolate;
+  }
+
+  /* Con JS el fondo pasa a una capa propia (.visor__fondo, la crea
+     galeria.ts) para poder fundirlo mientras la foto se amplía: ni el
+     ::backdrop ni el fondo del <dialog> se pueden animar por opacidad sin
+     arrastrar a la foto con ellos. */
+  .galeria[data-js] .visor,
+  .galeria[data-js] .visor::backdrop {
+    background: transparent;
+  }
+
+  .visor__fondo {
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    background: var(--oscuro);
+  }
+
+  .visor[open] {
+    display: grid;
+    grid-template-rows: auto 1fr auto;
+    gap: 1rem;
+  }
+
+  .visor::backdrop {
+    background: var(--oscuro);
+  }
+
+  .visor__cerrar {
+    justify-self: end;
+  }
+
+  /* Foto + epígrafe centrados juntos en el alto disponible (en móvil la
+     foto apaisada es mucho más baja que la pantalla). */
+  .visor__figura {
+    display: grid;
+    align-content: center;
+    justify-items: center;
+    gap: 0.75rem;
+    min-height: 0;
+    margin: 0;
+  }
+
+  /* Alto máximo = pantalla menos Cerrar, epígrafe y controles. */
+  .visor__img {
+    max-width: 100%;
+    max-height: calc(100dvh - 15rem);
+    width: auto;
+    height: auto;
+    object-fit: contain;
+  }
+
+  .visor__pie {
+    max-width: var(--medida-max);
+    margin: 0;
+    text-align: center;
+    color: var(--plata);
+  }
+
+  .visor__controles {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: clamp(1rem, 4vw, 2.5rem);
+  }
+
+  .visor__contador {
+    min-width: 4ch;
+    margin: 0;
+    text-align: center;
+    font-variant-numeric: tabular-nums;
+  }
+</style>

@@ -1,0 +1,265 @@
+---
+// Integrantes (spec §3 fila 3, oscuro): 5 músicos con foto, nombre, rol y
+// redes. Por defecto (sin JS / móvil / movimiento reducido) es una lista
+// vertical — el estado final visible sin JS. Con motionOK && ancho,
+// src/scripts/integrantes.ts convierte `.elenco` en una fila y fija la
+// sección mientras la cámara viaja de músico en músico (containerAnimation
+// para el acercamiento de cada retrato). Task 13 (Trayectoria) reutiliza
+// esta misma técnica de pin horizontal.
+import { Picture } from "astro:assets";
+import { integrantes } from "../data/integrantes";
+import { redes } from "../data/redes";
+import guillermoPerez from "../assets/fotos/bn/guillermo-perez.jpg";
+import marceloMarrero from "../assets/fotos/bn/marcelo-marrero.jpg";
+import fernandoSaavedra from "../assets/fotos/bn/fernando-saavedra.jpg";
+import henryAcuna from "../assets/fotos/bn/henry-acuna.jpg";
+import diegoRodriguez from "../assets/fotos/bn/diego-rodriguez.jpg";
+
+// Mapa slug → import: `foto` en los datos es el nombre de archivo (Tarea 3),
+// astro:assets exige imports estáticos así que no se puede resolver dinámico.
+const fotos = {
+  "guillermo-perez": guillermoPerez,
+  "marcelo-marrero": marceloMarrero,
+  "fernando-saavedra": fernandoSaavedra,
+  "henry-acuna": henryAcuna,
+  "diego-rodriguez": diegoRodriguez,
+} as const;
+---
+
+<section
+  id="integrantes"
+  class="integrantes ambiente-oscuro"
+  data-ambiente="oscuro"
+  aria-labelledby="integrantes-titulo"
+>
+  <h2 class="titulo integrantes__titulo" id="integrantes-titulo">Integrantes</h2>
+
+  <ol class="elenco">
+    {
+      integrantes.map((musico) => (
+        <li class="musico" data-foto={musico.foto}>
+          <div class="musico__foto">
+            <Picture
+              src={fotos[musico.foto as keyof typeof fotos]}
+              formats={["avif", "webp"]}
+              widths={[480, 900, 1440]}
+              sizes="(min-width: 900px) 448px, 100vw"
+              alt={musico.alt}
+              loading="lazy"
+              decoding="async"
+            />
+          </div>
+          <div class="musico__velo" aria-hidden="true" />
+          <div class="musico__datos">
+            <p class="titulo musico__nombre">{musico.nombre}</p>
+            <p class="dato musico__rol">{musico.rol}</p>
+            <ul class="musico__redes">
+              <li>
+                <a
+                  href={redes.instagram}
+                  target="_blank"
+                  rel="noopener"
+                  aria-label="Instagram de Estampas del Sur"
+                >
+                  IG
+                </a>
+              </li>
+              <li>
+                <a
+                  href={redes.facebook}
+                  target="_blank"
+                  rel="noopener"
+                  aria-label="Facebook de Estampas del Sur"
+                >
+                  FB
+                </a>
+              </li>
+            </ul>
+          </div>
+        </li>
+      ))
+    }
+  </ol>
+</section>
+
+<style>
+  .integrantes {
+    position: relative;
+    padding: calc(var(--nav-h) + 3rem) clamp(1.25rem, 5vw, 4rem) clamp(3rem, 8vh, 5rem);
+  }
+
+  .integrantes__titulo {
+    margin: 0 0 clamp(1.5rem, 5vh, 2.5rem);
+    font-size: clamp(var(--paso-3), 6vw, var(--paso-5));
+  }
+
+  /* ---------- Lista (estado final visible sin JS): columna vertical ---------- */
+  .elenco {
+    display: grid;
+    gap: clamp(1.5rem, 4vh, 2.5rem);
+    max-width: 28rem;
+    margin: 0 auto;
+    padding: 0;
+    list-style: none;
+  }
+
+  .musico {
+    position: relative;
+    aspect-ratio: 3 / 4;
+    overflow: clip;
+    isolation: isolate;
+  }
+
+  .musico__foto {
+    position: absolute;
+    inset: 0;
+  }
+
+  .musico__foto :global(picture),
+  .musico__foto :global(img) {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+  }
+
+  .musico__foto :global(img) {
+    object-fit: cover;
+    object-position: center 28%;
+  }
+
+  /* Encuadre por integrante (ruling del controlador): cada retrato tiene
+     el sujeto en una zona distinta del cuadro; se ajusta la posición en
+     vez de agregar un campo nuevo a los datos. */
+  .musico[data-foto="guillermo-perez"] .musico__foto :global(img) {
+    /* Fondo mayormente negro: sin este ajuste la cara queda fuera del
+       cuadro y sólo se ve la mano sobre el bajo. */
+    object-position: center 25%;
+  }
+
+  .musico[data-foto="henry-acuna"] .musico__foto :global(img) {
+    /* Sentado al teclado: la cara queda más abajo que en las de pie. */
+    object-position: center 35%;
+  }
+
+  .musico[data-foto="diego-rodriguez"] .musico__foto :global(img) {
+    /* La cara está muy arriba del encuadre original. */
+    object-position: center 10%;
+  }
+
+  /* Velo de legibilidad bajo el texto (excepción de gradiente permitida) */
+  .musico__velo {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    pointer-events: none;
+    background: linear-gradient(
+      to top,
+      color-mix(in srgb, var(--oscuro) 92%, transparent) 0%,
+      color-mix(in srgb, var(--oscuro) 55%, transparent) 35%,
+      color-mix(in srgb, var(--oscuro) 0%, transparent) 65%
+    );
+  }
+
+  .musico__datos {
+    position: absolute;
+    z-index: 2;
+    inset: auto 0 0;
+    padding: 1.25rem 1.5rem 1.5rem;
+  }
+
+  /* Columna (por defecto, incl. móvil): la tarjeta mide hasta 28rem, así
+     que el tamaño se acota a ese ancho en vez de a todo el viewport (si no,
+     nombres largos desbordarían la tarjeta en escritorio con movimiento
+     reducido, donde la columna queda angosta sobre un viewport ancho). */
+  .musico__nombre {
+    margin: 0;
+    /* Techo medido contra la palabra más larga (RODRÍGUEZ) en el ancho real
+       disponible dentro de la tarjeta (~287px a 390px de viewport): más
+       grande que esto la rompe a mitad de palabra en vez de en el espacio. */
+    font-size: clamp(1.875rem, 8vw, 2.125rem);
+    color: var(--papel);
+    overflow-wrap: anywhere;
+  }
+
+  .musico__rol {
+    margin: 0.35rem 0 0;
+    color: var(--plata);
+  }
+
+  .musico__redes {
+    display: flex;
+    gap: 0.5rem;
+    margin: 0.85rem 0 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .musico__redes a {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 44px;
+    min-height: 44px;
+    font-family: var(--fuente-dato);
+    font-stretch: 72%;
+    font-weight: 700;
+    font-size: 1rem;
+    letter-spacing: 0.04em;
+    color: var(--papel);
+    text-decoration: none;
+    border: 1px solid color-mix(in srgb, var(--plata) 45%, transparent);
+  }
+
+  .musico__redes a:hover,
+  .musico__redes a:focus-visible {
+    border-color: var(--oro);
+    color: var(--oro);
+  }
+
+  /* ---------- Fila horizontal fijada (integrantes.ts, motionOK && ancho) ----------
+     [data-fila] lo pone/quita el controlador: cruzar los 900px o activar
+     movimiento reducido revierte a la columna de arriba sin pin-spacer ni
+     transforms residuales. */
+  .integrantes[data-fila] {
+    height: 100svh;
+    display: flex;
+    flex-direction: column;
+    padding: calc(var(--nav-h) + 1.5rem) 0 0;
+    /* El anclaje del menú debe caer en el inicio del pin (Review Focus 3):
+       el padding de arriba ya deja el título debajo del nav. */
+    scroll-margin-top: 0;
+  }
+
+  .integrantes[data-fila] .integrantes__titulo {
+    flex: none;
+    margin: 0 clamp(1.25rem, 5vw, 4rem) 1rem;
+  }
+
+  .integrantes[data-fila] .elenco {
+    flex: 1 1 auto;
+    display: flex;
+    flex-wrap: nowrap;
+    min-height: 0;
+    max-width: none;
+    gap: 0;
+  }
+
+  .integrantes[data-fila] .musico {
+    flex: none;
+    width: 100vw;
+    height: 100%;
+    aspect-ratio: auto;
+  }
+
+  .integrantes[data-fila] .musico__datos {
+    padding: 1.5rem clamp(1.5rem, 5vw, 4rem) clamp(2rem, 6vh, 3.5rem);
+  }
+
+  /* En fila cada retrato es un cuadro a pantalla completa: el nombre es el
+     protagonista («nombre en .titulo gigante», spec §3) y debe leerse
+     claramente más grande que el título de la sección. */
+  .integrantes[data-fila] .musico__nombre {
+    font-size: clamp(4rem, 8vw, 8.5rem);
+  }
+</style>

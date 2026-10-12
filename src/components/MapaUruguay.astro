@@ -1,0 +1,59 @@
+---
+// Mapa de Uruguay "pirograbado" (spec §2.4, §3 fila 6: Disco). El contorno
+// sale de Natural Earth 1:50m admin-0 countries (dominio público, feature
+// ADMIN="Uruguay"), proyectado en equirectangular con corrección cos(lat) y
+// simplificado a 92 puntos con Douglas-Peucker — generado con
+// scripts/generar-mapa-uruguay.py (el GeoJSON de origen no se commitea; si
+// hace falta regenerar el `d`, correr ese script de nuevo). El punto marca
+// Pando, Canelones (−34.717, −55.958) con la misma proyección.
+//
+// Por defecto (sin JS) el trazo ya está dibujado: `stroke-dasharray: 1` +
+// `stroke-dashoffset: 0` sobre `pathLength="1"` da el estado final sin
+// depender de script. revelado.ts (modo "trazo") anima la entrada sólo
+// cuando hay movimiento; con `prefers-reduced-motion: reduce` no toca nada
+// y el mapa queda dibujado de entrada (igual que sin JS).
+interface Props {
+  clase?: string;
+}
+
+const { clase } = Astro.props;
+
+const D =
+  "M 523.58 446.90 L 513.26 459.77 L 506.97 479.98 L 485.85 507.87 L 481.55 523.60 L 458.75 540.02 L 442.71 558.50 L 432.21 558.04 L 422.77 565.95 L 368.35 590.00 L 348.80 585.47 L 334.33 585.55 L 320.88 574.95 L 290.22 571.11 L 270.99 575.35 L 245.15 587.01 L 231.77 586.21 L 217.79 581.37 L 210.17 571.08 L 170.43 559.21 L 138.45 532.25 L 100.67 531.73 L 71.72 535.26 L 67.25 531.69 L 58.33 514.77 L 33.42 490.99 L 13.85 467.35 L 10.00 444.13 L 18.59 388.95 L 17.56 379.60 L 24.79 374.28 L 31.95 373.21 L 45.01 353.77 L 46.06 344.91 L 34.02 294.19 L 41.93 276.18 L 42.27 267.42 L 37.70 259.72 L 38.15 235.88 L 35.25 228.39 L 37.43 222.19 L 50.11 209.76 L 55.53 191.90 L 55.62 186.56 L 48.95 176.79 L 51.02 167.38 L 65.21 140.78 L 67.74 129.85 L 64.71 114.32 L 65.92 109.78 L 71.22 107.39 L 73.60 100.31 L 72.79 82.69 L 67.32 68.15 L 71.51 56.63 L 89.79 32.57 L 90.31 24.39 L 94.04 19.68 L 99.78 28.51 L 134.02 31.17 L 143.54 14.47 L 152.43 10.33 L 172.70 10.00 L 239.24 72.64 L 252.55 90.58 L 257.20 97.74 L 255.23 116.33 L 256.62 126.82 L 269.90 125.67 L 276.58 121.72 L 297.33 99.37 L 321.34 122.86 L 332.64 144.42 L 340.86 150.91 L 349.21 155.04 L 354.79 150.84 L 368.98 164.33 L 400.24 175.62 L 422.30 206.85 L 437.44 220.09 L 467.84 231.77 L 483.94 244.33 L 500.16 285.94 L 524.38 307.35 L 537.70 312.66 L 545.20 319.24 L 548.41 326.05 L 521.08 358.93 L 512.20 365.93 L 507.29 378.23 L 507.29 436.47 L 520.85 446.31 Z";
+
+const PANDO = { cx: 261.35, cy: 564.06 };
+---
+
+<svg
+  class:list={["mapa-uruguay", clase]}
+  viewBox="0 0 558.41 600"
+  role="img"
+  aria-label="Mapa de Uruguay"
+>
+  <path d={D} pathLength="1" data-revelar="trazo"></path>
+  <circle cx={PANDO.cx} cy={PANDO.cy} r="7" data-punto></circle>
+</svg>
+
+<style>
+  .mapa-uruguay {
+    display: block;
+    width: 100%;
+    height: auto;
+    overflow: visible;
+  }
+
+  .mapa-uruguay path {
+    fill: none;
+    stroke: var(--oro-viejo);
+    stroke-width: 3;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    stroke-dasharray: 1;
+    stroke-dashoffset: 0;
+  }
+
+  .mapa-uruguay circle {
+    fill: var(--oro-viejo);
+    opacity: 1;
+  }
+</style>

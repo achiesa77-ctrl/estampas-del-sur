@@ -1,0 +1,124 @@
+---
+// El Grupo (spec §3 fila 2, papel): presentación revelada línea por línea
+// (gris → tinta) + cifras en cuadro (contador) + ritmos como lista en
+// línea. Comportamiento compartido en src/scripts/revelado.ts.
+import { grupo } from "../data/grupo";
+---
+
+<section id="grupo" class="grupo ambiente-papel" data-ambiente="papel" aria-labelledby="grupo-titulo">
+  <h2 class="titulo grupo__titulo" id="grupo-titulo">El grupo</h2>
+
+  <div class="grupo__presentacion medida" data-revelar="lineas">
+    {grupo.presentacion.map((parrafo) => <p>{parrafo}</p>)}
+  </div>
+
+  <ul class="grupo__cifras" aria-label="En números">
+    {
+      grupo.cifras.map(({ valor, etiqueta }) => (
+        <li class="grupo__cifra">
+          <p class="titulo grupo__cifra-numero">
+            <span class="grupo__cifra-prefijo" aria-hidden="true">
+              ▸
+            </span>
+            <span data-contador>{valor}</span>
+          </p>
+          <p class="dato grupo__cifra-etiqueta">{etiqueta}</p>
+        </li>
+      ))
+    }
+  </ul>
+
+  <ul class="dato grupo__ritmos" aria-label="Ritmos que toca el grupo">
+    {grupo.ritmos.map((ritmo) => <li>{ritmo}</li>)}
+  </ul>
+</section>
+
+<style>
+  .grupo {
+    display: grid;
+    gap: clamp(2rem, 6vh, 3.5rem);
+    padding: calc(var(--nav-h) + 3rem) clamp(1.25rem, 5vw, 4rem) clamp(3rem, 8vh, 5rem);
+  }
+
+  .grupo__titulo {
+    margin: 0;
+    font-size: clamp(var(--paso-3), 6vw, var(--paso-5));
+  }
+
+  /* Declaración editorial: Newsreader grande, alineada a la izquierda,
+     sin itálica (se reserva para epígrafes/citas). */
+  .grupo__presentacion {
+    display: grid;
+    gap: 1.1em;
+    font-size: clamp(var(--paso-3), 2.6vw, var(--paso-4));
+    line-height: 1.4;
+  }
+
+  .grupo__presentacion p {
+    margin: 0;
+  }
+
+  /* Cifras: fila con numerales grandes + etiquetas chicas. Sin tarjetas ni
+     sombras (craft): un solo filete fino de la rampa neutra las separa de
+     la presentación. */
+  .grupo__cifras {
+    display: flex;
+    flex-wrap: wrap;
+    gap: clamp(1.75rem, 6vw, 4rem);
+    margin: 0;
+    padding-top: clamp(1.5rem, 4vh, 2.5rem);
+    list-style: none;
+    border-top: 1px solid color-mix(in srgb, var(--lapiz) 35%, transparent);
+  }
+
+  .grupo__cifra {
+    display: grid;
+    gap: 0.25rem;
+  }
+
+  .grupo__cifra-numero {
+    margin: 0;
+    font-size: clamp(var(--paso-4), 5vw, var(--paso-5));
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* Prefijo de cuadro (decorativo): marca de archivo antes del número,
+     como el ▸ de la hoja de contactos de la portada. */
+  .grupo__cifra-prefijo {
+    margin-right: 0.3em;
+    font-family: var(--fuente-dato);
+    font-stretch: 72%;
+    font-weight: 600;
+    font-size: 1rem;
+    vertical-align: 0.6em;
+    color: var(--lapiz);
+  }
+
+  .grupo__cifra-etiqueta {
+    margin: 0;
+    color: var(--lapiz);
+  }
+
+  .grupo__ritmos {
+    display: flex;
+    flex-wrap: wrap;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .grupo__ritmos li {
+    position: relative;
+  }
+
+  .grupo__ritmos li:not(:first-child) {
+    margin-left: 1.1em;
+  }
+
+  .grupo__ritmos li:not(:first-child)::before {
+    content: "·";
+    position: absolute;
+    left: -0.85em;
+    color: var(--lapiz);
+  }
+</style>

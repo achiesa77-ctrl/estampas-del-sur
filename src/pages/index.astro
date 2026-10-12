@@ -1,0 +1,70 @@
+---
+import Base from "../layouts/Base.astro";
+import Nav from "../components/Nav.astro";
+import Portada from "../components/Portada.astro";
+import Grupo from "../components/Grupo.astro";
+import Integrantes from "../components/Integrantes.astro";
+import Historia from "../components/Historia.astro";
+import Repertorio from "../components/Repertorio.astro";
+import Disco from "../components/Disco.astro";
+import Videos from "../components/Videos.astro";
+import Trayectoria from "../components/Trayectoria.astro";
+import Agenda from "../components/Agenda.astro";
+import Galeria from "../components/Galeria.astro";
+import Contacto from "../components/Contacto.astro";
+import Creditos from "../components/Creditos.astro";
+import { precargaElegida } from "../components/portada-foto";
+
+const precarga = await precargaElegida();
+---
+
+<Base>
+  <link
+    slot="head"
+    rel="preload"
+    as="image"
+    type={precarga.type}
+    imagesrcset={precarga.imagesrcset}
+    imagesizes={precarga.imagesizes}
+    fetchpriority="high"
+  />
+  <Nav />
+  <main id="contenido">
+    <Portada />
+    <Grupo />
+    <Integrantes />
+    <Historia />
+    <Repertorio />
+    <Disco />
+    <Videos />
+    <Trayectoria />
+    <Agenda />
+    <Galeria />
+    <Contacto />
+  </main>
+  <Creditos />
+</Base>
+
+<script>
+  import { initMotion } from "../scripts/motion";
+  import { initNav } from "../scripts/nav";
+  import { initPortada } from "../scripts/portada";
+  import { initAmbientes } from "../scripts/ambientes";
+  import { initRevelado } from "../scripts/revelado";
+  import { initIntegrantes } from "../scripts/integrantes";
+  import { initReproductor } from "../scripts/reproductor";
+  import { initVideos } from "../scripts/videos";
+  import { initTrayectoria } from "../scripts/trayectoria";
+  import { initGaleria } from "../scripts/galeria";
+
+  initMotion();
+  initNav();
+  initPortada();
+  initAmbientes();
+  initRevelado();
+  initIntegrantes();
+  initReproductor();
+  initVideos();
+  initTrayectoria();
+  initGaleria();
+</script>

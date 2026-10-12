@@ -1,5 +1,9 @@
-# Estampas del Sur — sitio estático (sin build).
-# Netlify publica la raíz del repo, donde está index.html.
+# Estampas del Sur — sitio Astro.
 [build]
-  publish = "."
-  command = ""
+  publish = "dist"
+  command = "npm run build"
+
+# Astro 7 exige Node >= 22.12; se fija para no depender del valor por
+# defecto de Netlify.
+[build.environment]
+  NODE_VERSION = "22"

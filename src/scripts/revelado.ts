@@ -1,0 +1,369 @@
+// Revelado de contenido (spec §2.1, §3): modos reutilizables que cada
+// sección activa con un atributo. initRevelado() es el único punto de
+// entrada; despacha a una función privada por modo. Tareas futuras
+// agregan más modos (copia, trazo, creditos) como nuevas funciones
+// privadas, llamadas desde el mismo initRevelado().
+import { gsap } from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { SplitText } from "gsap/SplitText";
+import { condiciones, mm } from "./motion";
+
+const DURACION_CONTADOR = 1.2;
+
+function leerToken(variable: string): string {
+  return getComputedStyle(document.documentElement).getPropertyValue(variable).trim();
+}
+
+/** Hallazgo de la ronda 1 de revisión (Tarea 11): si el elemento YA cruzó
+ *  su umbral de entrada en el momento en que se registra el ScrollTrigger
+ *  (la página cargó con un salto directo a la sección — `/#disco` —, o a
+ *  una sección que ya entra en el viewport inicial), `ScrollTrigger` dispara
+ *  `onEnter` casi de inmediato. Esta guarda evita animar lo que ya está a
+ *  la vista (sólo se confirma su estado final, sin transición): sólo se
+ *  anima lo que de verdad está por entrar.
+ *
+ *  Para lo que sí está por entrar, las funciones de abajo NO usan
+ *  `gsap.fromTo` dentro de `onEnter`: `fromTo` renderiza su estado "from"
+ *  recién al crear el tween, y si ese "salto a la vista" ocurre con el
+ *  scroll ya detenido (nav + `prefers-reduced-motion: reduce`, que hace un
+ *  salto nativo en vez de scroll suave — ver `scrollA()` en motion.ts — o
+ *  cualquier salto instantáneo de scroll), el contenido ya está pintado en
+ *  pantalla (opacidad 1, CSS por defecto) un instante antes de que el
+ *  "from" lo apague de golpe: un parpadeo, no una entrada. En cambio, se
+ *  oculta con `gsap.set` apenas se registra (antes de cualquier scroll,
+ *  gradual o instantáneo) y se anima sólo hacia el estado final con
+ *  `gsap.to`, para que nunca exista un cuadro donde algo visible se apague. */
+function yaEntro(el: Element, porcentajeViewport: number): boolean {
+  return el.getBoundingClientRect().top <= window.innerHeight * porcentajeViewport;
+}
+
+/** [data-revelar="lineas"]: cada línea del texto pasa de --lapiz a
+ *  --tinta a medida que se desplaza por la franja de lectura. */
+function revelarLineas(): void {
+  const contenedores = gsap.utils.toArray<HTMLElement>('[data-revelar="lineas"]');
+  if (!contenedores.length) return;
+
+  mm.add({ motionOK: condiciones.motionOK, reduce: condiciones.reduce }, (ctx) => {
+    const { motionOK } = ctx.conditions ?? {};
+    // Reduce: el color del ambiente (--tinta) ya es el estado final; no
+    // hay nada que revelar.
+    if (!motionOK) return;
+
+    const lapiz = leerToken("--lapiz");
+    const tinta = leerToken("--tinta");
+
+    for (const contenedor of contenedores) {
+      // Un SplitText por bloque (cada <p>), no por el contenedor entero:
+      // si se splittea el contenedor completo, los wrappers de línea
+      // quedan como hijos directos de su grid y el gap entre párrafos se
+      // cuela entre cada línea (hallazgo de revisión); además el
+      // aria-label que arma SplitText concatena el texto de los dos
+      // párrafos sin espacio. Partiendo por bloque, cada línea queda
+      // anidada dentro de su propio párrafo y el espaciado entre líneas
+      // lo da sólo el line-height de ese párrafo.
+      const bloques = contenedor.children.length
+        ? (Array.from(contenedor.children) as HTMLElement[])
+        : [contenedor];
+
+      for (const bloque of bloques) {
+        SplitText.create(bloque, {
+          type: "lines",
+          linesClass: "linea",
+          autoSplit: true, // re-split en resize/carga de fuente
+          onSplit(self) {
+            return gsap.fromTo(
+              self.lines,
+              { color: lapiz },
+              {
+                color: tinta,
+                ease: "none",
+                stagger: 0.05,
+                scrollTrigger: {
+                  trigger: contenedor,
+                  start: "top 80%",
+                  end: "bottom 55%",
+                  scrub: true,
+                },
+              },
+            );
+          },
+        });
+      }
+    }
+    // autoSplit re-crea su propia animación en cada re-split; el revert
+    // de mm (SplitText + ScrollTrigger quedan en el contexto) limpia todo.
+  });
+}
+
+/** [data-contador]: cuenta de 0 al valor final una sola vez al entrar en
+ *  pantalla. El valor final vive en el propio HTML (estado final visible
+ *  sin JS); se lee una sola vez, antes de que el contador lo sobrescriba. */
+function revelarContadores(): void {
+  const elementos = gsap.utils.toArray<HTMLElement>("[data-contador]");
+  if (!elementos.length) return;
+
+  for (const el of elementos) {
+    const destino = Number(el.textContent?.replace(/\D/g, "") || "0");
+    el.dataset.valor = String(destino);
+    // Nombre accesible fijo: evita que un lector de pantalla anuncie un
+    // valor parcial mientras el contador está en movimiento.
+    el.setAttribute("aria-label", String(destino));
+  }
+
+  mm.add({ motionOK: condiciones.motionOK, reduce: condiciones.reduce }, (ctx) => {
+    const { motionOK } = ctx.conditions ?? {};
+
+    for (const el of elementos) {
+      const destino = Number(el.dataset.valor);
+      el.textContent = motionOK ? "0" : String(destino);
+      if (!motionOK) continue;
+
+      ScrollTrigger.create({
+        trigger: el,
+        // Apenas asoma: con "top 85%" la franja de abajo de la pantalla
+        // mostraba «0 años en escena» quieto, un dato falso (verificación
+        // final).
+        start: "top bottom",
+        once: true,
+        onEnter: () => {
+          const proxy = { valor: 0 };
+          gsap.to(proxy, {
+            valor: destino,
+            duration: DURACION_CONTADOR,
+            ease: "power1.out",
+            onUpdate: () => {
+              el.textContent = String(Math.round(proxy.valor));
+            },
+          });
+        },
+      });
+    }
+
+    return () => {
+      // Si el revert llega a mitad de cuadro, el texto no debe quedar
+      // trunco: vuelve al valor final leído al principio.
+      for (const el of elementos) el.textContent = el.dataset.valor ?? el.textContent;
+    };
+  });
+}
+
+/** [data-revelar="simple"]: aparición en bloque (opacidad + leve subida). */
+function revelarSimple(): void {
+  const elementos = gsap.utils.toArray<HTMLElement>('[data-revelar="simple"]');
+  if (!elementos.length) return;
+
+  mm.add({ motionOK: condiciones.motionOK, reduce: condiciones.reduce }, (ctx) => {
+    const { motionOK } = ctx.conditions ?? {};
+
+    const yaVisibles = elementos.filter((el) => yaEntro(el, 0.85));
+    const porRevelar = elementos.filter((el) => !yaEntro(el, 0.85));
+    // Ya estaban a la vista (CSS, sin JS): se confirma el estado final sin
+    // transición, nunca se los hace parpadear.
+    if (yaVisibles.length) gsap.set(yaVisibles, { opacity: 1, y: 0 });
+    if (!porRevelar.length) return;
+
+    // Se ocultan de una (antes de cualquier scroll) y sólo se anima hacia
+    // el estado final al entrar — nunca un "from" aplicado de golpe.
+    gsap.set(porRevelar, motionOK ? { opacity: 0, y: 24 } : { opacity: 0 });
+
+    ScrollTrigger.batch(porRevelar, {
+      start: "top 85%",
+      once: true,
+      onEnter: (batch) =>
+        gsap.to(
+          batch,
+          motionOK
+            ? { opacity: 1, y: 0, duration: 0.6, ease: "power2.out", stagger: 0.08 }
+            : { opacity: 1, duration: 0.15, ease: "power1.out" },
+        ),
+    });
+  });
+}
+
+/** [data-revelar="copia"]: copias impresas (Historia, spec §2.4/§3 fila 4)
+ *  que caen a su rotación fija y «hacen foco» al entrar en pantalla. La
+ *  rotación final y el CSS (--copia, sombra) ya dejan la copia en su
+ *  estado final sin JS; acá sólo se anima la entrada. El foco se simula
+ *  con una capa superior (`.copia__foco`, tono papel) que funde su
+ *  opacidad de 1 a 0 — nunca `filter: blur` (prohibido por el contrato:
+ *  blur en cada frame de scroll es carísimo y además re-flashea con
+ *  movimiento reducido). */
+function revelarCopias(): void {
+  const copias = gsap.utils.toArray<HTMLElement>('[data-revelar="copia"]');
+  if (!copias.length) return;
+
+  mm.add({ motionOK: condiciones.motionOK, reduce: condiciones.reduce }, (ctx) => {
+    const { motionOK } = ctx.conditions ?? {};
+
+    for (const copia of copias) {
+      const foco = copia.querySelector<HTMLElement>(".copia__foco");
+      const rotacionFinal = Number(copia.dataset.rotacion ?? "0");
+
+      if (!motionOK) {
+        // Reduce: sólo opacidad, ≤200ms; sin caída ni rotación de más, y
+        // la capa de foco no llega a mostrarse.
+        if (foco) gsap.set(foco, { opacity: 0 });
+
+        if (yaEntro(copia, 0.9)) {
+          gsap.set(copia, { opacity: 1 });
+          continue;
+        }
+
+        gsap.set(copia, { opacity: 0 });
+        ScrollTrigger.create({
+          trigger: copia,
+          start: "top 90%",
+          once: true,
+          onEnter: () => gsap.to(copia, { opacity: 1, duration: 0.2, ease: "none" }),
+        });
+        continue;
+      }
+
+      if (yaEntro(copia, 0.85)) {
+        // Ya estaba a la vista: la rotación/posición final (CSS, --rot) ya
+        // es la correcta; sólo se confirma y se apaga el foco sin animar.
+        gsap.set(copia, { y: 0, rotation: rotacionFinal });
+        if (foco) gsap.set(foco, { opacity: 0 });
+        continue;
+      }
+
+      gsap.set(copia, { y: -40, rotation: rotacionFinal + 4 });
+      if (foco) gsap.set(foco, { opacity: 1 });
+
+      ScrollTrigger.create({
+        trigger: copia,
+        start: "top 85%",
+        once: true,
+        onEnter: () => {
+          gsap.to(copia, { y: 0, rotation: rotacionFinal, duration: 0.9, ease: "power2.out" });
+          if (foco) {
+            gsap.to(foco, { opacity: 0, duration: 0.6, delay: 0.25, ease: "power1.out" });
+          }
+        },
+      });
+    }
+  });
+}
+
+/** [data-revelar="trazo"]: el contorno de Uruguay (Disco, spec §3 fila 6,
+ *  "mapa pirograbado") se dibuja en trazo dorado al entrar en pantalla; el
+ *  punto de Pando aparece recién cuando el trazo termina de dibujarse.
+ *  MapaUruguay.astro ya deja el trazo dibujado y el punto visible como
+ *  estado final sin JS (stroke-dasharray:1 / stroke-dashoffset:0); acá sólo
+ *  se anima la entrada cuando hay movimiento (reduce: se queda con ese
+ *  estado final, igual que sin JS). */
+function revelarTrazo(): void {
+  const trazos = gsap.utils.toArray<SVGPathElement>('[data-revelar="trazo"]');
+  if (!trazos.length) return;
+
+  mm.add({ motionOK: condiciones.motionOK, reduce: condiciones.reduce }, (ctx) => {
+    const { motionOK } = ctx.conditions ?? {};
+    if (!motionOK) return;
+
+    for (const trazo of trazos) {
+      const punto = trazo.closest("svg")?.querySelector<SVGElement>("[data-punto]");
+
+      if (yaEntro(trazo, 0.8)) {
+        // Ya estaba a la vista: el trazo ya se ve dibujado por CSS (sin
+        // JS, stroke-dashoffset:0); no lo "borramos" para redibujarlo.
+        if (punto) gsap.set(punto, { opacity: 1 });
+        continue;
+      }
+
+      gsap.set(trazo, { strokeDashoffset: 1 });
+      if (punto) gsap.set(punto, { opacity: 0 });
+
+      ScrollTrigger.create({
+        trigger: trazo,
+        start: "top 80%",
+        once: true,
+        onEnter: () => {
+          gsap.to(trazo, {
+            strokeDashoffset: 0,
+            duration: 2.2,
+            ease: "power2.inOut",
+            // autoRound:false — con pathLength="1" el valor va de 1 a 0;
+            // GSAP redondea strokeDashoffset a entero por defecto, así
+            // que sin esto el trazo queda pegado en 1 y salta a 0 de
+            // golpe (mismo hallazgo que en portada.ts, círculo de lápiz).
+            autoRound: false,
+            onComplete: () => {
+              if (punto) gsap.to(punto, { opacity: 1, duration: 0.3, ease: "power1.out" });
+            },
+          });
+        },
+      });
+    }
+  });
+}
+
+/** [data-revelar="creditos"]: créditos finales (Creditos.astro, spec §3
+ *  fila 11). Cada fila sube (y 60→0) y aparece con scrub a medida que
+ *  entra; el emblema entra al final (scale .9→1 + opacidad). Reduce: sólo
+ *  opacidad, también atada al scroll (no hay desplazamiento que marear).
+ *
+ *  El pie es lo último de la página: un `end` fijo como "top 60%" puede
+ *  quedar MÁS ABAJO del scroll máximo y los créditos se quedarían a medio
+ *  entrar para siempre. `clamp()` (GSAP ≥ 3.12) recorta start/end al
+ *  recorrido posible, así que al tocar fondo todo termina en su estado
+ *  final. */
+function revelarCreditos(): void {
+  const pies = gsap.utils.toArray<HTMLElement>('[data-revelar="creditos"]');
+  if (!pies.length) return;
+
+  mm.add({ motionOK: condiciones.motionOK, reduce: condiciones.reduce }, (ctx) => {
+    const { motionOK } = ctx.conditions ?? {};
+
+    for (const pie of pies) {
+      const filas = gsap.utils.toArray<HTMLElement>(
+        ".creditos__fila-extra, .creditos__fila",
+        pie,
+      );
+      for (const fila of filas) {
+        gsap.fromTo(
+          fila,
+          motionOK ? { y: 60, opacity: 0 } : { opacity: 0 },
+          {
+            ...(motionOK ? { y: 0 } : {}),
+            opacity: 1,
+            ease: "none",
+            scrollTrigger: {
+              trigger: fila,
+              start: "clamp(top bottom)",
+              end: "clamp(top 70%)",
+              scrub: motionOK ? 0.6 : true,
+            },
+          },
+        );
+      }
+
+      const emblema = pie.querySelector<HTMLElement>(".creditos__emblema");
+      if (emblema) {
+        gsap.fromTo(
+          emblema,
+          motionOK ? { scale: 0.9, opacity: 0 } : { opacity: 0 },
+          {
+            ...(motionOK ? { scale: 1 } : {}),
+            opacity: 1,
+            ease: "none",
+            scrollTrigger: {
+              trigger: emblema,
+              start: "clamp(top 95%)",
+              end: "clamp(center 65%)",
+              scrub: motionOK ? 0.6 : true,
+            },
+          },
+        );
+      }
+    }
+  });
+}
+
+export function initRevelado(): void {
+  revelarLineas();
+  revelarContadores();
+  revelarSimple();
+  revelarCopias();
+  revelarTrazo();
+  revelarCreditos();
+}

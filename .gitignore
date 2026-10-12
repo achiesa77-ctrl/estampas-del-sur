@@ -23,3 +23,12 @@ fotos/321.jpeg
 Thumbs.db
 .DS_Store
 desktop.ini
+.superpowers/
+
+# Astro / Node / herramientas de prueba
+node_modules/
+dist/
+.astro/
+test-results/
+playwright-report/
+scripts/__pycache__/
