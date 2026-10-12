@@ -11,7 +11,7 @@ Fecha: 2026-10-11 · Rama: `rediseno-documental` · Spec: `specs/2026-10-09-redi
 | 3 | Portada: hoja de contactos completa, y estático con movimiento reducido | Cumple | Cuadros `?t=0`, `?t=2`, `?t=3.4`, `?t=fin` revisados a 1440 y 390; `portada.spec.ts`. |
 | 4 | Todo el contenido presente con datos corregidos | Cumple | Una sección por componente, sin stubs; tests por sección. |
 | 5 | Contraste AA, foco visible, áreas táctiles ≥ 44 px | Cumple (ver nota sobre ambientes) | `a11y.spec.ts`: foco visible en todo el recorrido con Tab, `alt` en toda `<img>`, ≥ 44×44 en móvil, sin scroll horizontal a 390 px. |
-| 6 | Bytes ≤ ~1.9 MB y LCP < 2.5 s en 4G | **Bytes: cumple. LCP: cumple en móvil, NO en escritorio** | Ver «Rendimiento». |
+| 6 | Bytes ≤ ~1.9 MB y LCP < 2.5 s en 4G | Bytes: cumple. LCP: cumple en móvil; en escritorio 5.4 s, **aceptado por el usuario** (2026-10-11) | Ver «Rendimiento». |
 | 7 | `npm run build` sin errores y Netlify publicando `dist/` | Cumple | `netlify.toml` publica `dist/` y ahora fija `NODE_VERSION = "22"` (Astro 7 exige ≥ 22.12). |
 
 ## Batería
@@ -47,7 +47,9 @@ En móvil no pasa (no hay pin), por eso da 1.1 s.
 
 Hipótesis descartadas con experimentos aislados: crear el pin al final (se probó crearlo al inicio), el `ScrollTrigger.refresh()` de `crearScroll()` (se quitó), la creación del ScrollTrigger de salida (se desactivó), liberar el `overflow` de `<html>` y quitar `lenis-stopped`. Ninguno lo movió. Los cambios de prueba se revirtieron: no se dejó nada no probado en la portada.
 
-**Lo que ve una persona** no cambia: contenido a ~1.1 s y foto a pantalla completa a ~3.3 s, por diseño de la coreografía aprobada (≤ 4.5 s). Lo que no cumple es la **métrica** tal como la reporta Chrome. Queda como decisión pendiente (ver «Pendiente»).
+**Lo que ve una persona** no cambia: contenido a ~1.1 s y foto a pantalla completa a ~3.3 s, por diseño de la coreografía aprobada (≤ 4.5 s). Lo que no cumple es la **métrica** tal como la reporta Chrome.
+
+**Decisión (2026-10-11):** el usuario acepta el LCP de escritorio así documentado; no se acorta la coreografía ni se sigue investigando por ahora.
 
 ## Problemas encontrados y corregidos en esta verificación
 
@@ -61,8 +63,7 @@ Hipótesis descartadas con experimentos aislados: crear el pin al final (se prob
 - `dist/` incluye `repertorio/` (3 audios), `og/` (`portada-hd.jpg`, `logo-nuevo.jpg`) y el favicon; todas las rutas referenciadas por `index.html` existen.
 - `og:image` con URL absoluta a `https://estampasdelsur.netlify.app/og/portada-hd.jpg`.
 
-## Pendiente (decisión del usuario)
+## Pendiente
 
-- **LCP de escritorio 5.4 s** (criterio 6). Opciones: aceptarlo documentado; acortar la coreografía (la métrica seguiría cayendo al final de la secuencia); o seguir investigando el re-registro de Chrome.
 - Fechas reales de agenda (fuera de alcance, spec §9).
 - Foto original del disco (621×470) para mejorar nitidez (spec §9).
