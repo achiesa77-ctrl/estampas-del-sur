@@ -109,9 +109,14 @@ test.describe("escritorio (con movimiento)", () => {
       await expect.poll(() => tienePinSpacer(page, id)).toBe(true);
       await page.evaluate(() => window.scrollTo(0, document.documentElement.scrollHeight));
       await expect.poll(() => page.evaluate(() => window.scrollY)).toBeGreaterThan(2000);
-      // Al bajar el nav se esconde; subir un poco lo trae de vuelta.
-      await page.evaluate(() => window.scrollBy(0, -300));
-      await expect(nav(page)).not.toHaveClass(/nav--oculta/);
+      // Al bajar el nav se esconde; subir un poco lo trae de vuelta. Se
+      // repite hasta verlo: tras el salto al fondo, Lenis o un refresh
+      // pueden emitir otro scroll hacia abajo que lo vuelve a esconder.
+      await expect(async () => {
+        await page.mouse.move(700, 450);
+        await page.mouse.wheel(0, -300);
+        await expect(nav(page)).not.toHaveClass(/nav--oculta/, { timeout: 500 });
+      }).toPass({ timeout: 8000 });
       await nav(page).getByRole("link", { name: nombre, exact: true }).click();
 
       await expect(async () => {

@@ -2,3 +2,8 @@
 [build]
   publish = "dist"
   command = "npm run build"
+
+# Astro 7 exige Node >= 22.12; se fija para no depender del valor por
+# defecto de Netlify.
+[build.environment]
+  NODE_VERSION = "22"
